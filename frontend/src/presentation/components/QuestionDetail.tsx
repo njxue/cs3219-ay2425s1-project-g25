@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Tag, Divider, Button } from "antd";
 import { Question } from "../../domain/entities/Question";
-import { getDifficultyColor, getStatusColor } from "../utils/QuestionUtils";
+import { getDifficultyColor, getStatusColor } from "../utils/questionUtils";
 import styles from "./QuestionDetail.module.css";
 
 interface QuestionDetailProps {

@@ -1,28 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
 
 interface SearchBarProps {
-	onSearch: (searchTerm: string) => void;
+	searchTerm: string;
+	onSearch: (term: string) => void;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-	const [searchTerm, setSearchTerm] = useState("");
-
-	const handleSearch = () => {
-		onSearch(searchTerm);
+export const SearchBar: React.FC<SearchBarProps> = ({
+	searchTerm,
+	onSearch,
+}) => {
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		onSearch(e.target.value);
 	};
 
 	return (
 		<Input
-			placeholder="Search questions"
+			placeholder="Search questions..."
 			value={searchTerm}
-			onChange={(e) => setSearchTerm(e.target.value)}
-			onPressEnter={handleSearch}
-			style={{ width: "100%", marginBottom: "16px" }}
-			suffix={
-				<SearchOutlined onClick={handleSearch} style={{ cursor: "pointer" }} />
-			}
+			onChange={handleInputChange}
+			allowClear
 		/>
 	);
 };

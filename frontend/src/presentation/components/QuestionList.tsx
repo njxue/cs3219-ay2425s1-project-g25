@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { List, Spin, Alert } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { QuestionCard } from "./QuestionCard";
@@ -22,41 +22,18 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 	isLoading,
 	error,
 }) => {
-	const [filteredQuestions, setFilteredQuestions] =
-		useState<Question[]>(questions);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filters, setFilters] = useState({
-		difficulty: "",
-		category: "",
-		status: "",
+
+	const filteredQuestions = questions.filter((question) => {
+		const matchesSearch =
+			question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			question.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+		return matchesSearch;
 	});
-
-	useEffect(() => {
-		const filtered = questions.filter((question) => {
-			const matchesSearch =
-				question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				question.description.toLowerCase().includes(searchTerm.toLowerCase());
-			const matchesDifficulty =
-				filters.difficulty === "" || question.difficulty === filters.difficulty;
-			const matchesCategory =
-				filters.category === "" ||
-				question.categories.includes(filters.category);
-			const matchesStatus =
-				filters.status === "" || question.status === filters.status;
-
-			return (
-				matchesSearch && matchesDifficulty && matchesCategory && matchesStatus
-			);
-		});
-		setFilteredQuestions(filtered);
-	}, [questions, searchTerm, filters]);
 
 	const handleSearch = (term: string) => {
 		setSearchTerm(term);
-	};
-
-	const handleFilterChange = (newFilters: typeof filters) => {
-		setFilters(newFilters);
 	};
 
 	if (isLoading) {
@@ -85,7 +62,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 	return (
 		<div className={styles.questionListContainer}>
 			<div className={styles.searchFilterBarContainer}>
-				<SearchBar onSearch={handleSearch} />
+				<SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
 			</div>
 			<List
 				className={styles.list}

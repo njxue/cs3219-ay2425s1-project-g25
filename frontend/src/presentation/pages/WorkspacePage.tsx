@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Breadcrumb, Button } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
 import { Question } from "../../domain/entities/Question";
 import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
 import styles from "./WorkspacePage.module.css";
+import { handleError } from "presentation/utils/errorHandler";
+import { HASH, ROUTES, ERRORS, MESSAGES } from "presentation/utils/constants";
 
 const WorkspacePage: React.FC = () => {
 	const [questions, setQuestions] = useState<Question[]>([]);
@@ -20,10 +22,9 @@ const WorkspacePage: React.FC = () => {
 			try {
 				const fetchedQuestions = await questionUseCases.getAllQuestions();
 				setQuestions(fetchedQuestions);
-				setIsLoading(false);
-			} catch (error) {
-				console.error("Failed to fetch questions:", error);
-				setError("Failed to load questions. Please try again later.");
+			} catch (err) {
+				setError(handleError(err, ERRORS.FAILED_TO_LOAD_QUESTIONS));
+			} finally {
 				setIsLoading(false);
 			}
 		};
@@ -34,16 +35,15 @@ const WorkspacePage: React.FC = () => {
 	useEffect(() => {
 		const handleHashChange = async () => {
 			const hash = window.location.hash.slice(1);
-			const [questionId, state] = hash.split("/");
+			const [questionId, state] = hash.split(HASH.SEPARATOR);
 
 			if (questionId) {
 				try {
 					const question = await questionUseCases.getQuestion(questionId);
 					setSelectedQuestion(question);
-					setIsWorking(state === "working");
-				} catch (error) {
-					console.error("Failed to fetch question:", error);
-					setError("Failed to load the selected question. Please try again.");
+					setIsWorking(state === ROUTES.WORKING);
+				} catch (err) {
+					setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
 					setSelectedQuestion(null);
 					setIsWorking(false);
 				}
@@ -58,7 +58,7 @@ const WorkspacePage: React.FC = () => {
 		return () => window.removeEventListener("hashchange", handleHashChange);
 	}, []);
 
-	const handleSelectQuestion = async (questionId: string) => {
+	const handleSelectQuestion = useCallback(async (questionId: string) => {
 		setIsLoading(true);
 		setError(null);
 		try {
@@ -66,68 +66,65 @@ const WorkspacePage: React.FC = () => {
 			setSelectedQuestion(question);
 			setIsWorking(false);
 			window.location.hash = `#${question.id}`;
-		} catch (error) {
-			console.error("Failed to select question:", error);
-			setError("Failed to load the selected question. Please try again.");
+		} catch (err) {
+			setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, []);
 
-	const handleStartQuestion = () => {
+	const handleStartQuestion = useCallback(() => {
 		setIsWorking(true);
 		if (selectedQuestion) {
-			window.location.hash = `#${selectedQuestion.id}/working`;
+			window.location.hash = `#${selectedQuestion.id}${HASH.SEPARATOR}${ROUTES.WORKING}`;
 		}
-	};
+	}, [selectedQuestion]);
 
-	const handleBreadcrumbClick = (item: string) => () => {
-		switch (item) {
-			case "Workspace":
+	const handleBreadcrumbClick = useCallback(
+		(item: string) => () => {
+			if (item === ROUTES.WORKSPACE) {
 				setSelectedQuestion(null);
 				setIsWorking(false);
 				window.location.hash = "";
-				break;
-			case selectedQuestion?.title:
-				if (selectedQuestion) {
-					setIsWorking(false);
-					window.location.hash = `#${selectedQuestion.id}`;
-				}
-				break;
-			default:
-				break;
-		}
-	};
+			} else if (item === selectedQuestion?.title) {
+				setIsWorking(false);
+				window.location.hash = `#${selectedQuestion.id}`;
+			}
+		},
+		[selectedQuestion]
+	);
 
 	const isNarrow = selectedQuestion !== null;
 
-	const renderBreadcrumb = () => {
-		return (
-			<Breadcrumb className={styles.breadcrumb}>
+	const renderBreadcrumb = () => (
+		<Breadcrumb className={styles.breadcrumb}>
+			<Breadcrumb.Item>
+				<Button type="link" onClick={handleBreadcrumbClick(ROUTES.WORKSPACE)}>
+					{ROUTES.WORKSPACE}
+				</Button>
+			</Breadcrumb.Item>
+			{selectedQuestion && (
 				<Breadcrumb.Item>
-					<Button type="link" onClick={handleBreadcrumbClick("Workspace")}>
-						Workspace
+					<Button
+						type="link"
+						onClick={handleBreadcrumbClick(selectedQuestion.title)}
+					>
+						{selectedQuestion.title}
 					</Button>
 				</Breadcrumb.Item>
-				{selectedQuestion && (
-					<Breadcrumb.Item>
-						<Button
-							type="link"
-							onClick={handleBreadcrumbClick(selectedQuestion.title)}
-						>
-							{selectedQuestion.title}
-						</Button>
-					</Breadcrumb.Item>
-				)}
-				{isWorking && <Breadcrumb.Item>Working</Breadcrumb.Item>}
-			</Breadcrumb>
-		);
-	};
+			)}
+			{isWorking && (
+				<Breadcrumb.Item>
+					{ROUTES.WORKING.charAt(0).toUpperCase() + ROUTES.WORKING.slice(1)}
+				</Breadcrumb.Item>
+			)}
+		</Breadcrumb>
+	);
 
 	return (
 		<div className={styles.container}>
 			{renderBreadcrumb()}
-			<h1 className={styles.heading}>Workspace</h1>
+			<h1 className={styles.heading}>{ROUTES.WORKSPACE}</h1>
 			<p className={styles.description}>
 				This is your workspace. Below are the available questions.
 			</p>
@@ -176,9 +173,8 @@ const WorkspacePage: React.FC = () => {
 					{isWorking && (
 						<Col span={16} className={styles.transitionCol}>
 							<div className={styles.workingArea}>
-								{/* Add your working area components here */}
-								<h2>Working Area</h2>
-								<p>This is where you'll work on the selected question.</p>
+								<h2>{MESSAGES.WORKING_AREA_TITLE}</h2>
+								<p>{MESSAGES.WORKING_AREA_DESCRIPTION}</p>
 							</div>
 						</Col>
 					)}

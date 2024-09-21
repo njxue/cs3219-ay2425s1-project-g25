@@ -5,7 +5,7 @@ import styles from "./QuestionCard.module.css";
 import {
 	getDifficultyColor,
 	getStatusColor,
-} from "presentation/utils/QuestionUtils";
+} from "presentation/utils/questionUtils";
 
 interface QuestionCardProps {
 	question: Question;
