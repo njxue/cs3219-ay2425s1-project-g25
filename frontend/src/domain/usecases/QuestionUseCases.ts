@@ -1,11 +1,8 @@
-// src/domain/usecases/QuestionUseCases.ts
-
 import { Question } from '../entities/question';
 import { questionRepository } from '../../data/repositories/questionRepositoryImpl';
 import { NotFoundError } from '../../presentation/utils/errors';
-import { QuestionValidator } from '../validation/questionValidator';
-import { ERRORS } from '../../presentation/utils/constants';
 import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/iQuestionRepository';
+import { QuestionValidator } from 'domain/validation/QuestionValidator';
 
 export class QuestionUseCases {
     constructor(private questionRepository: IQuestionRepository) { }
@@ -17,7 +14,7 @@ export class QuestionUseCases {
     async getQuestion(id: string): Promise<Question> {
         const question = await this.questionRepository.getQuestion(id);
         if (!question) {
-            throw new NotFoundError(ERRORS.QUESTION_NOT_FOUND);
+            throw new NotFoundError('Question not found');
         }
         return question;
     }

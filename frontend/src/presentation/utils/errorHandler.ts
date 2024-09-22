@@ -1,14 +1,10 @@
-export class QuestionError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "QuestionError";
-    }
-}
+import { AppError } from './errors';
+import { ERRORS } from './constants';
 
 export const handleError = (error: unknown, customMessage?: string): string => {
-    if (error instanceof QuestionError) {
+    if (error instanceof AppError) {
         return error.message;
     }
-    console.error(error);
-    return customMessage || "An unexpected error occurred. Please try again.";
+    console.error('Unhandled error: ', error);
+    return customMessage || ERRORS.GENERAL_ERROR;
 };

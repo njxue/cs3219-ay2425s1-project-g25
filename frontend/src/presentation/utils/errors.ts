@@ -1,14 +1,27 @@
-
-export class ValidationError extends Error {
-    constructor(message: string) {
+export class AppError extends Error {
+    constructor(message: string, public statusCode: number = 500) {
         super(message);
+        this.name = 'AppError';
+    }
+}
+
+export class ValidationError extends AppError {
+    constructor(message: string) {
+        super(message, 400);
         this.name = 'ValidationError';
     }
 }
 
-export class NotFoundError extends Error {
+export class NotFoundError extends AppError {
+    constructor(message: string) {
+        super(message, 404);
+        this.name = 'NotFoundError';
+    }
+}
+
+export class QuestionError extends AppError {
     constructor(message: string) {
         super(message);
-        this.name = 'NotFoundError';
+        this.name = 'QuestionError';
     }
 }
