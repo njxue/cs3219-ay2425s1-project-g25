@@ -1,8 +1,8 @@
 export interface Question {
-    id: string;
+    questionId: string;
     title: string;
     description: string;
     difficulty: string;
     categories: string[];
-    link: string;
+    url: string;
 }

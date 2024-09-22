@@ -31,7 +31,7 @@ export class QuestionUseCases {
 
     async deleteQuestion(id: string): Promise<void> {
         const question = await this.getQuestion(id);
-        await this.questionRepository.deleteQuestion(question.id);
+        await this.questionRepository.deleteQuestion(question.questionId);
     }
 
     async getQuestionsByDifficulty(difficulty: string): Promise<Question[]> {

@@ -66,7 +66,7 @@ const WorkspacePage: React.FC = () => {
 			const question = await questionUseCases.getQuestion(questionId);
 			setSelectedQuestion(question);
 			setIsWorking(false);
-			window.location.hash = `#${question.id}`;
+			window.location.hash = `#${question.questionId}`;
 		} catch (err) {
 			setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
 		} finally {
@@ -77,7 +77,7 @@ const WorkspacePage: React.FC = () => {
 	const handleStartQuestion = useCallback(() => {
 		setIsWorking(true);
 		if (selectedQuestion) {
-			window.location.hash = `#${selectedQuestion.id}${HASH.SEPARATOR}${ROUTES.WORKING}`;
+			window.location.hash = `#${selectedQuestion.questionId}${HASH.SEPARATOR}${ROUTES.WORKING}`;
 		}
 	}, [selectedQuestion]);
 
@@ -89,7 +89,7 @@ const WorkspacePage: React.FC = () => {
 				window.location.hash = "";
 			} else if (item === selectedQuestion?.title) {
 				setIsWorking(false);
-				window.location.hash = `#${selectedQuestion.id}`;
+				window.location.hash = `#${selectedQuestion.questionId}`;
 			}
 		},
 		[selectedQuestion]

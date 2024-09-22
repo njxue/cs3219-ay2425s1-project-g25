@@ -70,10 +70,10 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 				dataSource={filteredQuestions}
 				renderItem={(question) => (
 					<QuestionCard
-						key={question.id}
+						key={question.questionId}
 						question={question}
-						isSelected={selectedQuestion?.id === question.id}
-						onClick={() => onSelectQuestion(question.id)}
+						isSelected={selectedQuestion?.questionId === question.questionId}
+						onClick={() => onSelectQuestion(question.questionId)}
 						isNarrow={isNarrow}
 					/>
 				)}
