@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Tag, Divider } from "antd";
+import { Card, Tag } from "antd";
 import { Question } from "../../domain/entities/question";
 import styles from "./QuestionCard.module.css";
 import { getDifficultyColor } from "presentation/utils/questionUtils";
@@ -27,8 +27,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 		<div className={styles.header}>
 			<h2 className={styles.title}>{question.title}</h2>
 		</div>
-		<p className={styles.description}>{question.description}</p>
-		<Divider className={styles.divider} />
+
 		<div className={styles.footer}>
 			<Tag
 				color={getDifficultyColor(question.difficulty)}

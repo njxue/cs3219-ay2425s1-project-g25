@@ -6,7 +6,7 @@ import { QuestionDetail } from "../components/QuestionDetail";
 import { Question } from "../../domain/entities/question";
 import { questionUseCases } from "../../domain/usecases/questionUseCases";
 import styles from "./WorkspacePage.module.css";
-import { HASH, ROUTES, ERRORS, MESSAGES } from "presentation/utils/constants";
+import { HASH, ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
 
 const WorkspacePage: React.FC = () => {
@@ -14,7 +14,6 @@ const WorkspacePage: React.FC = () => {
 	const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
 		null
 	);
-	const [isWorking, setIsWorking] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -36,21 +35,18 @@ const WorkspacePage: React.FC = () => {
 	useEffect(() => {
 		const handleHashChange = async () => {
 			const hash = window.location.hash.slice(1);
-			const [questionId, state] = hash.split(HASH.SEPARATOR);
+			const questionId = hash.split(HASH.SEPARATOR)[0];
 
 			if (questionId) {
 				try {
 					const question = await questionUseCases.getQuestion(questionId);
 					setSelectedQuestion(question);
-					setIsWorking(state === ROUTES.WORKING);
 				} catch (err) {
 					setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
 					setSelectedQuestion(null);
-					setIsWorking(false);
 				}
 			} else {
 				setSelectedQuestion(null);
-				setIsWorking(false);
 			}
 		};
 
@@ -65,7 +61,6 @@ const WorkspacePage: React.FC = () => {
 		try {
 			const question = await questionUseCases.getQuestion(questionId);
 			setSelectedQuestion(question);
-			setIsWorking(false);
 			window.location.hash = `#${question.questionId}`;
 		} catch (err) {
 			setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
@@ -74,21 +69,12 @@ const WorkspacePage: React.FC = () => {
 		}
 	}, []);
 
-	const handleStartQuestion = useCallback(() => {
-		setIsWorking(true);
-		if (selectedQuestion) {
-			window.location.hash = `#${selectedQuestion.questionId}${HASH.SEPARATOR}${ROUTES.WORKING}`;
-		}
-	}, [selectedQuestion]);
-
 	const handleBreadcrumbClick = useCallback(
 		(item: string) => () => {
 			if (item === ROUTES.WORKSPACE) {
 				setSelectedQuestion(null);
-				setIsWorking(false);
 				window.location.hash = "";
 			} else if (item === selectedQuestion?.title) {
-				setIsWorking(false);
 				window.location.hash = `#${selectedQuestion.questionId}`;
 			}
 		},
@@ -114,11 +100,6 @@ const WorkspacePage: React.FC = () => {
 					</Button>
 				</Breadcrumb.Item>
 			)}
-			{isWorking && (
-				<Breadcrumb.Item>
-					{ROUTES.WORKING.charAt(0).toUpperCase() + ROUTES.WORKING.slice(1)}
-				</Breadcrumb.Item>
-			)}
 		</Breadcrumb>
 	);
 
@@ -138,45 +119,22 @@ const WorkspacePage: React.FC = () => {
 					gutter={32}
 				>
 					<Col
-						span={isWorking ? 8 : selectedQuestion ? 8 : 24}
+						span={selectedQuestion ? 8 : 24}
 						className={styles.transitionCol}
 					>
-						{!isWorking ? (
-							<QuestionList
-								isNarrow={isNarrow}
-								questions={questions}
-								selectedQuestion={selectedQuestion}
-								onSelectQuestion={handleSelectQuestion}
-								isLoading={isLoading}
-								error={error}
-							/>
-						) : (
-							selectedQuestion && (
-								<QuestionDetail
-									question={selectedQuestion}
-									onStartQuestion={handleStartQuestion}
-									isWorking={isWorking}
-								/>
-							)
-						)}
+						<QuestionList
+							isNarrow={isNarrow}
+							questions={questions}
+							selectedQuestion={selectedQuestion}
+							onSelectQuestion={handleSelectQuestion}
+							isLoading={isLoading}
+							error={error}
+						/>
 					</Col>
 
-					{selectedQuestion && !isWorking && (
+					{selectedQuestion && (
 						<Col span={16} className={styles.transitionCol}>
-							<QuestionDetail
-								question={selectedQuestion}
-								onStartQuestion={handleStartQuestion}
-								isWorking={isWorking}
-							/>
-						</Col>
-					)}
-
-					{isWorking && (
-						<Col span={16} className={styles.transitionCol}>
-							<div className={styles.workingArea}>
-								<h2>{MESSAGES.WORKING_AREA_TITLE}</h2>
-								<p>{MESSAGES.WORKING_AREA_DESCRIPTION}</p>
-							</div>
+							<QuestionDetail question={selectedQuestion} />
 						</Col>
 					)}
 				</Row>

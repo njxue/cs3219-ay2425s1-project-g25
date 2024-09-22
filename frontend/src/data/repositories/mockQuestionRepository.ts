@@ -6,7 +6,35 @@ const initialQuestions: Question[] = [
     {
         questionId: "1",
         title: "Reverse a String",
-        description: "Write a function that reverses a string. The input string is given as an array of characters s. You must do this by modifying the input array in-place with O(1) extra memory.",
+        description: `
+### Problem
+
+Write a function that reverses a string. The input string is given as an array of characters \`s\`. You must do this by modifying the input array **in-place** with O(1) extra memory.
+
+### Instructions
+
+- Reverse the characters in the array in-place.
+- Do not allocate extra space for another array.
+
+### Example
+
+**Input:**
+\`\`\`text
+s = ["h", "e", "l", "l", "o"]
+\`\`\`
+
+**Output:**
+\`\`\`text
+["o", "l", "l", "e", "h"]
+\`\`\`
+
+### Constraints
+
+- 1 <= \`s.length\` <= 10^5
+- \`s[i]\` is a printable ASCII character.
+
+[View problem](https://leetcode.com/problems/reverse-string/)
+    `,
         difficulty: "Easy",
         categories: ["Strings", "Algorithms"],
         url: "https://leetcode.com/problems/reverse-string/"
@@ -14,7 +42,35 @@ const initialQuestions: Question[] = [
     {
         questionId: "2",
         title: "Linked List Cycle Detection",
-        description: "Implement a function to detect if a linked list contains a cycle.",
+        description: `
+### Problem
+
+Implement a function to detect if a linked list contains a cycle.
+
+### Instructions
+
+- Given a linked list, determine if it has a cycle in it.
+- Can you solve it using O(1) memory?
+
+### Example
+
+**Input:**
+\`\`\`
+head = [3, 2, 0, -4], pos = 1 (indicating tail connects to node index 1)
+\`\`\`
+
+**Output:**
+\`\`\`
+true
+\`\`\`
+
+### Constraints
+
+- The number of nodes in the list is in the range [0, 10^4].
+- \`-10^5 <= Node.val <= 10^5\`.
+
+[View problem](https://leetcode.com/problems/linked-list-cycle/)
+    `,
         difficulty: "Easy",
         categories: ["Data Structures", "Algorithms"],
         url: "https://leetcode.com/problems/linked-list-cycle/"
