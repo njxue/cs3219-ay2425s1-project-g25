@@ -2,10 +2,7 @@ import React from "react";
 import { Card, Tag, Divider } from "antd";
 import { Question } from "../../domain/entities/question";
 import styles from "./QuestionCard.module.css";
-import {
-	getDifficultyColor,
-	getStatusColor,
-} from "presentation/utils/questionUtils";
+import { getDifficultyColor } from "presentation/utils/questionUtils";
 
 interface QuestionCardProps {
 	question: Question;
@@ -29,21 +26,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	>
 		<div className={styles.header}>
 			<h2 className={styles.title}>{question.title}</h2>
-			{!isNarrow && (
-				<Tag
-					color={getStatusColor(question.status)}
-					className={styles.statusTag}
-				>
-					{question.status}
-				</Tag>
-			)}
 		</div>
 		<p className={styles.description}>{question.description}</p>
-		{isNarrow && (
-			<Tag color={getStatusColor(question.status)} className={styles.statusTag}>
-				{question.status}
-			</Tag>
-		)}
 		<Divider className={styles.divider} />
 		<div className={styles.footer}>
 			<Tag

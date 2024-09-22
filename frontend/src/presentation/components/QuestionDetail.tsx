@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Tag, Divider, Button } from "antd";
 import { Question } from "../../domain/entities/question";
-import { getDifficultyColor, getStatusColor } from "../utils/questionUtils";
+import { getDifficultyColor } from "../utils/questionUtils";
 import styles from "./QuestionDetail.module.css";
 
 interface QuestionDetailProps {
@@ -20,23 +20,7 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
 					<h2 className={styles.title}>{question.title}</h2>
-					{isWorking && (
-						<Tag
-							color={getStatusColor(question.status)}
-							className={styles.statusTag}
-						>
-							{question.status}
-						</Tag>
-					)}
 				</div>
-				{!isWorking && (
-					<Tag
-						color={getStatusColor(question.status)}
-						className={styles.statusTag}
-					>
-						{question.status}
-					</Tag>
-				)}
 			</div>
 			<Divider className={styles.divider} />
 			<div className={styles.content}>

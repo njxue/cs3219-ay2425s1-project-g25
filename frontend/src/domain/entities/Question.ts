@@ -4,6 +4,5 @@ export interface Question {
     description: string;
     difficulty: string;
     categories: string[];
-    status: 'complete' | 'working' | 'starting';
     link: string;
 }
