@@ -1,6 +1,5 @@
 import { IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/iQuestionRepository';
 
-// Update the Question interface to include the link
 interface Question {
     id: string;
     title: string;
@@ -8,7 +7,7 @@ interface Question {
     difficulty: string;
     categories: string[];
     status: 'complete' | 'working' | 'starting';
-    link: string; // Add this line
+    link: string;
 }
 
 const initialQuestions: Question[] = [

@@ -1,5 +1,3 @@
-// src/data/repositories/QuestionRemoteDataSource.ts
-
 import { BaseApi } from '../BaseApi';
 import { Question } from '../../domain/entities/question';
 
