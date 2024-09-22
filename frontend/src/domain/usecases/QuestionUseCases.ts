@@ -1,11 +1,11 @@
 // src/domain/usecases/QuestionUseCases.ts
 
-import { Question } from '../entities/Question';
-import { questionRepository } from '../../data/repositories/QuestionRepositoryImpl';
+import { Question } from '../entities/question';
+import { questionRepository } from '../../data/repositories/questionRepositoryImpl';
 import { NotFoundError } from '../../presentation/utils/errors';
-import { QuestionValidator } from '../validation/QuestionValidator';
+import { QuestionValidator } from '../validation/questionValidator';
 import { ERRORS } from '../../presentation/utils/constants';
-import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/IQuestionRepository';
+import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/iQuestionRepository';
 
 export class QuestionUseCases {
     constructor(private questionRepository: IQuestionRepository) { }

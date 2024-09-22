@@ -1,4 +1,4 @@
-import { IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/IQuestionRepository';
+import { IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/iQuestionRepository';
 
 // Update the Question interface to include the link
 interface Question {

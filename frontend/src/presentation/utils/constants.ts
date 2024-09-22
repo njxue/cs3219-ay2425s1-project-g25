@@ -1,5 +1,5 @@
 export const ROUTES = {
-    WORKSPACE: "Workspace",
+    WORKSPACE: "workspace",
     WORKING: "working",
 };
 

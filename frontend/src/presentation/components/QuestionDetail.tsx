@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Tag, Divider, Button } from "antd";
-import { Question } from "../../domain/entities/Question";
+import { Question } from "../../domain/entities/question";
 import { getDifficultyColor, getStatusColor } from "../utils/questionUtils";
 import styles from "./QuestionDetail.module.css";
 
