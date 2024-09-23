@@ -1,6 +1,6 @@
-import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/iQuestionRepository';
-import { Question } from '../../domain/entities/question';
-import { questionRemoteDataSource } from './questionRemoteDataSource';
+import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/IQuestionRepository';
+import { Question } from '../../domain/entities/Question';
+import { questionRemoteDataSource } from './QuestionRemoteDataSource';
 import { mockQuestionRemoteDataSource } from './mockQuestionRepository';
 
 // Set this to true to use the mock API, false to use the real API

@@ -1,5 +1,5 @@
 import { BaseApi } from '../BaseApi';
-import { Question } from '../../domain/entities/question';
+import { Question } from '../../domain/entities/Question';
 
 const API_URL = '/api/questions';
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { List, Spin, Alert } from "antd";
-import { Question } from "../../domain/entities/question";
+import { Question } from "../../domain/entities/Question";
 import { QuestionCard } from "./QuestionCard";
 import styles from "./QuestionList.module.css";
 import { SearchBar } from "./SearchBar";

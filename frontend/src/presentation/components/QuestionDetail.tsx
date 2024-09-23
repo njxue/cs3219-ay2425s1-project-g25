@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Tag, Divider } from "antd";
-import { Question } from "../../domain/entities/question";
-import { getDifficultyColor } from "../utils/questionUtils";
+import { Question } from "../../domain/entities/Question";
+import { getDifficultyColor } from "../utils/QuestionUtils";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
