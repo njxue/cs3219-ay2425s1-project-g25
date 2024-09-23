@@ -1,7 +1,7 @@
-import { Question } from '../entities/question';
-import { questionRepository } from '../../data/repositories/questionRepositoryImpl';
+import { Question } from '../entities/Question';
+import { questionRepository } from '../../data/repositories/QuestionRepositoryImpl';
 import { NotFoundError } from '../../presentation/utils/errors';
-import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/iQuestionRepository';
+import { IQuestionRepository, IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/IQuestionRepository';
 import { QuestionValidator } from 'domain/validation/QuestionValidator';
 
 export class QuestionUseCases {

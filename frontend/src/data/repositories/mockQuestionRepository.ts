@@ -1,5 +1,5 @@
-import { Question } from 'domain/entities/question';
-import { IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/iQuestionRepository';
+import { Question } from 'domain/entities/Question';
+import { IQuestionInput, IQuestionUpdateInput } from '../../domain/repositories/IQuestionRepository';
 
 
 const initialQuestions: Question[] = [

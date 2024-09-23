@@ -1,4 +1,4 @@
-import { Question } from '../entities/question';
+import { Question } from '../entities/Question';
 
 export interface IQuestionInput {
     title: string;

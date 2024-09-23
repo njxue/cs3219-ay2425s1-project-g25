@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, Tag } from "antd";
-import { Question } from "../../domain/entities/question";
+import { Question } from "../../domain/entities/Question";
 import styles from "./QuestionCard.module.css";
-import { getDifficultyColor } from "presentation/utils/questionUtils";
+import { getDifficultyColor } from "presentation/utils/QuestionUtils";
 
 interface QuestionCardProps {
 	question: Question;
