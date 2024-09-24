@@ -1,6 +1,6 @@
 export interface Question {
     _id: string,
-    questionId: number,
+    code: number,
     title: string,
     description: string,
     difficulty: string,

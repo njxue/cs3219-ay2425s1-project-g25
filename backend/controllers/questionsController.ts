@@ -6,18 +6,23 @@ export async function getAllQuestions(request: Request, response: Response) {
 }
 
 export async function createQuestion(request: Request, response: Response) {
-    const { questionId, title, description, difficulty, categories, url } = request.body;
+    const { title, description, difficulty, categories, url } = request.body;
 
     try {
-        const existingQuestion = await questionModel.findOne({ questionId });
+        const existingQuestion = await questionModel.findOne({ title });
         if (existingQuestion) {
             return response.status(400).json({
-                message: "A question with the given questionId already exists."
+                message: "A question with the given code already exists."
             });
         }
 
+        // Get counting code:
+        // Find the largest code in the collection
+        const largestQuestion = await questionModel.findOne().sort({ code: -1 });
+        const code = largestQuestion ? largestQuestion.code + 1 : 1;
+
         const newQuestion = new questionModel({
-            questionId,
+            code,
             title,
             description,
             difficulty,
@@ -28,7 +33,7 @@ export async function createQuestion(request: Request, response: Response) {
         await newQuestion.save();
 
         response.status(200).json({
-            message: `New question ${questionId}: ${title} created.`
+            message: `New question ${code}: ${title} created.`
         });
     } catch (error) {
         if (error instanceof Error) {
