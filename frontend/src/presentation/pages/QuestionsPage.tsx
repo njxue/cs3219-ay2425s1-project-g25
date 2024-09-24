@@ -10,7 +10,7 @@ import styles from "./QuestionsPage.module.css";
 import { ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
 import { AddQuestionButton } from "presentation/components/buttons/AddQuestionButton";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -20,7 +20,6 @@ const QuestionsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const navigate = useNavigate();
 
     const selectedQuestionId = searchParams.get('selected');
 
