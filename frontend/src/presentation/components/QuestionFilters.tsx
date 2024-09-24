@@ -59,12 +59,9 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     [selectedCategories, searchTerm, triggerFiltersChange]
   );
 
-  const handleCategorySearch = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setCategorySearchTerm(e.target.value);
-    },
-    []
-  );
+  const handleCategorySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCategorySearchTerm(e.target.value);
+  };
 
   const handleCategoryTagChange = useCallback(
     (category: string, checked: boolean) => {

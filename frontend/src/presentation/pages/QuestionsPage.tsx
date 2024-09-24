@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Breadcrumb, Button, Spin, Alert } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
@@ -75,7 +75,7 @@ const QuestionsPage: React.FC = () => {
     fetchSelectedQuestion();
   }, [selectedQuestionId]);
 
-  const handleSelectQuestion = useCallback(
+  const handleSelectQuestion = (
     (questionId: string) => {
       setError(null);
       if (selectedQuestionId === questionId) {
@@ -83,22 +83,20 @@ const QuestionsPage: React.FC = () => {
       } else {
         setSelectedQuestionId(questionId);
       }
-    },
-    [selectedQuestionId]
+    }
   );
 
-  const handleBreadcrumbClick = useCallback(
+  const handleBreadcrumbClick = (
     (item: string) => () => {
       if (item === ROUTES.WORKSPACE) {
         setSelectedQuestionId(null);
       }
-    },
-    []
+    }
   );
 
-  const handleAddQuestion = useCallback(() => {
+  const handleAddQuestion = () => {
     console.log("Add Question button clicked");
-  }, []);
+  };
 
   const renderBreadcrumb = () => (
     <Breadcrumb className={styles.breadcrumb}>

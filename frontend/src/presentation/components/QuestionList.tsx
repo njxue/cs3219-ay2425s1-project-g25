@@ -38,12 +38,12 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     return Array.from(categoriesSet);
   }, [questions]);
 
-  const handleFiltersChange = useCallback((newFilters: React.SetStateAction<{ 
+  const handleFiltersChange = (newFilters: React.SetStateAction<{ 
 		selectedDifficulty: string; 
 		selectedCategories: string[]; 
 		searchTerm: string; }>) => {
     setFilters(newFilters);
-  }, []);
+  };
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((question) => {
