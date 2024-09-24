@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Breadcrumb, Button, Spin, Alert } from "antd";
+import { Row, Col, Breadcrumb, Button, Spin, Alert, Modal } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
 import { LandingComponent } from "../components/LandingComponent";
+import { NewQuestionForm } from "../components/NewQuestionForm/NewQuestionForm";
 import { Question } from "../../domain/entities/Question";
 import { QUESTIONS_PAGE_TEXT } from "presentation/utils/constants";
 import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
@@ -18,6 +19,7 @@ const QuestionsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -76,7 +78,11 @@ const QuestionsPage: React.FC = () => {
     };
 
     const handleAddQuestion = () => {
-        console.log("Add Question button clicked");
+        setIsModalVisible(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalVisible(false);
     };
 
     const renderBreadcrumb = () => (
@@ -120,7 +126,10 @@ const QuestionsPage: React.FC = () => {
                         />
                         {selectedQuestionId && (
                             <div className={styles.addButtonWrapper}>
-                                <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />
+                                <AddQuestionButton
+                                    label={QUESTIONS_PAGE_TEXT.ADD_QUESTION}
+                                    onClick={handleAddQuestion}
+                                />
                             </div>
                         )}
                     </Col>
@@ -156,6 +165,16 @@ const QuestionsPage: React.FC = () => {
                     </Col>
                 </Row>
             </div>
+
+            <Modal
+                title="Add New Question"
+                visible={isModalVisible}
+                onCancel={handleCloseModal}
+                footer={null}
+                width={800} 
+            >
+                <NewQuestionForm />
+            </Modal>
         </div>
     );
 };
