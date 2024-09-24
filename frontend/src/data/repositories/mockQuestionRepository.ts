@@ -32,8 +32,6 @@ s = ["h", "e", "l", "l", "o"]
 
 - 1 <= \`s.length\` <= 10^5
 - \`s[i]\` is a printable ASCII character.
-
-[View problem](https://leetcode.com/problems/reverse-string/)
     `,
         difficulty: "Easy",
         categories: ["Strings", "Algorithms"],
@@ -68,8 +66,6 @@ true
 
 - The number of nodes in the list is in the range [0, 10^4].
 - \`-10^5 <= Node.val <= 10^5\`.
-
-[View problem](https://leetcode.com/problems/linked-list-cycle/)
     `,
         difficulty: "Easy",
         categories: ["Data Structures", "Algorithms"],
