@@ -10,7 +10,7 @@ import styles from "./QuestionsPage.module.css";
 import { ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
 import { AddQuestionButton } from "presentation/components/buttons/AddQuestionButton";
-import { useSearchParams, useNavigate } from "react-router-dom"; // Import hooks from react-router-dom
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -19,12 +19,11 @@ const QuestionsPage: React.FC = () => {
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [searchParams, setSearchParams] = useSearchParams(); // Use this to handle query parameters
-    const navigate = useNavigate(); // Use this for programmatic navigation
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
-    const selectedQuestionId = searchParams.get('selected'); // Get the selected question ID from query parameters
+    const selectedQuestionId = searchParams.get('selected');
 
-    // Fetch questions on initial load
     useEffect(() => {
         const fetchQuestions = async () => {
             setIsLoading(true);
@@ -41,7 +40,6 @@ const QuestionsPage: React.FC = () => {
         fetchQuestions();
     }, []);
 
-    // Fetch selected question when questionId changes
     useEffect(() => {
         const fetchSelectedQuestion = async () => {
             if (selectedQuestionId) {
@@ -63,21 +61,17 @@ const QuestionsPage: React.FC = () => {
         fetchSelectedQuestion();
     }, [selectedQuestionId]);
 
-    // Handle selecting a question
     const handleSelectQuestion = (questionId: string) => {
         setError(null);
         if (selectedQuestionId === questionId) {
-            // If the same question is selected again, remove it from the URL
-            navigate(ROUTES.QUESTIONS);
+            setSearchParams({});
         } else {
-            // Set the selected question ID in the URL
             setSearchParams({ selected: questionId });
         }
     };
 
     const handleBreadcrumbClick = (item: string) => () => {
         if (item === ROUTES.QUESTIONS) {
-            // Reset the selected question in the URL
             setSearchParams({});
         }
     };
