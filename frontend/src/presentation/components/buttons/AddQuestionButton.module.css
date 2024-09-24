@@ -1,0 +1,22 @@
+.customButton {
+        background-color: #ff8c00;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .customButton:hover,
+    .customButton:focus,
+    .customButton:active {
+        background-color: #e67600;
+        color: #ffffff;
+    }
+    
+    .customButton span {
+        color: inherit;
+    }
+  

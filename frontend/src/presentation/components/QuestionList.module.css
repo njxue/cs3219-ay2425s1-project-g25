@@ -1,5 +1,23 @@
-.list {
-    max-height: 100%;
-    overflow-y: auto;
-    padding: 8px;
-}
+.questionListContainer {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+    }
+    
+    .listContainer {
+        flex: 1 1 auto;
+        overflow-y: auto;
+    }
+    
+    .list {
+        padding: 16px;
+    }
+    
+    .centerContent {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+  
