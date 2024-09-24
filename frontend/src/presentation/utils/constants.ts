@@ -1,3 +1,5 @@
+import { QuestionDifficulty } from "domain/entities/QuestionDifficulty";
+
 export const ROUTES = {
     QUESTIONS: "Questions",
 };
@@ -41,10 +43,10 @@ export const QUESTIONS_FILTER_TEXT = {
 }
 
 export const DIFFICULTY_TEXT = {
-    ALL: "All",
-    EASY: "Easy",
-    MEDIUM: "Medium",
-    HARD: "Hard"
+    ALL: "All" as QuestionDifficulty,
+    EASY: "Easy" as QuestionDifficulty,
+    MEDIUM: "Medium" as QuestionDifficulty,
+    HARD: "Hard" as QuestionDifficulty
 }
 
 export const LANDING_CARD_TEXT = {
