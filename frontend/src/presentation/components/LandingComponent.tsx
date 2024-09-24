@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "antd";
 import styles from "./LandingComponent.module.css";
 import { AddQuestionButton } from "./buttons/AddQuestionButton";
+import { LANDING_CARD_TEXT } from "presentation/utils/constants";
 
 interface LandingComponentProps {
     onAddQuestion: () => void;
@@ -11,9 +12,9 @@ export const LandingComponent: React.FC<LandingComponentProps> = ({ onAddQuestio
     <div className={styles.cardWrapper}>
         <Card className={styles.card}>
             <div className={styles.content}>
-                <h2>{"Welcome to the Question Workspace"}</h2>
-                <p>{"Select a question from the list or add a new question to get started."}</p>
-                <AddQuestionButton label="Add a New Question" onClick={onAddQuestion} />
+                <h2>{LANDING_CARD_TEXT.WELCOME}</h2>
+                <p>{LANDING_CARD_TEXT.INSTRUCTIONS}</p>
+                <AddQuestionButton label={LANDING_CARD_TEXT.ADD_QUESTION} onClick={onAddQuestion} />
             </div>
         </Card>
     </div>

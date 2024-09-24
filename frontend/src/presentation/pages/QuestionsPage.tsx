@@ -4,26 +4,27 @@ import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
 import { LandingComponent } from "../components/LandingComponent";
 import { Question } from "../../domain/entities/Question";
+import { QUESTIONS_PAGE_TEXT } from "presentation/utils/constants";
 import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
 import styles from "./QuestionsPage.module.css";
 import { ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
 import { AddQuestionButton } from "presentation/components/buttons/AddQuestionButton";
-
-const LAST_SELECTED_QUESTION_KEY = "lastSelectedQuestionId";
+import { useSearchParams, useNavigate } from "react-router-dom"; // Import hooks from react-router-dom
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(
-        null
-    );
-    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-        null
-    );
+    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [searchParams, setSearchParams] = useSearchParams(); // Use this to handle query parameters
+    const navigate = useNavigate(); // Use this for programmatic navigation
+
+    const selectedQuestionId = searchParams.get('selected'); // Get the selected question ID from query parameters
+
+    // Fetch questions on initial load
     useEffect(() => {
         const fetchQuestions = async () => {
             setIsLoading(true);
@@ -38,61 +39,48 @@ const QuestionsPage: React.FC = () => {
         };
 
         fetchQuestions();
-
-        //Should we use slugs/query params instead of this?
-        const lastSelectedQuestionId = localStorage.getItem(
-            LAST_SELECTED_QUESTION_KEY
-        );
-
-        if (lastSelectedQuestionId) {
-            setSelectedQuestionId(lastSelectedQuestionId);
-        }
     }, []);
 
+    // Fetch selected question when questionId changes
     useEffect(() => {
         const fetchSelectedQuestion = async () => {
             if (selectedQuestionId) {
                 setIsQuestionLoading(true);
                 try {
-                    const question = await questionUseCases.getQuestion(
-                        selectedQuestionId
-                    );
+                    const question = await questionUseCases.getQuestion(selectedQuestionId);
                     setSelectedQuestion(question);
-                    localStorage.setItem(LAST_SELECTED_QUESTION_KEY, selectedQuestionId);
                 } catch (err) {
                     setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
                     setSelectedQuestion(null);
-                    localStorage.removeItem(LAST_SELECTED_QUESTION_KEY);
                 } finally {
                     setIsQuestionLoading(false);
                 }
             } else {
                 setSelectedQuestion(null);
-                localStorage.removeItem(LAST_SELECTED_QUESTION_KEY);
             }
         };
 
         fetchSelectedQuestion();
     }, [selectedQuestionId]);
 
-    const handleSelectQuestion = (
-        (questionId: string) => {
-            setError(null);
-            if (selectedQuestionId === questionId) {
-                setSelectedQuestionId(null);
-            } else {
-                setSelectedQuestionId(questionId);
-            }
+    // Handle selecting a question
+    const handleSelectQuestion = (questionId: string) => {
+        setError(null);
+        if (selectedQuestionId === questionId) {
+            // If the same question is selected again, remove it from the URL
+            navigate(ROUTES.QUESTIONS);
+        } else {
+            // Set the selected question ID in the URL
+            setSearchParams({ selected: questionId });
         }
-    );
+    };
 
-    const handleBreadcrumbClick = (
-        (item: string) => () => {
-            if (item === ROUTES.WORKSPACE) {
-                setSelectedQuestionId(null);
-            }
+    const handleBreadcrumbClick = (item: string) => () => {
+        if (item === ROUTES.QUESTIONS) {
+            // Reset the selected question in the URL
+            setSearchParams({});
         }
-    );
+    };
 
     const handleAddQuestion = () => {
         console.log("Add Question button clicked");
@@ -101,8 +89,8 @@ const QuestionsPage: React.FC = () => {
     const renderBreadcrumb = () => (
         <Breadcrumb className={styles.breadcrumb}>
             <Breadcrumb.Item>
-                <Button type="link" onClick={handleBreadcrumbClick(ROUTES.WORKSPACE)}>
-                    {ROUTES.WORKSPACE}
+                <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
+                    {ROUTES.QUESTIONS}
                 </Button>
             </Breadcrumb.Item>
             {selectedQuestion && (
@@ -132,14 +120,14 @@ const QuestionsPage: React.FC = () => {
                         <QuestionList
                             isNarrow={selectedQuestionId !== null}
                             questions={questions}
-                            selectedQuestionId={selectedQuestionId}
+                            selectedQuestionId={selectedQuestionId || null}
                             onSelectQuestion={handleSelectQuestion}
                             isLoading={isLoading}
                             error={error}
                         />
                         {selectedQuestionId && (
                             <div className={styles.addButtonWrapper}>
-                                <AddQuestionButton label="Add a New Question" onClick={handleAddQuestion} />
+                                <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />
                             </div>
                         )}
                     </Col>

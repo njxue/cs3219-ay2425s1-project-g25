@@ -4,6 +4,7 @@ import { Question } from '../../domain/entities/Question';
 import { QuestionCard } from './QuestionCard';
 import { QuestionFilters } from './QuestionFilters';
 import styles from './QuestionList.module.css';
+import { QUESTIONS_LIST_TEXT } from 'presentation/utils/constants';
 
 interface QuestionListProps {
     questions: Question[];
@@ -106,8 +107,8 @@ export const QuestionList: React.FC<QuestionListProps> = ({
             <div className={styles.listContainer}>
                 {filteredQuestions.length === 0 ? (
                     <Alert
-                        message="No Questions"
-                        description="No questions match your filters."
+                        message={QUESTIONS_LIST_TEXT.NO_QUESTIONS}
+                        description={QUESTIONS_LIST_TEXT.NO_QUESTIONS_DESCRIPTION}
                         type="info"
                         showIcon
                     />

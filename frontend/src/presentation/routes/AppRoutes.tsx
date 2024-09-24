@@ -6,10 +6,10 @@ import QuestionsPage from "presentation/pages/QuestionsPage";
 const AppRoutes: React.FC = () => {
 	return (
 		<Routes>
-			<Route path="/" element={<Navigate to="/workspace" />} />
+			<Route path="/" element={<Navigate to="/questions" />} />
 
 			<Route
-				path="/workspace"
+				path="/questions"
 				element={
 					<Layout>
 						<QuestionsPage />

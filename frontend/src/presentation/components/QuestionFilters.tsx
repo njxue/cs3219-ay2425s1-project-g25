@@ -2,6 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Select, Input, Tag, Dropdown, Button } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import styles from './QuestionFilters.module.css';
+import { DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from 'presentation/utils/constants';
+import { getDifficultyColor } from 'presentation/utils/QuestionUtils';
 
 const { CheckableTag } = Tag;
 
@@ -18,7 +20,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     allCategories,
     onFiltersChange,
 }) => {
-    const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
+    const [selectedDifficulty, setSelectedDifficulty] = useState<string>(DIFFICULTY_TEXT.ALL);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [categorySearchTerm, setCategorySearchTerm] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -92,7 +94,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         >
             <div className={styles.categoryDropdownContainer}>
                 <Input
-                    placeholder="Search Categories"
+                    placeholder={QUESTIONS_FILTER_TEXT.SELECT_CATEGORIES}
                     value={categorySearchTerm}
                     onChange={handleCategorySearch}
                     className={styles.categorySearchBar}
@@ -130,23 +132,23 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
 
                 <div className={styles.filterItem}>
                 <Select
-                    placeholder="Select Difficulty"
+                    placeholder={QUESTIONS_FILTER_TEXT.SELECT_DIFFICULTY}
                     value={selectedDifficulty}
                     onChange={handleDifficultyChange}
                     className={styles.difficultyFilter}
                     optionLabelProp="label"
                     options={[{
-                        value: "All",
-                        label: <span>{"All"}</span>
+                        value: DIFFICULTY_TEXT.ALL,
+                        label: <span>{DIFFICULTY_TEXT.ALL}</span>
                     },{
-                        value: "Easy",
-                        label: <span style={{ color: 'green' }}>Easy</span>
+                        value: DIFFICULTY_TEXT.EASY,
+                        label: <span style={{ color: getDifficultyColor(DIFFICULTY_TEXT.EASY) }}>{DIFFICULTY_TEXT.EASY}</span>
                     },{
-                        value: "Medium",
-                        label: <span style={{ color: 'goldenrod' }}>Medium</span>
+                        value: DIFFICULTY_TEXT.MEDIUM,
+                        label: <span style={{ color: getDifficultyColor(DIFFICULTY_TEXT.MEDIUM) }}>{DIFFICULTY_TEXT.MEDIUM}</span>
                     },{
-                        value: "Hard",
-                        label: <span style={{ color: 'red' }}>Hard</span>
+                        value: DIFFICULTY_TEXT.HARD,
+                        label: <span style={{ color: getDifficultyColor(DIFFICULTY_TEXT.HARD) }}>{DIFFICULTY_TEXT.HARD}</span>
                     }
                     ]}
                 />
@@ -155,7 +157,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
 
             <div className={styles.searchBarContainer}>
                 <Input.Search
-                    placeholder="Search by title"
+                    placeholder={QUESTIONS_FILTER_TEXT.SELECT_TITLE}
                     value={searchTerm}
                     onChange={handleSearch}
                     className={styles.searchBar}
