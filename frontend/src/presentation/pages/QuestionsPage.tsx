@@ -39,6 +39,7 @@ const QuestionsPage: React.FC = () => {
 
     fetchQuestions();
 
+    //Should we use slugs/query params instead of this?
     const lastSelectedQuestionId = localStorage.getItem(
       LAST_SELECTED_QUESTION_KEY
     );

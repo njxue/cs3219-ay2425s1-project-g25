@@ -3,7 +3,6 @@ import { Select, Input, Tag, Dropdown, Button } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import styles from './QuestionFilters.module.css';
 
-const { Option } = Select;
 const { CheckableTag } = Tag;
 
 interface QuestionFiltersProps {
@@ -30,9 +29,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
       selectedCategories: string[];
       searchTerm: string;
     }) => {
-      if (onFiltersChange) {
-        onFiltersChange(filters);
-      }
+      onFiltersChange?.(filters);
     },
     [onFiltersChange]
   );
@@ -73,7 +70,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     (category: string, checked: boolean) => {
       const nextSelectedCategories = checked
         ? [...selectedCategories, category]
-        : selectedCategories.filter((c) => c !== category);
+        : selectedCategories?.filter((c) => c !== category);
       setSelectedCategories(nextSelectedCategories);
       triggerFiltersChange({
         selectedDifficulty,
@@ -141,29 +138,21 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
             onChange={handleDifficultyChange}
             className={styles.difficultyFilter}
             optionLabelProp="label"
-          >
-            <Option value="All" label="All">
-              All
-            </Option>
-            <Option
-              value="Easy"
-              label={<span style={{ color: 'green' }}>Easy</span>}
-            >
-              <span style={{ color: 'green' }}>Easy</span>
-            </Option>
-            <Option
-              value="Medium"
-              label={<span style={{ color: 'goldenrod' }}>Medium</span>}
-            >
-              <span style={{ color: 'goldenrod' }}>Medium</span>
-            </Option>
-            <Option
-              value="Hard"
-              label={<span style={{ color: 'red' }}>Hard</span>}
-            >
-              <span style={{ color: 'red' }}>Hard</span>
-            </Option>
-          </Select>
+            options={[{
+                value: "All",
+                label: <span>{"All"}</span>
+              },{
+                value: "Easy",
+                label: <span style={{ color: 'green' }}>Easy</span>
+              },{
+                value: "Medium",
+                label: <span style={{ color: 'goldenrod' }}>Medium</span>
+              },{
+                value: "Hard",
+                label: <span style={{ color: 'red' }}>Hard</span>
+              }
+            ]}
+          />
         </div>
       </div>
 
