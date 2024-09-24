@@ -38,3 +38,4 @@ Icon
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+/user-service/user-service/.env
