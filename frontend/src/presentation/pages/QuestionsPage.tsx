@@ -171,7 +171,7 @@ const QuestionsPage: React.FC = () => {
                 visible={isModalVisible}
                 onCancel={handleCloseModal}
                 footer={null}
-                width={800} 
+                width={1200} 
             >
                 <NewQuestionForm />
             </Modal>
