@@ -17,7 +17,7 @@ export async function createQuestion(request: Request, response: Response, next:
         const existingQuestion = await questionModel.findOne({ title });
         if (existingQuestion) {
             return response.status(400).json({
-                message: "A question with the given code already exists."
+                message: "A question with the given title already exists."
             });
         }
 
