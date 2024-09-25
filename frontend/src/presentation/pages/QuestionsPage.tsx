@@ -15,7 +15,9 @@ import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+        null
+    );
     const [isLoading, setIsLoading] = useState(true);
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ const QuestionsPage: React.FC = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const selectedQuestionId = searchParams.get('code');
+    const selectedQuestionId = searchParams.get("code");
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -46,7 +48,9 @@ const QuestionsPage: React.FC = () => {
             if (selectedQuestionId) {
                 setIsQuestionLoading(true);
                 try {
-                    const question = await questionUseCases.getQuestion(selectedQuestionId);
+                    const question = await questionUseCases.getQuestion(
+                        selectedQuestionId
+                    );
                     setSelectedQuestion(question);
                 } catch (err) {
                     setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
@@ -168,10 +172,10 @@ const QuestionsPage: React.FC = () => {
 
             <Modal
                 title="Add New Question"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onCancel={handleCloseModal}
                 footer={null}
-                width={1200} 
+                width={1200}
             >
                 <NewQuestionForm />
             </Modal>
