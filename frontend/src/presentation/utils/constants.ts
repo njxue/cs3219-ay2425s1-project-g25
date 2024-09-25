@@ -42,8 +42,8 @@ export const QUESTIONS_FILTER_TEXT = {
     SELECT_TITLE: "Search by title",
 }
 
-export const DIFFICULTY_TEXT = {
-    ALL: "All" as QuestionDifficulty,
+export const FILTER_DIFFICULTY_TEXT = {
+    ALL: "All",
     EASY: "Easy" as QuestionDifficulty,
     MEDIUM: "Medium" as QuestionDifficulty,
     HARD: "Hard" as QuestionDifficulty

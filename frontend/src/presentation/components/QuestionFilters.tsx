@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Select, Input, Tag, Dropdown, Button } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import styles from './QuestionFilters.module.css';
-import { DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from 'presentation/utils/constants';
+import { FILTER_DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from 'presentation/utils/constants';
 import { getDifficultyColor } from 'presentation/utils/QuestionUtils';
 
 const { CheckableTag } = Tag;
@@ -20,7 +20,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     allCategories,
     onFiltersChange,
 }) => {
-    const [selectedDifficulty, setSelectedDifficulty] = useState<string>(DIFFICULTY_TEXT.ALL);
+    const [selectedDifficulty, setSelectedDifficulty] = useState<string>(FILTER_DIFFICULTY_TEXT.ALL);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [categorySearchTerm, setCategorySearchTerm] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -133,22 +133,22 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
                 <div className={styles.filterItem}>
                     <Select
                         placeholder="Choose Difficulty"
-                        value={selectedDifficulty === DIFFICULTY_TEXT.ALL ? 'Choose Difficulty' : selectedDifficulty}
+                        value={selectedDifficulty === FILTER_DIFFICULTY_TEXT.ALL ? 'Choose Difficulty' : selectedDifficulty}
                         onChange={handleDifficultyChange}
                         className={styles.difficultyFilter}
                         optionLabelProp="label"
                         options={[{
-                            value: DIFFICULTY_TEXT.ALL,
+                            value: FILTER_DIFFICULTY_TEXT.ALL,
                             label: <span>All</span>
                         },{
-                            value: DIFFICULTY_TEXT.EASY,
-                            label: <span style={{ color: getDifficultyColor(DIFFICULTY_TEXT.EASY) }}>{DIFFICULTY_TEXT.EASY}</span>
+                            value: FILTER_DIFFICULTY_TEXT.EASY,
+                            label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>{FILTER_DIFFICULTY_TEXT.EASY}</span>
                         },{
-                            value: DIFFICULTY_TEXT.MEDIUM,
-                            label: <span style={{ color: getDifficultyColor(DIFFICULTY_TEXT.MEDIUM) }}>{DIFFICULTY_TEXT.MEDIUM}</span>
+                            value: FILTER_DIFFICULTY_TEXT.MEDIUM,
+                            label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>{FILTER_DIFFICULTY_TEXT.MEDIUM}</span>
                         },{
-                            value: DIFFICULTY_TEXT.HARD,
-                            label: <span style={{ color: getDifficultyColor(DIFFICULTY_TEXT.HARD) }}>{DIFFICULTY_TEXT.HARD}</span>
+                            value: FILTER_DIFFICULTY_TEXT.HARD,
+                            label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>{FILTER_DIFFICULTY_TEXT.HARD}</span>
                         }]}
                     />
                 </div>

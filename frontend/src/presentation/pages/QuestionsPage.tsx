@@ -23,7 +23,7 @@ const QuestionsPage: React.FC = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const selectedQuestionId = searchParams.get('selected');
+    const selectedQuestionId = searchParams.get('code');
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -67,7 +67,7 @@ const QuestionsPage: React.FC = () => {
         if (selectedQuestionId === questionId) {
             setSearchParams({});
         } else {
-            setSearchParams({ selected: questionId });
+            setSearchParams({ code: questionId });
         }
     };
 
