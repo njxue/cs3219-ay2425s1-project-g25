@@ -8,6 +8,7 @@ import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
+import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 
 interface NewQuestionFormProps {
     onSubmit?: () => void;
@@ -20,6 +21,14 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
         required: "${label} is required",
         whitespace: "${label} is required",
     };
+
+    const {
+        FIELD_TITLE,
+        FIELD_DIFFICULTY,
+        FIELD_DESCRIPTION,
+        FIELD_CATEGORIES,
+        FIELD_URL,
+    } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(question: IQuestionInput) {
         const res = await questionRepository.createQuestion(question);
@@ -39,20 +48,20 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                 <Row>
                     <Col span={24}>
                         <Form.Item
-                            label="Title"
-                            name="title"
+                            label={FIELD_TITLE.label}
+                            name={FIELD_TITLE.name}
                             rules={[{ required: true, whitespace: true }]}
                             labelAlign="right"
                         >
-                            <Input placeholder="Title" />
+                            <Input placeholder={FIELD_TITLE.label} />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={6}>
                         <Form.Item
-                            label="Difficulty"
-                            name="difficulty"
+                            label={FIELD_DIFFICULTY.label}
+                            name={FIELD_DIFFICULTY.name}
                             rules={[
                                 {
                                     required: true,
@@ -60,15 +69,15 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                             ]}
                         >
                             <Select
-                                placeholder="Difficulty"
+                                placeholder={FIELD_DIFFICULTY.label}
                                 options={difficultyOptions}
                             />
                         </Form.Item>
                     </Col>
                     <Col span={18}>
                         <Form.Item
-                            label="Categories"
-                            name="categories"
+                            label={FIELD_CATEGORIES.label}
+                            name={FIELD_CATEGORIES.name}
                             rules={[
                                 {
                                     required: true,
@@ -76,7 +85,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                             ]}
                         >
                             <Select
-                                placeholder="Categories"
+                                placeholder={FIELD_CATEGORIES.label}
                                 allowClear
                                 mode="multiple"
                                 options={categoryOptions}
@@ -86,8 +95,11 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <Form.Item label="Reference URL" name="url">
-                            <Input type="text" placeholder="Reference URL" />
+                        <Form.Item
+                            label={FIELD_URL.label}
+                            name={FIELD_URL.name}
+                        >
+                            <Input type="text" placeholder={FIELD_URL.label} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -95,15 +107,19 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                 <Row>
                     <Col span={24}>
                         <Form.Item
-                            name="description"
-                            label="Description"
+                            label={FIELD_DESCRIPTION.label}
+                            name={FIELD_DESCRIPTION.name}
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={form.getFieldValue("description") || ""}
+                                value={
+                                    form.getFieldValue(
+                                        FIELD_DESCRIPTION.name
+                                    ) || ""
+                                }
                                 onChange={(description) =>
                                     form.setFieldValue(
-                                        "description",
+                                        FIELD_DESCRIPTION.name,
                                         description
                                     )
                                 }

@@ -8,8 +8,7 @@ import styles from "../NewQuestionForm/NewQuestionForm.module.css";
 import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
-
-// Reusable form for both Create and Edit
+import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 
 interface EditQuestionFormProps {
     question: Question;
@@ -25,7 +24,16 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
         whitespace: "${label} is required",
     };
 
+    //  Remove questionId to convert to IQuestionUpdateInput
     const { questionId: _, ...questionUpdateInput } = question;
+
+    const {
+        FIELD_TITLE,
+        FIELD_DIFFICULTY,
+        FIELD_DESCRIPTION,
+        FIELD_CATEGORIES,
+        FIELD_URL,
+    } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
         await questionRepository.updateQuestion(
@@ -48,20 +56,20 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                 <Row>
                     <Col span={24}>
                         <Form.Item
-                            label="Title"
-                            name="title"
+                            label={FIELD_TITLE.label}
+                            name={FIELD_TITLE.name}
                             rules={[{ required: true, whitespace: true }]}
                             labelAlign="right"
                         >
-                            <Input placeholder="Title" />
+                            <Input placeholder={FIELD_TITLE.label} />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={6}>
                         <Form.Item
-                            label="Difficulty"
-                            name="difficulty"
+                            label={FIELD_DIFFICULTY.label}
+                            name={FIELD_DIFFICULTY.name}
                             rules={[
                                 {
                                     required: true,
@@ -69,15 +77,15 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                             ]}
                         >
                             <Select
-                                placeholder="Difficulty"
+                                placeholder={FIELD_DIFFICULTY.label}
                                 options={difficultyOptions}
                             />
                         </Form.Item>
                     </Col>
                     <Col span={18}>
                         <Form.Item
-                            label="Categories"
-                            name="categories"
+                            label={FIELD_CATEGORIES.label}
+                            name={FIELD_CATEGORIES.name}
                             rules={[
                                 {
                                     required: true,
@@ -85,7 +93,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                             ]}
                         >
                             <Select
-                                placeholder="Categories"
+                                placeholder={FIELD_CATEGORIES.label}
                                 allowClear
                                 mode="multiple"
                                 options={categoryOptions}
@@ -95,8 +103,11 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <Form.Item label="Reference URL" name="url">
-                            <Input type="text" placeholder="Reference URL" />
+                        <Form.Item
+                            label={FIELD_URL.label}
+                            name={FIELD_URL.name}
+                        >
+                            <Input type="text" placeholder={FIELD_URL.label} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -104,15 +115,15 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                 <Row>
                     <Col span={24}>
                         <Form.Item
-                            name="description"
-                            label="Description"
+                            label={FIELD_DESCRIPTION.label}
+                            name={FIELD_DESCRIPTION.name}
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={form.getFieldValue("description") || ""}
+                                value={form.getFieldValue("descripton") || ""}
                                 onChange={(description) =>
                                     form.setFieldValue(
-                                        "description",
+                                        FIELD_DESCRIPTION.name,
                                         description
                                     )
                                 }
