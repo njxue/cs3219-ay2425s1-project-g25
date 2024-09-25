@@ -2,18 +2,20 @@ import { Input, Form, Select, Row, Col, Button } from "antd";
 import {
     categoryOptions,
     difficultyOptions,
-    initialQuestionInput,
 } from "presentation/utils/QuestionUtils";
 import MdEditor from "@uiw/react-md-editor";
-import styles from "./NewQuestionForm.module.css";
-import { IQuestionInput } from "domain/repositories/IQuestionRepository";
+import styles from "../NewQuestionForm/NewQuestionForm.module.css";
+import { Question } from "domain/entities/Question";
+import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 
-interface NewQuestionFormProps {
+interface EditQuestionFormProps {
+    question: Question;
     onSubmit?: () => void;
 }
-export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
+export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
+    question,
     onSubmit,
 }) => {
     const [form] = Form.useForm();
@@ -21,6 +23,9 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
         required: "${label} is required",
         whitespace: "${label} is required",
     };
+
+    //  Remove questionId to convert to IQuestionUpdateInput
+    const { questionId: _, ...questionUpdateInput } = question;
 
     const {
         FIELD_TITLE,
@@ -30,10 +35,13 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
         FIELD_URL,
     } = QUESTION_FORM_FIELDS;
 
-    async function handleSubmit(question: IQuestionInput) {
-        const res = await questionRepository.createQuestion(question);
+    async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
+        await questionRepository.updateQuestion(
+            question?.questionId,
+            questionUpdate
+        );
         onSubmit?.();
-        // TODO: when BE completed
+        // TODO: handle after BE complete
     }
 
     return (
@@ -41,7 +49,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
             <Form
                 layout="vertical"
                 onFinish={handleSubmit}
-                initialValues={initialQuestionInput}
+                initialValues={questionUpdateInput}
                 validateMessages={validateMessages}
                 scrollToFirstError
             >
@@ -112,11 +120,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={
-                                    form.getFieldValue(
-                                        FIELD_DESCRIPTION.name
-                                    ) || ""
-                                }
+                                value={form.getFieldValue("descripton") || ""}
                                 onChange={(description) =>
                                     form.setFieldValue(
                                         FIELD_DESCRIPTION.name,
@@ -131,7 +135,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                     </Col>
                 </Row>
                 <Button type="primary" htmlType="submit">
-                    Create
+                    Save
                 </Button>
             </Form>
         </div>
