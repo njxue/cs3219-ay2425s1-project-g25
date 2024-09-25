@@ -1,5 +1,6 @@
 import { QuestionDifficulty } from "domain/entities/QuestionDifficulty";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
+import { FILTER_DIFFICULTY_TEXT } from "./constants";
 
 export const getDifficultyColor = (difficulty: QuestionDifficulty): string => {
 	switch (difficulty) {
@@ -32,16 +33,16 @@ export const difficultyOptions: {
 	label: JSX.Element | string;
 }[] = [
 	{
-		value: "Easy" as QuestionDifficulty,
-		label: <span style={{ color: getDifficultyColor("Easy") }}>Easy</span>,
+		value: FILTER_DIFFICULTY_TEXT.EASY as QuestionDifficulty,
+		label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>{FILTER_DIFFICULTY_TEXT.EASY}</span>,
 	},
 	{
-		value: "Medium" as QuestionDifficulty,
-		label: <span style={{ color: getDifficultyColor("Medium") }}>Medium</span>,
+		value: FILTER_DIFFICULTY_TEXT.MEDIUM as QuestionDifficulty,
+		label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>{FILTER_DIFFICULTY_TEXT.MEDIUM}</span>,
 	},
 	{
-		value: "Hard" as QuestionDifficulty,
-		label: <span style={{ color: getDifficultyColor("Hard") }}>Hard</span>,
+		value: FILTER_DIFFICULTY_TEXT.HARD as QuestionDifficulty,
+		label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>{FILTER_DIFFICULTY_TEXT.HARD}</span>,
 	},
 ];
 
