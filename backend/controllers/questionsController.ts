@@ -1,26 +1,16 @@
 import questionModel from "../models/Question";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
-export async function getAllQuestions(request: Request, response: Response) {
+export async function getAllQuestions(request: Request, response: Response, next: NextFunction) {
     try {
         const questions = await questionModel.find();
         response.status(200).json(questions);
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error fetching questions:", error.message);
-            response.status(400).json({
-                message: `Failed to fetch questions: ${error.message}`
-            });
-        } else {
-            console.error("Error fetching questions:", error);
-            response.status(400).json({
-                message: "Failed to fetch questions."
-            });
-        }
+        next(error);
     }
 }
 
-export async function createQuestion(request: Request, response: Response) {
+export async function createQuestion(request: Request, response: Response, next: NextFunction) {
     const { title, description, difficulty, categories, url } = request.body;
 
     try {
@@ -51,21 +41,11 @@ export async function createQuestion(request: Request, response: Response) {
             message: `New question ${code}: ${title} created.`
         });
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error creating the question:", error.message);
-            response.status(400).json({
-                message: `Failed to create the question: ${error.message}`
-            });
-        } else {
-            console.error("Error creating the question:", error);
-            response.status(400).json({
-                message: "Failed to create the question."
-            });
-        }
+        next(error);
     }
 }
 
-export async function updateQuestion(request: Request, response: Response) {
+export async function updateQuestion(request: Request, response: Response, next: NextFunction) {
     const { code } = request.params;
     const updateData = request.body;
 
@@ -87,22 +67,12 @@ export async function updateQuestion(request: Request, response: Response) {
             updatedQuestion
         });
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error updating the question:", error.message);
-            response.status(400).json({
-                message: `Failed to update the question: ${error.message}`
-            });
-        } else {
-            console.error("Error updating the question:", error);
-            response.status(400).json({
-                message: "Failed to update the question."
-            });
-        }
+        next(error);
     }
 }
 
 
-export async function deleteQuestion(request: Request, response: Response) {
+export async function deleteQuestion(request: Request, response: Response, next: NextFunction) {
     const { code } = request.params;
 
     try {
@@ -118,22 +88,12 @@ export async function deleteQuestion(request: Request, response: Response) {
             message: `Question ${code} deleted successfully.`
         });
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error deleting the question:", error.message);
-            response.status(400).json({
-                message: `Failed to delete the question: ${error.message}`
-            });
-        } else {
-            console.error("Error deleting the question:", error);
-            response.status(400).json({
-                message: "Failed to delete the question."
-            });
-        }
+        next(error);
     }
 }
 
 
-export async function getQuestion(request: Request, response: Response) {
+export async function getQuestion(request: Request, response: Response, next: NextFunction) {
     const { code } = request.params;
 
     try {
@@ -146,16 +106,6 @@ export async function getQuestion(request: Request, response: Response) {
 
         response.status(200).json(question);
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error fetching the question:", error.message);
-            response.status(400).json({
-                message: `Failed to fetch the question: ${error.message}`
-            });
-        } else {
-            console.error("Error fetching the question:", error);
-            response.status(400).json({
-                message: "Failed to fetch the question."
-            });
-        }
+        next(error);
     }
 }
