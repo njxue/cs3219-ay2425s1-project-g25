@@ -1,28 +1,37 @@
 import questionModel from "../models/Question";
+import categoryModel from "../models/Category";
 import { Request, Response, NextFunction } from "express";
 
 export async function getAllQuestions(request: Request, response: Response, next: NextFunction) {
     try {
-        const questions = await questionModel.find();
+        const questions = await questionModel.find().populate('categories'); // Populate categories
         response.status(200).json(questions);
     } catch (error) {
         next(error);
     }
 }
 
-export async function createQuestion(request: Request, response: Response, next: NextFunction) {
-    const { title, description, difficulty, categories, url } = request.body;
+export async function createQuestion(req: Request, res: Response, next: NextFunction) {
+    const { title, description, difficulty, categories, url } = req.body;
 
     try {
         const existingQuestion = await questionModel.findOne({ title });
         if (existingQuestion) {
-            return response.status(400).json({
+            return res.status(400).json({
                 message: "A question with the given title already exists."
             });
         }
 
-        // Get counting code:
-        // Find the largest code in the collection
+        // Find or create categories based on names
+        const categoryIds = await Promise.all(categories.map(async (categoryName: string) => {
+            let category = await categoryModel.findOne({ name: categoryName });
+            if (!category) {
+                category = new categoryModel({ name: categoryName });
+                await category.save();
+            }
+            return category._id;
+        }));
+
         const largestQuestion = await questionModel.findOne().sort({ code: -1 });
         const code = largestQuestion ? largestQuestion.code + 1 : 1;
 
@@ -31,14 +40,15 @@ export async function createQuestion(request: Request, response: Response, next:
             title,
             description,
             difficulty,
-            categories,
+            categories: categoryIds,
             url
         });
 
         await newQuestion.save();
 
-        response.status(200).json({
-            message: `New question ${code}: ${title} created.`
+        res.status(201).json({
+            message: `New question ${code}: ${title} created.`,
+            question: newQuestion
         });
     } catch (error) {
         next(error);
@@ -47,14 +57,27 @@ export async function createQuestion(request: Request, response: Response, next:
 
 export async function updateQuestion(request: Request, response: Response, next: NextFunction) {
     const { code } = request.params;
-    const updateData = request.body;
+    let { categories, ...updateData } = request.body;
 
     try {
+        if (categories) {
+            // If categories are being updated, map names to ObjectId references
+            const categoryIds = await Promise.all(categories.map(async (categoryName: string) => {
+                let category = await categoryModel.findOne({ name: categoryName });
+                if (!category) {
+                    category = new categoryModel({ name: categoryName });
+                    await category.save();
+                }
+                return category._id;
+            }));
+            updateData = { ...updateData, categories: categoryIds }; // Update categories with ObjectId references
+        }
+
         const updatedQuestion = await questionModel.findOneAndUpdate(
             { code },
             { $set: updateData },
             { new: true, runValidators: true } // return the updated document and apply validation
-        );
+        ).populate('categories'); // Populate categories in the response
 
         if (!updatedQuestion) {
             return response.status(404).json({
@@ -70,6 +93,7 @@ export async function updateQuestion(request: Request, response: Response, next:
         next(error);
     }
 }
+
 
 
 export async function deleteQuestion(request: Request, response: Response, next: NextFunction) {
