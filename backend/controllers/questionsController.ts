@@ -134,13 +134,13 @@ export async function deleteQuestion(request: Request, response: Response) {
 
 
 export async function getQuestion(request: Request, response: Response) {
-    const { questionId } = request.params;
+    const { code } = request.params;
 
     try {
-        const question = await questionModel.findOne({ questionId });
+        const question = await questionModel.findOne({ code });
         if (!question) {
             return response.status(404).json({
-                message: `Question with id ${questionId} not found.`
+                message: `Question with code ${code} not found.`
             });
         }
 
