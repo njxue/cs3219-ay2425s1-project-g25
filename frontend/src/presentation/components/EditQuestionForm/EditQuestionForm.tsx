@@ -4,7 +4,7 @@ import {
     difficultyOptions,
 } from "presentation/utils/QuestionUtils";
 import MdEditor from "@uiw/react-md-editor";
-import styles from "./EditQuestionForm.module.css";
+import styles from "../NewQuestionForm/NewQuestionForm.module.css";
 import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
