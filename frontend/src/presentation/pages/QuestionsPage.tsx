@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Breadcrumb, Button, Spin, Alert } from "antd";
+import { Row, Col, Breadcrumb, Button, Spin, Alert, Modal } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
 import { LandingComponent } from "../components/LandingComponent";
+import { NewQuestionForm } from "../components/NewQuestionForm/NewQuestionForm";
 import { Question } from "../../domain/entities/Question";
 import { QUESTIONS_PAGE_TEXT } from "presentation/utils/constants";
 import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
@@ -10,7 +11,7 @@ import styles from "./QuestionsPage.module.css";
 import { ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
 import { AddQuestionButton } from "presentation/components/buttons/AddQuestionButton";
-import { useSearchParams, useNavigate } from "react-router-dom"; // Import hooks from react-router-dom
+import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -18,13 +19,12 @@ const QuestionsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
-    const [searchParams, setSearchParams] = useSearchParams(); // Use this to handle query parameters
-    const navigate = useNavigate(); // Use this for programmatic navigation
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    const selectedQuestionId = searchParams.get('selected'); // Get the selected question ID from query parameters
+    const selectedQuestionId = searchParams.get('code');
 
-    // Fetch questions on initial load
     useEffect(() => {
         const fetchQuestions = async () => {
             setIsLoading(true);
@@ -41,7 +41,6 @@ const QuestionsPage: React.FC = () => {
         fetchQuestions();
     }, []);
 
-    // Fetch selected question when questionId changes
     useEffect(() => {
         const fetchSelectedQuestion = async () => {
             if (selectedQuestionId) {
@@ -63,27 +62,27 @@ const QuestionsPage: React.FC = () => {
         fetchSelectedQuestion();
     }, [selectedQuestionId]);
 
-    // Handle selecting a question
     const handleSelectQuestion = (questionId: string) => {
         setError(null);
         if (selectedQuestionId === questionId) {
-            // If the same question is selected again, remove it from the URL
-            navigate(ROUTES.QUESTIONS);
+            setSearchParams({});
         } else {
-            // Set the selected question ID in the URL
-            setSearchParams({ selected: questionId });
+            setSearchParams({ code: questionId });
         }
     };
 
     const handleBreadcrumbClick = (item: string) => () => {
         if (item === ROUTES.QUESTIONS) {
-            // Reset the selected question in the URL
             setSearchParams({});
         }
     };
 
     const handleAddQuestion = () => {
-        console.log("Add Question button clicked");
+        setIsModalVisible(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalVisible(false);
     };
 
     const renderBreadcrumb = () => (
@@ -127,7 +126,10 @@ const QuestionsPage: React.FC = () => {
                         />
                         {selectedQuestionId && (
                             <div className={styles.addButtonWrapper}>
-                                <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />
+                                <AddQuestionButton
+                                    label={QUESTIONS_PAGE_TEXT.ADD_QUESTION}
+                                    onClick={handleAddQuestion}
+                                />
                             </div>
                         )}
                     </Col>
@@ -163,6 +165,16 @@ const QuestionsPage: React.FC = () => {
                     </Col>
                 </Row>
             </div>
+
+            <Modal
+                title="Add New Question"
+                visible={isModalVisible}
+                onCancel={handleCloseModal}
+                footer={null}
+                width={1200} 
+            >
+                <NewQuestionForm />
+            </Modal>
         </div>
     );
 };
