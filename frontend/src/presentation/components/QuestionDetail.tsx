@@ -66,7 +66,10 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question }) => {
                 footer={null}
                 width={"75vw"}
             >
-                <EditQuestionForm question={question} />
+                <EditQuestionForm
+                    question={question}
+                    onSubmit={() => setIsEditModalOpen(false)}
+                />
             </Modal>
         </div>
     );

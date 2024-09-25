@@ -13,9 +13,11 @@ import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
 
 interface EditQuestionFormProps {
     question: Question;
+    onSubmit?: () => void;
 }
 export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
     question,
+    onSubmit,
 }) => {
     const [form] = Form.useForm();
     const validateMessages = {
@@ -30,6 +32,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
             question?.questionId,
             questionUpdate
         );
+        onSubmit?.();
         // TODO: handle after BE complete
     }
 
@@ -121,7 +124,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                     </Col>
                 </Row>
                 <Button type="primary" htmlType="submit">
-                    Submit
+                    Save
                 </Button>
             </Form>
         </div>
