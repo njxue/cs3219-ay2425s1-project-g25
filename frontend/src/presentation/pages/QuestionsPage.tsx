@@ -31,7 +31,8 @@ const QuestionsPage: React.FC = () => {
         const fetchQuestions = async () => {
             setIsLoading(true);
             try {
-                const fetchedQuestions = await questionUseCases.getAllQuestions();
+                const fetchedQuestions =
+                    await questionUseCases.getAllQuestions();
                 setQuestions(fetchedQuestions);
             } catch (err) {
                 setError(handleError(err, ERRORS.FAILED_TO_LOAD_QUESTIONS));
@@ -53,7 +54,12 @@ const QuestionsPage: React.FC = () => {
                     );
                     setSelectedQuestion(question);
                 } catch (err) {
-                    setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
+                    setError(
+                        handleError(
+                            err,
+                            ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION
+                        )
+                    );
                     setSelectedQuestion(null);
                 } finally {
                     setIsQuestionLoading(false);
@@ -92,7 +98,10 @@ const QuestionsPage: React.FC = () => {
     const renderBreadcrumb = () => (
         <Breadcrumb className={styles.breadcrumb}>
             <Breadcrumb.Item>
-                <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
+                <Button
+                    type="link"
+                    onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}
+                >
                     {ROUTES.QUESTIONS}
                 </Button>
             </Breadcrumb.Item>
@@ -164,7 +173,9 @@ const QuestionsPage: React.FC = () => {
                                 </div>
                             )
                         ) : (
-                            <LandingComponent onAddQuestion={handleAddQuestion} />
+                            <LandingComponent
+                                onAddQuestion={handleAddQuestion}
+                            />
                         )}
                     </Col>
                 </Row>
@@ -177,7 +188,7 @@ const QuestionsPage: React.FC = () => {
                 footer={null}
                 width={1200}
             >
-                <NewQuestionForm />
+                <NewQuestionForm onSubmit={handleCloseModal} />
             </Modal>
         </div>
     );
