@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Breadcrumb, Button, Spin, Alert, Modal } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
@@ -99,22 +99,30 @@ const QuestionsPage: React.FC = () => {
         setSearchParams({ code: updatedQuestion.questionId });
     };
 
-    const renderBreadcrumb = () => (
-        <Breadcrumb className={styles.breadcrumb}>
-            <Breadcrumb.Item>
-                <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
-                    {ROUTES.QUESTIONS}
-                </Button>
-            </Breadcrumb.Item>
-            {selectedQuestion && (
-                <Breadcrumb.Item>
+    
+    const renderBreadcrumb = () => {
+        const breadcrumbItems = [
+            {
+                title: (
+                    <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
+                        {ROUTES.QUESTIONS}
+                    </Button>
+                ),
+            },
+        ];
+
+        if (selectedQuestion) {
+            breadcrumbItems.push({
+                title: (
                     <Button type="link" disabled>
                         {selectedQuestion.title}
                     </Button>
-                </Breadcrumb.Item>
-            )}
-        </Breadcrumb>
-    );
+                ),
+            });
+        }
+
+        return <Breadcrumb className={styles.breadcrumb} items={breadcrumbItems} />;
+    };
 
     return (
         <div className={styles.container}>
@@ -186,6 +194,7 @@ const QuestionsPage: React.FC = () => {
             </Modal>
         </div>
     );
+
 };
 
 export default QuestionsPage;

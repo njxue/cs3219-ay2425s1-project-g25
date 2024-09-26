@@ -1,0 +1,57 @@
+.categoryDropdownContainer {
+    padding: 16px;
+    box-shadow: none;
+}
+
+.categorySearchBar {
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.categoriesGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.checkableTag {
+    display: flex;
+    align-items: center;
+    padding-right: 8px;
+    cursor: pointer;
+}
+
+.addCategoryContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.newCategoryInput {
+    width: 70%;
+}
+
+.addCategoryButton {
+    width: 30%;
+}
+
+.deleteCategoryContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.toggleDeleteButton {
+    display: flex;
+    align-items: center;
+}
+
+.confirmDeleteButton {
+    margin-left: 10px;
+}

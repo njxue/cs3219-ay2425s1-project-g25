@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Select, Input, Tag, Dropdown, Button } from 'antd';
+import React, { useState, useCallback } from 'react';
+import { Select, Input, Dropdown, Button, message } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import styles from './QuestionFilters.module.css';
 import { FILTER_DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from 'presentation/utils/constants';
 import { getDifficultyColor } from 'presentation/utils/QuestionUtils';
-
-const { CheckableTag } = Tag;
+import { CategoryFilter } from './Category/CategoryFilter';
+import { categoryUseCases } from 'domain/usecases/CategoryUseCases';
 
 interface QuestionFiltersProps {
     allCategories: string[];
@@ -17,12 +17,12 @@ interface QuestionFiltersProps {
 }
 
 export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
-    allCategories,
+    allCategories: initialCategories,
     onFiltersChange,
 }) => {
+    const [allCategories, setAllCategories] = useState<string[]>(initialCategories);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string>(FILTER_DIFFICULTY_TEXT.ALL);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [categorySearchTerm, setCategorySearchTerm] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
     const triggerFiltersChange = useCallback(
@@ -36,83 +36,79 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         [onFiltersChange]
     );
 
-    const handleSearch = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            const value = e.target.value;
-            setSearchTerm(value);
-            triggerFiltersChange({
-                selectedDifficulty,
-                selectedCategories,
-                searchTerm: value,
-            });
-        },
-        [selectedDifficulty, selectedCategories, triggerFiltersChange]
-    );
-
-    const handleDifficultyChange = useCallback(
-        (value: string) => {
-            setSelectedDifficulty(value);
-            triggerFiltersChange({
-                selectedDifficulty: value,
-                selectedCategories,
-                searchTerm,
-            });
-        },
-        [selectedCategories, searchTerm, triggerFiltersChange]
-    );
-
-    const handleCategorySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCategorySearchTerm(e.target.value);
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        triggerFiltersChange({
+            selectedDifficulty,
+            selectedCategories,
+            searchTerm: value,
+        });
     };
 
-    const handleCategoryTagChange = useCallback(
-        (category: string, checked: boolean) => {
-            const nextSelectedCategories = checked
-                ? [...selectedCategories, category]
-                : selectedCategories?.filter((c) => c !== category);
-            setSelectedCategories(nextSelectedCategories);
-            triggerFiltersChange({
-                selectedDifficulty,
-                selectedCategories: nextSelectedCategories,
-                searchTerm,
-            });
-        },
-        [selectedDifficulty, selectedCategories, searchTerm, triggerFiltersChange]
-    );
+    const handleDifficultyChange = (value: string) => {
+        setSelectedDifficulty(value);
+        triggerFiltersChange({
+            selectedDifficulty: value,
+            selectedCategories,
+            searchTerm,
+        });
+    };
 
-    const filteredCategories = useMemo(() => {
-        const lowerSearchTerm = categorySearchTerm.toLowerCase();
-        return allCategories.filter((category) =>
-            category.toLowerCase().includes(lowerSearchTerm)
-        );
-    }, [allCategories, categorySearchTerm]);
+    const handleCategoryChange = (category: string, checked: boolean) => {
+        const nextSelectedCategories = checked
+            ? [...selectedCategories, category]
+            : selectedCategories.filter((c) => c !== category);
+        setSelectedCategories(nextSelectedCategories);
+        triggerFiltersChange({
+            selectedDifficulty,
+            selectedCategories: nextSelectedCategories,
+            searchTerm,
+        });
+    };
 
-    const categoryDropdownContent = (
-        <div
-            className={styles.categoryDropdownContent}
-            onClick={(e) => e.stopPropagation()}
-        >
-            <div className={styles.categoryDropdownContainer}>
-                <Input
-                    placeholder={QUESTIONS_FILTER_TEXT.SELECT_CATEGORIES}
-                    value={categorySearchTerm}
-                    onChange={handleCategorySearch}
-                    className={styles.categorySearchBar}
-                    allowClear
-                />
-                <div className={styles.categoriesGrid}>
-                    {filteredCategories.map((category) => (
-                        <CheckableTag
-                            key={category}
-                            checked={selectedCategories.includes(category)}
-                            onChange={(checked) => handleCategoryTagChange(category, checked)}
-                        >
-                            {category}
-                        </CheckableTag>
-                    ))}
-                </div>
-            </div>
-        </div>
+    const handleAddCategory = async (category: string) => {
+        if (!category || category.trim() === "") {
+            message.error("Category cannot be empty!");
+            return;
+        }
+
+        if (allCategories.includes(category)) {
+            message.error("Category already exists!");
+            return;
+        }
+
+        try {
+            await categoryUseCases.createCategory(category);
+            setAllCategories([...allCategories, category]);
+            message.success("Category added successfully!");
+        } catch (error) {
+            message.error("Failed to add category!");
+            console.error("Failed to add category:", error);
+        }
+    };
+
+    const handleDeleteCategory = async (categoriesToDelete: string[]) => {
+        try {
+            await Promise.all(categoriesToDelete.map((category) => categoryUseCases.deleteCategory(category)));
+            const updatedCategories = allCategories.filter((category) => !categoriesToDelete.includes(category));
+            setAllCategories(updatedCategories);
+            setSelectedCategories(selectedCategories.filter((c) => !categoriesToDelete.includes(c)));
+            message.success("Categories deleted successfully!");
+        } catch (error) {
+            message.error("Failed to delete categories!");
+            console.error("Failed to delete categories:", error);
+        }
+    };
+
+    const dropdownContent = (
+        <CategoryFilter
+            allCategories={allCategories}
+            selectedCategories={selectedCategories}
+            onCategoryChange={handleCategoryChange}
+            onAddCategory={handleAddCategory}
+            onDeleteCategory={handleDeleteCategory}
+        />
     );
 
     return (
@@ -120,9 +116,10 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
             <div className={styles.filtersRow}>
                 <div className={styles.filterItem}>
                     <Dropdown
-                        overlay={categoryDropdownContent}
                         trigger={['click']}
+                        placement="bottomLeft"
                         overlayClassName={styles.categoryDropdownOverlay}
+                        dropdownRender={() => dropdownContent}
                     >
                         <Button className={styles.categoriesFilterButton}>
                             Categories <DownOutlined />
@@ -137,19 +134,24 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
                         onChange={handleDifficultyChange}
                         className={styles.difficultyFilter}
                         optionLabelProp="label"
-                        options={[{
-                            value: FILTER_DIFFICULTY_TEXT.ALL,
-                            label: <span>All</span>
-                        },{
-                            value: FILTER_DIFFICULTY_TEXT.EASY,
-                            label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>{FILTER_DIFFICULTY_TEXT.EASY}</span>
-                        },{
-                            value: FILTER_DIFFICULTY_TEXT.MEDIUM,
-                            label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>{FILTER_DIFFICULTY_TEXT.MEDIUM}</span>
-                        },{
-                            value: FILTER_DIFFICULTY_TEXT.HARD,
-                            label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>{FILTER_DIFFICULTY_TEXT.HARD}</span>
-                        }]}
+                        options={[
+                            {
+                                value: FILTER_DIFFICULTY_TEXT.ALL,
+                                label: <span>All</span>
+                            },
+                            {
+                                value: FILTER_DIFFICULTY_TEXT.EASY,
+                                label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>{FILTER_DIFFICULTY_TEXT.EASY}</span>
+                            },
+                            {
+                                value: FILTER_DIFFICULTY_TEXT.MEDIUM,
+                                label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>{FILTER_DIFFICULTY_TEXT.MEDIUM}</span>
+                            },
+                            {
+                                value: FILTER_DIFFICULTY_TEXT.HARD,
+                                label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>{FILTER_DIFFICULTY_TEXT.HARD}</span>
+                            }
+                        ]}
                     />
                 </div>
             </div>

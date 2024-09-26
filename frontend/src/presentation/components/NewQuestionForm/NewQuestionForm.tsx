@@ -3,11 +3,11 @@ import { Input, Form, Select, Row, Col, Button } from "antd";
 import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
-import { categoryRepository } from "data/repositories/CategoryRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 import { difficultyOptions, initialQuestionInput } from "presentation/utils/QuestionUtils";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Question } from "domain/entities/Question";
 
 interface NewQuestionFormProps {
@@ -28,7 +28,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categories = await categoryRepository.getAllCategories();
+                const categories = await categoryUseCases.getAllCategories();
                 const options = categories.map((category) => ({
                     value: category,
                     label: category

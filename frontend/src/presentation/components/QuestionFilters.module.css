@@ -1,59 +1,50 @@
 .filtersContainer {
-        display: flex;
-        flex-direction: column;
-        padding: 16px;
-        background-color: #fff;
-    }
-  
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filtersRow {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filterItem {
+    flex: 1;
+    min-width: 0;
+}
+
+.difficultyFilter {
+    width: 100%;
+}
+
+.searchBarContainer {
+    margin-top: 4px;
+}
+
+.categoriesFilterButton {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #d9d9d9;
+}
+
+.categoryDropdownOverlay {
+    padding: 0;
+    background-color: #ffffff;
+    border: 1px solid #d9d9d9;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+}
+
+@media (max-width: 600px) {
     .filtersRow {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
+        flex-direction: column;
     }
-  
+    
     .filterItem {
-        display: flex;
-        align-items: center;
-    }
-    
-    .difficultyFilter {
-        width: 160px;
-    }
-    
-    .categoryDropdownOverlay {
-        padding: 0;
-        min-width: 250px;
-    }
-  
-    .categoryDropdownContent {
-        padding: 8px;
-    }
-    
-    .categoryDropdownContainer {
-        border: 1px solid #d9d9d9;
-        border-radius: 4px;
-        background-color: #fff;
-        padding: 16px;
-    }
-  
-    .categorySearchBar {
-        margin-bottom: 8px;
-    }
-  
-    .categoriesGrid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        max-height: 200px;
-        overflow-y: auto;
-    }
-  
-    .searchBarContainer {
-        margin-top: 16px;
-    }
-  
-    .searchBar {
         width: 100%;
     }
-  
+}
