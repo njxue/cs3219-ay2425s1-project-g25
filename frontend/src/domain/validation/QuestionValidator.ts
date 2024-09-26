@@ -1,6 +1,7 @@
 import { ValidationError } from '../../presentation/utils/errors';
 import { ERRORS } from '../../presentation/utils/constants';
 import { IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/IQuestionRepository';
+import { QuestionDifficulty } from 'domain/entities/QuestionDifficulty';
 
 export class QuestionValidator {
     static validateQuestionInput(questionInput: IQuestionInput): void {
@@ -12,6 +13,9 @@ export class QuestionValidator {
         }
         if (!questionInput.categories || questionInput.categories.length === 0) {
             throw new ValidationError(ERRORS.QUESTION_CATEGORY_EMPTY);
+        }
+        if (!questionInput.difficulty) {
+            throw new ValidationError(ERRORS.QUESTION_DIFFICULTY_EMPTY);
         }
     }
 

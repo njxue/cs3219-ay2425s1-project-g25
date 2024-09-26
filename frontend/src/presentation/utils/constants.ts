@@ -17,6 +17,7 @@ export const HASH = {
 export const ERRORS = {
     QUESTION_TITLE_EMPTY: "Question title cannot be empty",
     QUESTION_DESCRIPTION_EMPTY: "Question description cannot be empty",
+    QUESTION_DIFFICULTY_EMPTY: "Question must have a difficulty level",
     QUESTION_CATEGORY_EMPTY: "Question must have at least one category",
     QUESTION_NOT_FOUND: "Question not found",
     FAILED_TO_LOAD_QUESTIONS:
