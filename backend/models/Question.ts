@@ -1,24 +1,24 @@
-import { Question as SharedQuestion } from '@shared/types/Question';
+// Question.ts (Backend Model)
 import mongoose, { Schema, Types } from 'mongoose';
 
-export interface Question
-  extends Omit<SharedQuestion, '_id'>,
-    Document {
+export interface Question extends mongoose.Document {
   _id: Types.ObjectId;
+  code: number;
+  title: string;
+  description: string;
+  difficulty: string;
+  categories: Types.ObjectId[]; // Reference ObjectId from Category
+  url: string;
 }
 
 const questionSchema: Schema = new Schema<Question>({
-  code: {type: Number, required: true, unique: true},
+  code: { type: Number, required: true, unique: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
   difficulty: { type: String, required: true },
-  categories: { type: [String], required: true },
+  categories: [{ type: Types.ObjectId, ref: 'category', required: true }],
   url: { type: String, required: true },
 });
 
-const questionModel = mongoose.model<Question>(
-  'question',
-  questionSchema
-);
-
+const questionModel = mongoose.model<Question>('question', questionSchema);
 export default questionModel;
