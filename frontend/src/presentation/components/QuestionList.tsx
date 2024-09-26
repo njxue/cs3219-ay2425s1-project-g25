@@ -5,7 +5,7 @@ import { QuestionCard } from './QuestionCard';
 import { QuestionFilters } from './QuestionFilters';
 import styles from './QuestionList.module.css';
 import { QUESTIONS_LIST_TEXT } from 'presentation/utils/constants';
-import { categoryRepository } from 'data/repositories/CategoryRepositoryImpl';
+import { categoryUseCases } from 'domain/usecases/CategoryUseCases';
 
 interface QuestionListProps {
     questions: Question[];
@@ -35,7 +35,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categories = await categoryRepository.getAllCategories();
+                const categories = await categoryUseCases.getAllCategories();
                 setAllCategories(categories);
             } catch (error) {
                 console.error("Failed to fetch categories", error);

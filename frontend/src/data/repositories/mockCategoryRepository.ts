@@ -20,9 +20,11 @@ export class MockCategoryRemoteDataSource {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 if (this.categories.includes(category)) {
+                    console.error(`Category "${category}" already exists.`);
                     reject(new Error('Category already exists'));
                 } else {
                     this.categories.push(category);
+                    console.log(`Category "${category}" added. Current categories:`, this.categories); //TODO: Remove when submitting
                     resolve();
                 }
             }, 300);
@@ -35,6 +37,7 @@ export class MockCategoryRemoteDataSource {
                 const index = this.categories.indexOf(category);
                 if (index !== -1) {
                     this.categories.splice(index, 1);
+                    console.log(`Category "${category}" deleted. Current categories:`, this.categories); //TODO: Remove when submitting
                     resolve();
                 } else {
                     reject(new Error('Category not found'));

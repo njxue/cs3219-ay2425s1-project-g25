@@ -245,8 +245,8 @@ export class MockQuestionRemoteDataSource {
                 const newQuestion: Question = {
                     ...question,
                     questionId: (this.questions.length + 1).toString(),
-                    difficulty: "Medium", // Default difficulty
-                    url: "" // Default empty link
+                    difficulty: "Medium",
+                    url: ""
                 };
                 this.questions.push(newQuestion);
                 resolve();

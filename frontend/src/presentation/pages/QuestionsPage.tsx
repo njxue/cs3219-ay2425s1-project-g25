@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// QuestionsPage.tsx
+import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Breadcrumb, Button, Spin, Alert, Modal } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
@@ -15,9 +16,7 @@ import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-        null
-    );
+    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -48,9 +47,7 @@ const QuestionsPage: React.FC = () => {
             if (selectedQuestionId) {
                 setIsQuestionLoading(true);
                 try {
-                    const question = await questionUseCases.getQuestion(
-                        selectedQuestionId
-                    );
+                    const question = await questionUseCases.getQuestion(selectedQuestionId);
                     setSelectedQuestion(question);
                 } catch (err) {
                     setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
@@ -75,11 +72,11 @@ const QuestionsPage: React.FC = () => {
         }
     };
 
-    const handleBreadcrumbClick = (item: string) => () => {
+    const handleBreadcrumbClick = useCallback((item: string) => () => {
         if (item === ROUTES.QUESTIONS) {
             setSearchParams({});
         }
-    };
+    }, [setSearchParams]);
 
     const handleAddQuestion = () => {
         setIsModalVisible(true);
@@ -89,22 +86,29 @@ const QuestionsPage: React.FC = () => {
         setIsModalVisible(false);
     };
 
-    const renderBreadcrumb = () => (
-        <Breadcrumb className={styles.breadcrumb}>
-            <Breadcrumb.Item>
-                <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
-                    {ROUTES.QUESTIONS}
-                </Button>
-            </Breadcrumb.Item>
-            {selectedQuestion && (
-                <Breadcrumb.Item>
+    const renderBreadcrumb = () => {
+        const breadcrumbItems = [
+            {
+                title: (
+                    <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
+                        {ROUTES.QUESTIONS}
+                    </Button>
+                ),
+            },
+        ];
+
+        if (selectedQuestion) {
+            breadcrumbItems.push({
+                title: (
                     <Button type="link" disabled>
                         {selectedQuestion.title}
                     </Button>
-                </Breadcrumb.Item>
-            )}
-        </Breadcrumb>
-    );
+                ),
+            });
+        }
+
+        return <Breadcrumb className={styles.breadcrumb} items={breadcrumbItems} />;
+    };
 
     return (
         <div className={styles.container}>
@@ -181,6 +185,7 @@ const QuestionsPage: React.FC = () => {
             </Modal>
         </div>
     );
+
 };
 
 export default QuestionsPage;

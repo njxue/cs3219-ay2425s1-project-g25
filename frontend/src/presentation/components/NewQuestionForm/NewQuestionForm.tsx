@@ -4,9 +4,9 @@ import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
-import { categoryRepository } from "data/repositories/CategoryRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 import { difficultyOptions, initialQuestionInput } from "presentation/utils/QuestionUtils";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 
 interface NewQuestionFormProps {
     onSubmit?: () => void;
@@ -32,7 +32,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categories = await categoryRepository.getAllCategories();
+                const categories = await categoryUseCases.getAllCategories();
                 const options = categories.map((category) => ({
                     value: category,
                     label: category,
@@ -47,7 +47,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     }, []);
 
     async function handleSubmit(question: IQuestionInput) {
-        const res = await questionRepository.createQuestion(question);
+        await questionRepository.createQuestion(question);
         onSubmit?.();
     }
 
