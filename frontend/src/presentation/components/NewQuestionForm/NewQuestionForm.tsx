@@ -3,12 +3,12 @@ import { Input, Form, Select, Row, Col, Button } from "antd";
 import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
-import { categoryRepository } from "data/repositories/CategoryRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 import { difficultyOptions, initialQuestionInput } from "presentation/utils/QuestionUtils";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 
 interface NewQuestionFormProps {
     onSubmit?: () => void;

@@ -1,4 +1,3 @@
-// QuestionsPage.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Breadcrumb, Button, Spin, Alert, Modal } from "antd";
 import { QuestionList } from "../components/QuestionList";
