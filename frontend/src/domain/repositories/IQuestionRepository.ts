@@ -20,7 +20,7 @@ export interface IQuestionUpdateInput {
 export interface IQuestionRepository {
 	getAllQuestions(): Promise<Question[]>;
 	getQuestion(id: string): Promise<Question>;
-	createQuestion(question: IQuestionInput): Promise<void>;
+	createQuestion(question: IQuestionInput): Promise<any>;
 	updateQuestion(
 		id: string,
 		questionUpdate: IQuestionUpdateInput

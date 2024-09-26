@@ -18,9 +18,23 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question }) => {
             <Card className={styles.card}>
                 <div className={styles.header}>
                     <div className={styles.titleContainer}>
-                        <h2 className={styles.title}>{question.title}</h2>
+                        <div className={styles.titleAndLink}>
+                            <h2>{question.title}</h2>
+                            {question.url && (
+                                <a
+                                    href={question?.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <img
+                                        src="/icons/external-link.svg"
+                                        width={24}
+                                    />
+                                </a>
+                            )}
+                        </div>
+
                         <img
-                            className={styles.editIcon}
                             src="/icons/pencil.svg"
                             width={24}
                             onClick={() => setIsEditModalOpen(true)}

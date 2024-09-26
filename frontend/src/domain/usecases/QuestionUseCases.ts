@@ -19,14 +19,14 @@ export class QuestionUseCases {
         return question;
     }
 
-    async createQuestion(questionInput: IQuestionInput): Promise<void> {
+    async createQuestion(questionInput: IQuestionInput): Promise<any> {
         QuestionValidator.validateQuestionInput(questionInput);
-        await this.questionRepository.createQuestion(questionInput);
+        return await this.questionRepository.createQuestion(questionInput);
     }
 
-    async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<void> {
+    async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<any> {
         QuestionValidator.validateQuestionUpdate(questionUpdate);
-        await this.questionRepository.updateQuestion(id, questionUpdate);
+        return await this.questionRepository.updateQuestion(id, questionUpdate);
     }
 
     async deleteQuestion(id: string): Promise<void> {
