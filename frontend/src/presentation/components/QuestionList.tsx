@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { List, Spin, Alert } from 'antd';
 import { Question } from '../../domain/entities/Question';
 import { QuestionCard } from './QuestionCard';
 import { QuestionFilters } from './QuestionFilters';
 import styles from './QuestionList.module.css';
 import { QUESTIONS_LIST_TEXT } from 'presentation/utils/constants';
+import { categoryRepository } from 'data/repositories/CategoryRepositoryImpl';
 
 interface QuestionListProps {
     questions: Question[];
@@ -29,15 +30,20 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         searchTerm: '',
     });
 
-    //TODO: Change this into something less hacky. It currently just 'XORs' all question categories to get
-    //a complete list. Ideally, there should just be a list of categories in the backend to query.
-    const allCategories = useMemo(() => {
-        const categoriesSet = new Set<string>();
-        questions.forEach((question) => {
-            question.categories.forEach((category) => categoriesSet.add(category));
-        });
-        return Array.from(categoriesSet);
-    }, [questions]);
+    const [allCategories, setAllCategories] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const categories = await categoryRepository.getAllCategories();
+                setAllCategories(categories);
+            } catch (error) {
+                console.error("Failed to fetch categories", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleFiltersChange = (newFilters: React.SetStateAction<{ 
         selectedDifficulty: string; 
