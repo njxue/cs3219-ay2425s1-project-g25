@@ -17,12 +17,12 @@ export class QuestionRepositoryImpl implements IQuestionRepository {
         return this.dataSource.getQuestion(id);
     }
 
-    async createQuestion(question: IQuestionInput): Promise<void> {
-        await this.dataSource.createQuestion(question);
+    async createQuestion(question: IQuestionInput): Promise<any> {
+        return await this.dataSource.createQuestion(question);
     }
 
-    async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<void> {
-        await this.dataSource.updateQuestion(id, questionUpdate);
+    async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<any> {
+        return await this.dataSource.updateQuestion(id, questionUpdate);
     }
 
     async deleteQuestion(id: string): Promise<void> {

@@ -28,24 +28,35 @@
     align-items: flex-center;
     justify-content: space-between;
     width: 100%;
+    gap: 24px;
 }
 
-.editIcon {
-    cursor: pointer;
-    opacity: 30%;
+.titleAndLink {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    max-width: 90%;
 }
 
-.editIcon:hover {
-    opacity: 100%;
-    transition: opacity 0.1s ease-in-out;
-}
-
-.title {
+.titleAndLink h2 {
     font-size: 1.5rem;
     font-weight: bold;
     color: #333;
     margin: 0;
-    margin-right: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.titleContainer img {
+    opacity: 30%;
+    cursor: pointer;
+}
+
+.titleContainer img:hover {
+    opacity: 100%;
+    transition: opacity 0.1s ease-in-out;
 }
 
 .content {

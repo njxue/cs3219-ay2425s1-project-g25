@@ -9,6 +9,8 @@ import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
+import { questionUseCases } from "domain/usecases/QuestionUseCases";
+import { toast } from "react-toastify";
 
 interface EditQuestionFormProps {
     question: Question;
@@ -36,12 +38,23 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
     } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
-        await questionRepository.updateQuestion(
-            question?.questionId,
-            questionUpdate
-        );
-        onSubmit?.();
-        // TODO: handle after BE complete
+        try {
+            const res = await questionUseCases.updateQuestion(
+                question?.questionId,
+                questionUpdate
+            );
+            const status = res?.status;
+            const data = res?.data;
+            if (status === 200) {
+                toast.success(data?.message);
+                onSubmit?.();
+            } else {
+                console.error(data?.message);
+                toast.error(data?.message);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     return (

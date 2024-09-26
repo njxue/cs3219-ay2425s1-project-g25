@@ -3,10 +3,12 @@ import { Input, Form, Select, Row, Col, Button } from "antd";
 import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
-import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
+import { categoryRepository } from "data/repositories/CategoryRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 import { difficultyOptions, initialQuestionInput } from "presentation/utils/QuestionUtils";
-import { categoryUseCases } from "domain/usecases/CategoryUseCases";
+import { questionUseCases } from "domain/usecases/QuestionUseCases";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface NewQuestionFormProps {
     onSubmit?: () => void;
@@ -16,18 +18,14 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     const [form] = Form.useForm();
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
 
+    const navigate = useNavigate();
+
     const validateMessages = {
         required: "${label} is required",
-        whitespace: "${label} is required",
+        whitespace: "${label} is required"
     };
 
-    const {
-        FIELD_TITLE,
-        FIELD_DIFFICULTY,
-        FIELD_DESCRIPTION,
-        FIELD_CATEGORIES,
-        FIELD_URL,
-    } = QUESTION_FORM_FIELDS;
+    const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -35,7 +33,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                 const categories = await categoryUseCases.getAllCategories();
                 const options = categories.map((category) => ({
                     value: category,
-                    label: category,
+                    label: category
                 }));
                 setCategoryOptions(options);
             } catch (error) {
@@ -47,8 +45,22 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     }, []);
 
     async function handleSubmit(question: IQuestionInput) {
-        await questionRepository.createQuestion(question);
-        onSubmit?.();
+        try {
+            const res = await questionUseCases.createQuestion(question);
+            const status = res?.status;
+            const data = res?.data;
+            if (status === 201) {
+                const newQuestion = data?.question;
+                navigate(`/questions?code=${newQuestion?.questionId}`);
+                toast.success(data?.message);
+                onSubmit?.();
+            } else {
+                toast.error(data?.message);
+                console.error(data?.message);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     return (
@@ -79,10 +91,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             name={FIELD_DIFFICULTY.name}
                             rules={[{ required: true }]}
                         >
-                            <Select
-                                placeholder={FIELD_DIFFICULTY.label}
-                                options={difficultyOptions}
-                            />
+                            <Select placeholder={FIELD_DIFFICULTY.label} options={difficultyOptions} />
                         </Form.Item>
                     </Col>
                     <Col span={18}>
@@ -116,9 +125,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                         >
                             <MdEditor
                                 value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
-                                onChange={(description) =>
-                                    form.setFieldValue(FIELD_DESCRIPTION.name, description)
-                                }
+                                onChange={(description) => form.setFieldValue(FIELD_DESCRIPTION.name, description)}
                                 overflow={false}
                                 height={500}
                                 enableScroll
