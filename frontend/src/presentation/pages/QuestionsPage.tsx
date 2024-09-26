@@ -27,20 +27,19 @@ const QuestionsPage: React.FC = () => {
 
     const selectedQuestionId = searchParams.get("code");
 
-    useEffect(() => {
-        const fetchQuestions = async () => {
-            setIsLoading(true);
-            try {
-                const fetchedQuestions =
-                    await questionUseCases.getAllQuestions();
-                setQuestions(fetchedQuestions);
-            } catch (err) {
-                setError(handleError(err, ERRORS.FAILED_TO_LOAD_QUESTIONS));
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchQuestions = async () => {
+        setIsLoading(true);
+        try {
+            const fetchedQuestions = await questionUseCases.getAllQuestions();
+            setQuestions(fetchedQuestions);
+        } catch (err) {
+            setError(handleError(err, ERRORS.FAILED_TO_LOAD_QUESTIONS));
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchQuestions();
     }, []);
 
@@ -188,7 +187,12 @@ const QuestionsPage: React.FC = () => {
                 footer={null}
                 width={1200}
             >
-                <NewQuestionForm onSubmit={handleCloseModal} />
+                <NewQuestionForm
+                    onSubmit={() => {
+                        handleCloseModal();
+                        fetchQuestions();
+                    }}
+                />
             </Modal>
         </div>
     );

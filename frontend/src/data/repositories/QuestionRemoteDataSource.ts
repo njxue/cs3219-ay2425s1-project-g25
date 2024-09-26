@@ -30,12 +30,12 @@ export class QuestionRemoteDataSource extends BaseApi {
         return this.get<Question>(`/${id}`);
     }
 
-    async createQuestion(question: IQuestionInput): Promise<void> {
-        await this.post<void>('/', question);
+    async createQuestion(question: IQuestionInput): Promise<any> {
+        return await this.post<any>('/', question);
     }
 
-    async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<void> {
-        await this.put<void>(`/${id}`, questionUpdate);
+    async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<any> {
+        return await this.put<any>(`/${id}`, questionUpdate);
     }
 
     async deleteQuestion(id: string): Promise<void> {
