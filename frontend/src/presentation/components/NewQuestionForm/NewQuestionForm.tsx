@@ -7,18 +7,16 @@ import { categoryRepository } from "data/repositories/CategoryRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
 import { difficultyOptions, initialQuestionInput } from "presentation/utils/QuestionUtils";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Question } from "domain/entities/Question";
 
 interface NewQuestionFormProps {
-    onSubmit?: () => void;
+    onSubmit?: (createdQuestion: Question) => void;
 }
 
 export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) => {
     const [form] = Form.useForm();
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
-
-    const navigate = useNavigate();
 
     const validateMessages = {
         required: "${label} is required",
@@ -51,9 +49,8 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
             const data = res?.data;
             if (status === 201) {
                 const newQuestion = data?.question;
-                navigate(`/questions?code=${newQuestion?.questionId}`);
                 toast.success(data?.message);
-                onSubmit?.();
+                onSubmit?.(newQuestion);
             } else {
                 toast.error(data?.message);
                 console.error(data?.message);
