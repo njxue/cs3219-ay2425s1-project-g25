@@ -71,11 +71,11 @@ const QuestionsPage: React.FC = () => {
         }
     };
 
-    const handleBreadcrumbClick = useCallback((item: string) => () => {
+    const handleBreadcrumbClick = (item: string) => () => {
         if (item === ROUTES.QUESTIONS) {
             setSearchParams({});
         }
-    }, [setSearchParams]);
+    };
 
     const handleAddQuestion = () => {
         setIsModalVisible(true);
