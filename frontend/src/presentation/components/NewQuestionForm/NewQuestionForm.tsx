@@ -1,22 +1,21 @@
+import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button } from "antd";
-import {
-    categoryOptions,
-    difficultyOptions,
-    initialQuestionInput,
-} from "presentation/utils/QuestionUtils";
 import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
 import { questionRepository } from "data/repositories/QuestionRepositoryImpl";
+import { categoryRepository } from "data/repositories/CategoryRepositoryImpl";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
+import { difficultyOptions, initialQuestionInput } from "presentation/utils/QuestionUtils";
 
 interface NewQuestionFormProps {
     onSubmit?: () => void;
 }
-export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
-    onSubmit,
-}) => {
+
+export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) => {
     const [form] = Form.useForm();
+    const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+
     const validateMessages = {
         required: "${label} is required",
         whitespace: "${label} is required",
@@ -30,10 +29,26 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
         FIELD_URL,
     } = QUESTION_FORM_FIELDS;
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const categories = await categoryRepository.getAllCategories();
+                const options = categories.map((category) => ({
+                    value: category,
+                    label: category,
+                }));
+                setCategoryOptions(options);
+            } catch (error) {
+                console.error("Failed to fetch categories", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     async function handleSubmit(question: IQuestionInput) {
         const res = await questionRepository.createQuestion(question);
         onSubmit?.();
-        // TODO: when BE completed
     }
 
     return (
@@ -62,11 +77,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                         <Form.Item
                             label={FIELD_DIFFICULTY.label}
                             name={FIELD_DIFFICULTY.name}
-                            rules={[
-                                {
-                                    required: true,
-                                },
-                            ]}
+                            rules={[{ required: true }]}
                         >
                             <Select
                                 placeholder={FIELD_DIFFICULTY.label}
@@ -78,32 +89,24 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                         <Form.Item
                             label={FIELD_CATEGORIES.label}
                             name={FIELD_CATEGORIES.name}
-                            rules={[
-                                {
-                                    required: true,
-                                },
-                            ]}
+                            rules={[{ required: true }]}
                         >
                             <Select
                                 placeholder={FIELD_CATEGORIES.label}
                                 allowClear
                                 mode="multiple"
                                 options={categoryOptions}
-                            ></Select>
+                            />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <Form.Item
-                            label={FIELD_URL.label}
-                            name={FIELD_URL.name}
-                        >
+                        <Form.Item label={FIELD_URL.label} name={FIELD_URL.name}>
                             <Input type="text" placeholder={FIELD_URL.label} />
                         </Form.Item>
                     </Col>
                 </Row>
-
                 <Row>
                     <Col span={24}>
                         <Form.Item
@@ -112,16 +115,9 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={
-                                    form.getFieldValue(
-                                        FIELD_DESCRIPTION.name
-                                    ) || ""
-                                }
+                                value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
                                 onChange={(description) =>
-                                    form.setFieldValue(
-                                        FIELD_DESCRIPTION.name,
-                                        description
-                                    )
+                                    form.setFieldValue(FIELD_DESCRIPTION.name, description)
                                 }
                                 overflow={false}
                                 height={500}
