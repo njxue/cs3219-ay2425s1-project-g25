@@ -49,12 +49,7 @@ const QuestionsPage: React.FC = () => {
                     const question = await questionUseCases.getQuestion(selectedQuestionId);
                     setSelectedQuestion(question);
                 } catch (err) {
-                    setError(
-                        handleError(
-                            err,
-                            ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION
-                        )
-                    );
+                    setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
                     setSelectedQuestion(null);
                 } finally {
                     setIsQuestionLoading(false);
@@ -90,6 +85,21 @@ const QuestionsPage: React.FC = () => {
         setIsModalVisible(false);
     };
 
+    const onCreateQuestion = (createdQuestion: Question) => {
+        handleCloseModal();
+        setQuestions((questions) => [...questions, createdQuestion]);
+        setSearchParams({ code: createdQuestion.questionId });
+    };
+
+    // TODO: fix this
+    const onEditQuestion = (updatedQuestion: Question) => {
+        setQuestions((prevQuestions) =>
+            prevQuestions.map((q) => (q.questionId === updatedQuestion.questionId ? { ...updatedQuestion } : q))
+        );
+        setSearchParams({ code: updatedQuestion.questionId });
+    };
+
+    
     const renderBreadcrumb = () => {
         const breadcrumbItems = [
             {
@@ -125,7 +135,7 @@ const QuestionsPage: React.FC = () => {
                         style={{
                             display: "flex",
                             flexDirection: "column",
-                            overflow: "hidden",
+                            overflow: "hidden"
                         }}
                     >
                         <QuestionList
@@ -151,7 +161,7 @@ const QuestionsPage: React.FC = () => {
                         style={{
                             display: "flex",
                             flexDirection: "column",
-                            overflow: "hidden",
+                            overflow: "hidden"
                         }}
                     >
                         {selectedQuestionId ? (
@@ -163,18 +173,11 @@ const QuestionsPage: React.FC = () => {
                                 <QuestionDetail question={selectedQuestion} />
                             ) : (
                                 <div className={styles.centerContent}>
-                                    <Alert
-                                        message="Error"
-                                        description={error}
-                                        type="error"
-                                        showIcon
-                                    />
+                                    <Alert message="Error" description={error} type="error" showIcon />
                                 </div>
                             )
                         ) : (
-                            <LandingComponent
-                                onAddQuestion={handleAddQuestion}
-                            />
+                            <LandingComponent onAddQuestion={handleAddQuestion} />
                         )}
                     </Col>
                 </Row>
@@ -187,12 +190,7 @@ const QuestionsPage: React.FC = () => {
                 footer={null}
                 width={1200}
             >
-                <NewQuestionForm
-                    onSubmit={() => {
-                        handleCloseModal();
-                        fetchQuestions();
-                    }}
-                />
+                <NewQuestionForm onSubmit={onCreateQuestion} />
             </Modal>
         </div>
     );
