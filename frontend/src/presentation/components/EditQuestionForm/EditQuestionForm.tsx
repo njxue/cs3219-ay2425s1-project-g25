@@ -35,14 +35,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const initialCategoryIds = questionCategories.map((cat) => cat._id);
 
     useEffect(() => {
-        form.setFieldsValue({
-            ...questionUpdateInput,
-            categories: initialCategoryIds,
-            description: question.description
-        });
-    }, [form, questionUpdateInput, initialCategoryIds, question.description]);
-
-    useEffect(() => {
         const fetchCategories = async () => {
             setIsLoadingCategories(true);
             try {
@@ -72,13 +64,13 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                 .filter(category => selectedCategoryIds.includes(category._id))
                 .map(category => category.name);
 
-            // Prepare the updated question object
+            // Prepare the updated question object, including the editorValue for description
             const updatedQuestion = {
                 ...questionUpdate,
                 categories: selectedCategoryNames, // Send category names instead of _id
-                description: editorValue,
+                description: editorValue,          // Use the editor's value for the description
             };
-            console.log(question._id, updatedQuestion)
+
             const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
             toast.success(data?.message || "Question updated successfully!");
             onSubmit?.(data?.updatedQuestion);
@@ -105,7 +97,10 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                 <Form
                     layout="vertical"
                     onFinish={handleSubmit}
-                    initialValues={questionUpdateInput}
+                    initialValues={{
+                        ...questionUpdateInput,
+                        categories: initialCategoryIds, // Pre-fill categories
+                    }}
                     validateMessages={validateMessages}
                     scrollToFirstError
                     form={form}
@@ -170,7 +165,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                             >
                                 <MdEditor
                                     value={editorValue}
-                                    onChange={(value?: string) => setEditorValue(value || "")}
+                                    onChange={(description) => setEditorValue(description || "")}
                                     overflow={false}
                                     enableScroll
                                     height={300}
