@@ -35,6 +35,9 @@
     margin: 0;
     flex-grow: 1;
     margin-right: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .narrowCard .title {

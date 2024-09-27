@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { Select, Input, Dropdown, Button, message } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
-import styles from './QuestionFilters.module.css';
-import { FILTER_DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from 'presentation/utils/constants';
-import { getDifficultyColor } from 'presentation/utils/QuestionUtils';
-import { CategoryFilter } from './Category/CategoryFilter';
-import { categoryUseCases } from 'domain/usecases/CategoryUseCases';
+import React, { useState, useCallback } from "react";
+import { Select, Input, Dropdown, Button, message } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import styles from "./QuestionFilters.module.css";
+import { FILTER_DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from "presentation/utils/constants";
+import { getDifficultyColor } from "presentation/utils/QuestionUtils";
+import { CategoryFilter } from "./Category/CategoryFilter";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 
 interface QuestionFiltersProps {
     allCategories: string[];
@@ -18,19 +18,15 @@ interface QuestionFiltersProps {
 
 export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     allCategories: initialCategories,
-    onFiltersChange,
+    onFiltersChange
 }) => {
     const [allCategories, setAllCategories] = useState<string[]>(initialCategories);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string>(FILTER_DIFFICULTY_TEXT.ALL);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
 
     const triggerFiltersChange = useCallback(
-        (filters: {
-            selectedDifficulty: string;
-            selectedCategories: string[];
-            searchTerm: string;
-        }) => {
+        (filters: { selectedDifficulty: string; selectedCategories: string[]; searchTerm: string }) => {
             onFiltersChange?.(filters);
         },
         [onFiltersChange]
@@ -42,7 +38,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         triggerFiltersChange({
             selectedDifficulty,
             selectedCategories,
-            searchTerm: value,
+            searchTerm: value
         });
     };
 
@@ -51,7 +47,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         triggerFiltersChange({
             selectedDifficulty: value,
             selectedCategories,
-            searchTerm,
+            searchTerm
         });
     };
 
@@ -63,7 +59,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         triggerFiltersChange({
             selectedDifficulty,
             selectedCategories: nextSelectedCategories,
-            searchTerm,
+            searchTerm
         });
     };
 
@@ -116,7 +112,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
             <div className={styles.filtersRow}>
                 <div className={styles.filterItem}>
                     <Dropdown
-                        trigger={['click']}
+                        trigger={["click"]}
                         placement="bottomLeft"
                         overlayClassName={styles.categoryDropdownOverlay}
                         dropdownRender={() => dropdownContent}
@@ -130,7 +126,9 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
                 <div className={styles.filterItem}>
                     <Select
                         placeholder="Choose Difficulty"
-                        value={selectedDifficulty === FILTER_DIFFICULTY_TEXT.ALL ? 'Choose Difficulty' : selectedDifficulty}
+                        value={
+                            selectedDifficulty === FILTER_DIFFICULTY_TEXT.ALL ? "Choose Difficulty" : selectedDifficulty
+                        }
                         onChange={handleDifficultyChange}
                         className={styles.difficultyFilter}
                         optionLabelProp="label"
@@ -141,15 +139,27 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
                             },
                             {
                                 value: FILTER_DIFFICULTY_TEXT.EASY,
-                                label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>{FILTER_DIFFICULTY_TEXT.EASY}</span>
+                                label: (
+                                    <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>
+                                        {FILTER_DIFFICULTY_TEXT.EASY}
+                                    </span>
+                                )
                             },
                             {
                                 value: FILTER_DIFFICULTY_TEXT.MEDIUM,
-                                label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>{FILTER_DIFFICULTY_TEXT.MEDIUM}</span>
+                                label: (
+                                    <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>
+                                        {FILTER_DIFFICULTY_TEXT.MEDIUM}
+                                    </span>
+                                )
                             },
                             {
                                 value: FILTER_DIFFICULTY_TEXT.HARD,
-                                label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>{FILTER_DIFFICULTY_TEXT.HARD}</span>
+                                label: (
+                                    <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>
+                                        {FILTER_DIFFICULTY_TEXT.HARD}
+                                    </span>
+                                )
                             }
                         ]}
                     />
