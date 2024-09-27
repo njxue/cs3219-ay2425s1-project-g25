@@ -44,6 +44,8 @@ s = ["h", "e", "l", "l", "o"]
 
 Implement a function to detect if a linked list contains a cycle.
 
+![Linked List Cycle](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)
+
 ### Instructions
 
 - Given a linked list, determine if it has a cycle in it.

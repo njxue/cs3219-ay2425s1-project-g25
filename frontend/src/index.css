@@ -9,3 +9,9 @@ body {
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+body .ant-btn-primary.ant-btn-link:disabled,
+body .ant-btn-primary.ant-btn-link.ant-btn-disabled {
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.75);
+}
