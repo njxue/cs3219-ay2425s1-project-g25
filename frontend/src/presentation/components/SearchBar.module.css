@@ -1,0 +1,51 @@
+.searchBarWrapper {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    /* Slightly lighter border for a softer look */
+    border-radius: 6px;
+    /* Slightly smaller border radius for a modern look */
+    padding: 6px 10px;
+    /* Reduce padding for a more compact appearance */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow */
+    width: 100%;
+    max-width: 350px;
+    /* Slightly narrower max width */
+}
+
+.searchBarWrapper:focus-within {
+    border-color: #1890ff;
+    /* A sharper focus color for modern UI */
+    box-shadow: 0 0 6px rgba(24, 144, 255, 0.1);
+    /* Softer focus shadow */
+}
+
+.searchIcon {
+    color: #a0a0a0;
+    /* Lighter color for a more subtle appearance */
+    font-size: 16px;
+    /* Slightly smaller icon size */
+    margin-right: 8px;
+    /* Reduced margin for compact alignment */
+}
+
+.searchInput {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    /* Smaller font size for modern minimalism */
+    width: 100%;
+    color: #333;
+}
+
+.searchInput::placeholder {
+    color: #a0a0a0;
+    /* Lighter placeholder for a cleaner look */
+}
+
+.searchInput:focus {
+    outline: none;
+}
