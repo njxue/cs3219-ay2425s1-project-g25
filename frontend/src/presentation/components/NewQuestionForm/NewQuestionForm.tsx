@@ -68,19 +68,12 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                 categories: selectedCategoryNames, // Send category names instead of _id
             };
 
-            const res = await questionUseCases.createQuestion(questionWithDescription);
-            const status = res?.status;
-            const data = res?.data;
-            if (status === 201) {
-                const newQuestion = data?.question;
-                toast.success(data?.message);
-                onSubmit?.(newQuestion);
-                form.resetFields();
-                setEditorValue(""); // Clear the editor value after submission
-            } else {
-                toast.error(data?.message || "Failed to create question.");
-                console.error(data?.message);
-            }
+            const data = await questionUseCases.createQuestion(questionWithDescription);
+            const newQuestion = data?.question;
+            toast.success(data?.message);
+            onSubmit?.(newQuestion);
+            form.resetFields();
+            setEditorValue("");
         } catch (err) {
             console.error(err);
             toast.error("An unexpected error occurred.");
@@ -150,7 +143,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                         >
                             <MdEditor
                                 value={editorValue}
-                                onChange={(description) => setEditorValue(description || "")} // Use editorValue for tracking
+                                onChange={(description) => setEditorValue(description || "")}
                                 overflow={false}
                                 enableScroll
                                 height={300}

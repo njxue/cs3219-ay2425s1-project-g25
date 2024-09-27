@@ -78,17 +78,10 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                 categories: selectedCategoryNames, // Send category names instead of _id
                 description: editorValue,
             };
-
-            const res = await questionUseCases.updateQuestion(question._id, updatedQuestion);
-            const status = res?.status;
-            const data = res?.data;
-            if (status === 200) {
-                toast.success(data?.message || "Question updated successfully!");
-                onSubmit?.(data?.updatedQuestion);
-            } else {
-                console.error(data?.message);
-                toast.error(data?.message || "Failed to update question!");
-            }
+            console.log(question._id, updatedQuestion)
+            const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
+            toast.success(data?.message || "Question updated successfully!");
+            onSubmit?.(data?.updatedQuestion);
         } catch (err) {
             const message = (err as Error).message || "Failed to update question!";
             console.error("Error updating question:", err);
