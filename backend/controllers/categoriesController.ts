@@ -28,7 +28,8 @@ export async function createCategory(request: Request, response: Response, next:
         await newCategory.save();
 
         response.status(200).json({
-            message: `New category ${name} created.`
+            message: `New category ${name} created.`,
+            category: newCategory
         });
     } catch (error) {
         next(error);
