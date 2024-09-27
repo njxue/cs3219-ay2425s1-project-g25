@@ -1,5 +1,8 @@
 import { Question } from "domain/entities/Question";
 import { IQuestionInput, IQuestionUpdateInput } from "../../domain/repositories/IQuestionRepository";
+import { mockCategoryRemoteDataSource } from "./mockCategoryRepository";
+
+const { categories } = mockCategoryRemoteDataSource;
 
 const initialQuestions: Question[] = [
     {
@@ -33,7 +36,10 @@ s = ["h", "e", "l", "l", "o"]
 - \`s[i]\` is a printable ASCII character.
     `,
         difficulty: "Easy",
-        categories: ["Strings", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Strings")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/reverse-string/"
     },
     {
@@ -69,7 +75,10 @@ true
 - \`-10^5 <= Node.val <= 10^5\`.
     `,
         difficulty: "Easy",
-        categories: ["Data Structures", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Data Structures")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/linked-list-cycle/"
     },
     {
@@ -77,7 +86,9 @@ true
         title: "Roman to Integer",
         description: "Given a roman numeral, convert it to an integer.",
         difficulty: "Easy",
-        categories: ["Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/roman-to-integer/"
     },
     {
@@ -85,52 +96,68 @@ true
         title: "Add Binary",
         description: "Given two binary strings a and b, return their sum as a binary string.",
         difficulty: "Easy",
-        categories: ["Bit Manipulation", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Bit Manipulation")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/add-binary/"
     },
     {
         questionId: "5",
         title: "Fibonacci Number",
-        description:
-            "The Fibonacci numbers, commonly denoted F(n) form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1. Given n, calculate F(n).",
+        description: `
+The Fibonacci numbers, commonly denoted F(n) form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1. Given n, calculate F(n).`,
         difficulty: "Easy",
-        categories: ["Recursion", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Recursion")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/fibonacci-number/"
     },
     {
         questionId: "6",
         title: "Implement Stack using Queues",
-        description:
-            "Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (push, top, pop, and empty).",
+        description: `
+Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (push, top, pop, and empty).`,
         difficulty: "Easy",
-        categories: ["Data Structures"],
+        categories: [
+            categories.find(cat => cat.name === "Data Structures")!
+        ],
         url: "https://leetcode.com/problems/implement-stack-using-queues/"
     },
     {
         questionId: "7",
         title: "Combine Two Tables",
-        description:
-            "Write a SQL solution to report the first name, last name, city, and state of each person in the Person table. If the address of a personId is not present in the Address table, report null instead.",
+        description: `
+Write a SQL solution to report the first name, last name, city, and state of each person in the Person table. If the address of a personId is not present in the Address table, report null instead.`,
         difficulty: "Easy",
-        categories: ["Databases"],
+        categories: [
+            categories.find(cat => cat.name === "Databases")!
+        ],
         url: "https://leetcode.com/problems/combine-two-tables/"
     },
     {
         questionId: "8",
         title: "Repeated DNA Sequences",
-        description:
-            "Given a string s that represents a DNA sequence, return all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.",
+        description: `
+Given a string s that represents a DNA sequence, return all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.`,
         difficulty: "Medium",
-        categories: ["Algorithms", "Bit Manipulation"],
+        categories: [
+            categories.find(cat => cat.name === "Algorithms")!,
+            categories.find(cat => cat.name === "Bit Manipulation")!
+        ],
         url: "https://leetcode.com/problems/repeated-dna-sequences/"
     },
     {
         questionId: "9",
         title: "Course Schedule",
-        description:
-            "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. Return true if you can finish all courses. Otherwise, return false.",
+        description: `
+There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. Return true if you can finish all courses. Otherwise, return false.`,
         difficulty: "Medium",
-        categories: ["Data Structures", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Data Structures")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/course-schedule/"
     },
     {
@@ -138,34 +165,44 @@ true
         title: "LRU Cache Design",
         description: "Design and implement an LRU (Least Recently Used) cache.",
         difficulty: "Medium",
-        categories: ["Data Structures"],
+        categories: [
+            categories.find(cat => cat.name === "Data Structures")!
+        ],
         url: "https://leetcode.com/problems/lru-cache/"
     },
     {
         questionId: "11",
         title: "Longest Common Subsequence",
-        description:
-            "Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.",
+        description: `
+Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.`,
         difficulty: "Medium",
-        categories: ["Strings", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Strings")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/longest-common-subsequence/"
     },
     {
         questionId: "12",
         title: "Rotate Image",
-        description:
-            "You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).",
+        description: `
+You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).`,
         difficulty: "Medium",
-        categories: ["Arrays", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Arrays")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/rotate-image/"
     },
     {
         questionId: "13",
         title: "Airplane Seat Assignment Probability",
-        description:
-            "n passengers board an airplane with exactly n seats. The first passenger has lost the ticket and picks a seat randomly. But after that, the rest of the passengers will take their own seat if it is still available, and pick other seats randomly when they find their seat occupied. Return the probability that the nth person gets his own seat.",
+        description: `
+n passengers board an airplane with exactly n seats. The first passenger has lost the ticket and picks a seat randomly. But after that, the rest of the passengers will take their own seat if it is still available, and pick other seats randomly when they find their seat occupied. Return the probability that the nth person gets his own seat.`,
         difficulty: "Medium",
-        categories: ["Brainteaser"],
+        categories: [
+            categories.find(cat => cat.name === "Brainteaser")!
+        ],
         url: "https://leetcode.com/problems/airplane-seat-assignment-probability/"
     },
     {
@@ -173,61 +210,79 @@ true
         title: "Validate Binary Search Tree",
         description: "Given the root of a binary tree, determine if it is a valid binary search tree (BST).",
         difficulty: "Medium",
-        categories: ["Data Structures", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Data Structures")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/validate-binary-search-tree/"
     },
     {
         questionId: "15",
         title: "Sliding Window Maximum",
-        description:
-            "You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position. Return the max sliding window.",
+        description: `
+You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position. Return the max sliding window.`,
         difficulty: "Hard",
-        categories: ["Arrays", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Arrays")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/sliding-window-maximum/"
     },
     {
         questionId: "16",
         title: "N-Queen Problem",
-        description:
-            "The n-queens puzzle is the problem of placing n queens on an n x n chessboard such that no two queens attack each other. Given an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.",
+        description: `
+The n-queens puzzle is the problem of placing n queens on an n x n chessboard such that no two queens attack each other. Given an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.`,
         difficulty: "Hard",
-        categories: ["Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/n-queens/"
     },
     {
         questionId: "17",
         title: "Serialize and Deserialize a Binary Tree",
-        description:
-            "Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.",
+        description: `
+Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.`,
         difficulty: "Hard",
-        categories: ["Data Structures", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Data Structures")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/"
     },
     {
         questionId: "18",
         title: "Wildcard Matching",
-        description:
-            "Given an input string (s) and a pattern (p), implement wildcard pattern matching with support for '?' and '*' where: '?' Matches any single character. '*' Matches any sequence of characters (including the empty sequence). The matching should cover the entire input string (not partial).",
+        description: `
+Given an input string (s) and a pattern (p), implement wildcard pattern matching with support for '?' and '*' where: '?' Matches any single character. '*' Matches any sequence of characters (including the empty sequence). The matching should cover the entire input string (not partial).`,
         difficulty: "Hard",
-        categories: ["Strings", "Algorithms"],
+        categories: [
+            categories.find(cat => cat.name === "Strings")!,
+            categories.find(cat => cat.name === "Algorithms")!
+        ],
         url: "https://leetcode.com/problems/wildcard-matching/"
     },
     {
         questionId: "19",
         title: "Chalkboard XOR Game",
-        description:
-            "You are given an array of integers nums represents the numbers written on a chalkboard. Alice and Bob take turns erasing exactly one number from the chalkboard, with Alice starting first. If erasing a number causes the bitwise XOR of all the elements of the chalkboard to become 0, then that player loses. Return true if and only if Alice wins the game, assuming both players play optimally.",
+        description: `
+You are given an array of integers nums represents the numbers written on a chalkboard. Alice and Bob take turns erasing exactly one number from the chalkboard, with Alice starting first. If erasing a number causes the bitwise XOR of all the elements of the chalkboard to become 0, then that player loses. Return true if and only if Alice wins the game, assuming both players play optimally.`,
         difficulty: "Hard",
-        categories: ["Brainteaser"],
+        categories: [
+            categories.find(cat => cat.name === "Brainteaser")!
+        ],
         url: "https://leetcode.com/problems/chalkboard-xor-game/"
     },
     {
         questionId: "20",
         title: "Trips and Users",
-        description:
-            "Write a SQL solution to find the cancellation rate of requests with unbanned users (both client and driver must not be banned) each day between '2013-10-01' and '2013-10-03'. Round Cancellation Rate to two decimal points.",
+        description: `
+Write a SQL solution to find the cancellation rate of requests with unbanned users (both client and driver must not be banned) each day between '2013-10-01' and '2013-10-03'. Round Cancellation Rate to two decimal points.`,
         difficulty: "Hard",
-        categories: ["Databases"],
+        categories: [
+            categories.find(cat => cat.name === "Databases")!
+        ],
         url: "https://leetcode.com/problems/trips-and-users/"
     }
 ];
@@ -235,12 +290,21 @@ true
 export class MockQuestionRemoteDataSource {
     private questions: Question[] = [...initialQuestions];
 
+    /**
+     * Fetches all questions.
+     * @returns Promise resolving to an array of Question objects.
+     */
     async getAllQuestions(): Promise<Question[]> {
         return new Promise((resolve) => {
             setTimeout(() => resolve([...this.questions]), 300);
         });
     }
 
+    /**
+     * Fetches a single question by ID.
+     * @param questionId - The unique identifier of the question.
+     * @returns Promise resolving to the Question object.
+     */
     async getQuestion(questionId: string): Promise<Question> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -254,9 +318,23 @@ export class MockQuestionRemoteDataSource {
         });
     }
 
+    /**
+     * Creates a new question.
+     * @param question - The question input data.
+     * @returns Promise resolving with the status and created question.
+     */
     async createQuestion(question: IQuestionInput): Promise<{ status: number; data: any }> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             setTimeout(() => {
+                const invalidCategories = question.categories.filter(
+                    (cat) => !categories.find((category) => category._id === cat._id && category.name === cat.name)
+                );
+
+                if (invalidCategories.length > 0) {
+                    reject(new Error(`Invalid categories: ${invalidCategories.map(cat => cat.name).join(", ")}`));
+                    return;
+                }
+
                 const questionId = (this.questions.length + 1).toString();
                 const newQuestion: Question = {
                     ...question,
@@ -271,6 +349,12 @@ export class MockQuestionRemoteDataSource {
         });
     }
 
+    /**
+     * Updates an existing question.
+     * @param questionId - The unique identifier of the question to update.
+     * @param questionUpdate - The update data.
+     * @returns Promise resolving with the status and updated question.
+     */
     async updateQuestion(
         questionId: string,
         questionUpdate: IQuestionUpdateInput
@@ -279,6 +363,16 @@ export class MockQuestionRemoteDataSource {
             setTimeout(() => {
                 const index = this.questions.findIndex((q) => q.questionId === questionId);
                 if (index !== -1) {
+                    if (questionUpdate.categories) {
+                        const invalidCategories = questionUpdate.categories.filter(
+                            (cat) => !categories.find((category) => category._id === cat._id && category.name === cat.name)
+                        );
+                        if (invalidCategories.length > 0) {
+                            reject(new Error(`Invalid categories: ${invalidCategories.map(cat => cat.name).join(", ")}`));
+                            return;
+                        }
+                    }
+
                     const updatedQuestion = {
                         ...this.questions[index],
                         ...questionUpdate
@@ -292,6 +386,11 @@ export class MockQuestionRemoteDataSource {
         });
     }
 
+    /**
+     * Deletes a question by ID.
+     * @param questionId - The unique identifier of the question to delete.
+     * @returns Promise resolving when the question is deleted.
+     */
     async deleteQuestion(questionId: string): Promise<void> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {

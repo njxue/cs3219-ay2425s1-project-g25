@@ -6,6 +6,7 @@ import { QuestionFilters } from "./QuestionFilters";
 import styles from "./QuestionList.module.css";
 import { QUESTIONS_LIST_TEXT } from "presentation/utils/constants";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
+import { Category } from 'domain/entities/Category';
 
 interface QuestionListProps {
     questions: Question[];
@@ -30,12 +31,12 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         searchTerm: ""
     });
 
-    const [allCategories, setAllCategories] = useState<string[]>([]);
+    const [allCategories, setAllCategories] = useState<Category[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categories = await categoryUseCases.getAllCategories();
+                const categories: Category[] = await categoryUseCases.getAllCategories();
                 setAllCategories(categories);
             } catch (error) {
                 console.error("Failed to fetch categories", error);
@@ -57,23 +58,33 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 
     const filteredQuestions = useMemo(() => {
         return questions.filter((question) => {
-            if (filters.selectedDifficulty !== "All" && question.difficulty !== filters.selectedDifficulty) {
+            if (
+                filters.selectedDifficulty !== 'All' &&
+                question.difficulty !== filters.selectedDifficulty
+            ) {
                 return false;
             }
-            if (filters.searchTerm && !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
+            if (
+                filters.searchTerm &&
+                !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
+            ) {
                 return false;
             }
             if (filters.selectedCategories.length > 0) {
-                const hasCategory = filters.selectedCategories.every((category) =>
-                    question.categories.includes(category)
+                const hasAllSelectedCategories = filters.selectedCategories.every((categoryId) =>
+                    question.categories.some((category) => category._id === categoryId)
                 );
-                if (!hasCategory) {
+                if (!hasAllSelectedCategories) {
                     return false;
                 }
             }
             return true;
         });
     }, [questions, filters]);
+
+    useEffect(() => {
+        console.log("Filtered Questions Updated:", filteredQuestions);
+    }, [filteredQuestions]);
 
     const renderItem = (question: Question) => (
         <QuestionCard

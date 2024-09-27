@@ -1,3 +1,4 @@
+import { Category } from 'domain/entities/Category';
 import { BaseApi } from '../BaseApi';
 
 const API_URL = '/api/categories';
@@ -7,12 +8,12 @@ export class CategoryRemoteDataSource extends BaseApi {
         super(API_URL);
     }
 
-    async getAllCategories(): Promise<string[]> {
-        return this.get<string[]>('/');
+    async getAllCategories(): Promise<Category[]> {
+        return this.get<Category[]>('/');
     }
 
-    async createCategory(category: string): Promise<void> {
-        await this.post<void>('/', { category });
+    async createCategory(category: string): Promise<Category> {
+        return await this.post<Category>('/', { category });
     }
 
     async deleteCategory(category: string): Promise<void> {

@@ -1,18 +1,19 @@
 import { QuestionDifficulty } from "domain/entities/QuestionDifficulty";
 import { Question } from "../entities/Question";
+import { Category } from "domain/entities/Category";
 
 export interface IQuestionInput {
 	title: string;
 	description: string;
 	difficulty: QuestionDifficulty;
-	categories: string[];
+	categories: Category[];
 	url: string;
 }
 
 export interface IQuestionUpdateInput {
 	title?: string;
 	description?: string;
-	categories?: string[];
+	categories?: Category[];
 	difficulty?: QuestionDifficulty;
 	url?: string;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button } from "antd";
 import MdEditor from "@uiw/react-md-editor";
@@ -8,6 +9,7 @@ import { difficultyOptions, initialQuestionInput } from "presentation/utils/Ques
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
+import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
 
 interface NewQuestionFormProps {
@@ -17,6 +19,7 @@ interface NewQuestionFormProps {
 export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) => {
     const [form] = Form.useForm();
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+    const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
 
     const validateMessages = {
         required: "${label} is required",
@@ -27,15 +30,19 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
     useEffect(() => {
         const fetchCategories = async () => {
+            setLoadingCategories(true);
             try {
-                const categories = await categoryUseCases.getAllCategories();
+                const categories: Category[] = await categoryUseCases.getAllCategories();
                 const options = categories.map((category) => ({
-                    value: category,
-                    label: category
+                    value: category._id,
+                    label: category.name
                 }));
                 setCategoryOptions(options);
             } catch (error) {
                 console.error("Failed to fetch categories", error);
+                toast.error("Failed to load categories.");
+            } finally {
+                setLoadingCategories(false);
             }
         };
 
@@ -53,11 +60,12 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                 onSubmit?.(newQuestion);
                 form.resetFields();
             } else {
-                toast.error(data?.message);
+                toast.error(data?.message || "Failed to create question.");
                 console.error(data?.message);
             }
         } catch (err) {
             console.error(err);
+            toast.error("An unexpected error occurred.");
         }
     }
 
@@ -104,6 +112,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                                 allowClear
                                 mode="multiple"
                                 options={categoryOptions}
+                                loading={loadingCategories}
                             />
                         </Form.Item>
                     </Col>
@@ -123,7 +132,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                         >
                             <MdEditor
                                 value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
-                                onChange={(description) => form.setFieldValue(FIELD_DESCRIPTION.name, description)}
+                                onChange={(description) => form.setFieldsValue({ [FIELD_DESCRIPTION.name]: description })}
                                 overflow={false}
                                 enableScroll
                                 height={300}
@@ -131,9 +140,11 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                         </Form.Item>
                     </Col>
                 </Row>
-                <Button type="primary" htmlType="submit">
-                    Create
-                </Button>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit">
+                        Create
+                    </Button>
+                </Form.Item>
             </Form>
         </div>
     );
