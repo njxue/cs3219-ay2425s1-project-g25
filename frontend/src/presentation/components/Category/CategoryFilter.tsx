@@ -1,17 +1,18 @@
 // CategoryFilter.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Input, Tag, Button, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import styles from './CategoryFilter.module.css';
+import { Category } from 'domain/entities/Category';
 
 const { CheckableTag } = Tag;
 
 interface CategoryFilterProps {
-    allCategories: string[];
+    allCategories: Category[];
     selectedCategories: string[];
-    onCategoryChange: (category: string, checked: boolean) => void;
-    onAddCategory: (category: string) => void;
-    onDeleteCategory: (categories: string[]) => void;
+    onCategoryChange: (categoryId: string, checked: boolean) => void;
+    onAddCategory: (categoryName: string) => void;
+    onDeleteCategory: (categoriesToDeleteIds: string[]) => void;
 }
 
 export const CategoryFilter: React.FC<CategoryFilterProps> = ({
@@ -25,13 +26,6 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     const [newCategory, setNewCategory] = useState('');
     const [deletingMode, setDeletingMode] = useState(false);
     const [categoriesToDelete, setCategoriesToDelete] = useState<string[]>([]);
-
-    const filteredCategories = useMemo(() => {
-        const lowerSearchTerm = categorySearchTerm.toLowerCase();
-        return allCategories.filter((category) =>
-            category.toLowerCase().includes(lowerSearchTerm)
-        );
-    }, [allCategories, categorySearchTerm]);
 
     const handleCategorySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCategorySearchTerm(e.target.value);
@@ -53,10 +47,10 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         setCategoriesToDelete([]);
     };
 
-    const handleCategoryToDeleteChange = (category: string, checked: boolean) => {
+    const handleCategoryToDeleteChange = (categoryId: string, checked: boolean) => {
         const updatedCategories = checked
-            ? [...categoriesToDelete, category]
-            : categoriesToDelete.filter((c) => c !== category);
+            ? [...categoriesToDelete, categoryId]
+            : categoriesToDelete.filter((c) => c !== categoryId);
         setCategoriesToDelete(updatedCategories);
     };
 
@@ -81,6 +75,13 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         });
     };
 
+    const filteredCategories = allCategories.filter((category) =>
+        category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
+    );
+
+    console.log("CategoryFilter received allCategories:", allCategories); // Debugging line
+    console.log("CategoryFilter filteredCategories:", filteredCategories); // Debugging line
+
     return (
         <div className={styles.categoryDropdownContainer}>
             <Input
@@ -94,20 +95,20 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
             <div className={styles.categoriesGrid}>
                 {filteredCategories.map((category) => (
                     <CheckableTag
-                        key={category}
+                        key={category._id}
                         checked={
                             deletingMode
-                                ? categoriesToDelete.includes(category)
-                                : selectedCategories.includes(category)
+                                ? categoriesToDelete.includes(category._id)
+                                : selectedCategories.includes(category._id)
                         }
                         onChange={(checked) =>
                             deletingMode
-                                ? handleCategoryToDeleteChange(category, checked)
-                                : onCategoryChange(category, checked)
+                                ? handleCategoryToDeleteChange(category._id, checked)
+                                : onCategoryChange(category._id, checked)
                         }
                         className={styles.checkableTag}
                     >
-                        {category}
+                        {category.name}
                     </CheckableTag>
                 ))}
             </div>

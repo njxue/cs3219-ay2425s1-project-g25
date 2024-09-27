@@ -4,7 +4,7 @@ import { questionRemoteDataSource } from './QuestionRemoteDataSource';
 import { mockQuestionRemoteDataSource } from './mockQuestionRepository';
 
 // Set this to true to use the mock API, false to use the real API
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 
 export class QuestionRepositoryImpl implements IQuestionRepository {
     private dataSource = USE_MOCK_API ? mockQuestionRemoteDataSource : questionRemoteDataSource;

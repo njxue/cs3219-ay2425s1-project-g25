@@ -1,4 +1,4 @@
-import { Category } from '@shared/types/Category';  // Assuming Category type exists
+import { Category } from "./Category";
 
 export interface Question {
     _id: string,

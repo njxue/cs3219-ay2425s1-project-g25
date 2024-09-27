@@ -1,15 +1,17 @@
+// QuestionFilters.tsx
 import React, { useState, useCallback } from "react";
-import { Select, Dropdown, Button, message } from "antd";
+import { Dropdown, Button, Select, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
 import { FILTER_DIFFICULTY_TEXT } from "presentation/utils/constants";
 import { getDifficultyColor } from "presentation/utils/QuestionUtils";
 import { CategoryFilter } from "./Category/CategoryFilter";
-import { categoryUseCases } from "domain/usecases/CategoryUseCases";
+import { Category } from "domain/entities/Category";
 import { SearchBar } from "./SearchBar";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 
 interface QuestionFiltersProps {
-    allCategories: string[];
+    allCategories: Category[];
     onFiltersChange: (filters: {
         selectedDifficulty: string;
         selectedCategories: string[];
@@ -18,24 +20,27 @@ interface QuestionFiltersProps {
 }
 
 export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
-    allCategories: initialCategories,
+    allCategories,
     onFiltersChange
 }) => {
-    const [allCategories, setAllCategories] = useState<string[]>(initialCategories);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string>(FILTER_DIFFICULTY_TEXT.ALL);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const triggerFiltersChange = useCallback(
-        (filters: { selectedDifficulty: string; selectedCategories: string[]; searchTerm: string }) => {
-            onFiltersChange?.(filters);
+    const handleFiltersChange = useCallback(
+        (filters: {
+            selectedDifficulty: string;
+            selectedCategories: string[];
+            searchTerm: string;
+        }) => {
+            onFiltersChange(filters);
         },
         [onFiltersChange]
     );
 
     const handleSearch = (term: string) => {
         setSearchTerm(term);
-        triggerFiltersChange({
+        handleFiltersChange({
             selectedDifficulty,
             selectedCategories,
             searchTerm: term
@@ -44,55 +49,59 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
 
     const handleDifficultyChange = (value: string) => {
         setSelectedDifficulty(value);
-        triggerFiltersChange({
+        handleFiltersChange({
             selectedDifficulty: value,
             selectedCategories,
             searchTerm
         });
     };
 
-    const handleCategoryChange = (category: string, checked: boolean) => {
+    const handleCategoryChange = (categoryId: string, checked: boolean) => {
         const nextSelectedCategories = checked
-            ? [...selectedCategories, category]
-            : selectedCategories.filter((c) => c !== category);
+            ? [...selectedCategories, categoryId]
+            : selectedCategories.filter((c) => c !== categoryId);
         setSelectedCategories(nextSelectedCategories);
-        triggerFiltersChange({
+        handleFiltersChange({
             selectedDifficulty,
             selectedCategories: nextSelectedCategories,
             searchTerm
         });
     };
 
-    const handleAddCategory = async (category: string) => {
-        if (!category || category.trim() === "") {
+    const handleAddCategory = async (categoryName: string) => {
+        if (!categoryName || categoryName.trim() === "") {
             message.error("Category cannot be empty!");
             return;
         }
 
-        if (allCategories.includes(category)) {
+        const exists = allCategories.some(
+            (category) => category.name.toLowerCase() === categoryName.toLowerCase()
+        );
+
+        if (exists) {
             message.error("Category already exists!");
             return;
         }
 
         try {
-            await categoryUseCases.createCategory(category);
-            setAllCategories([...allCategories, category]);
+            const newCategory: Category = await categoryUseCases.createCategory(categoryName);
+            // setAllCategories([...allCategories, newCategory]);
             message.success("Category added successfully!");
         } catch (error) {
-            message.error("Failed to add category!");
+            message.error((error as Error).message || "Failed to add category!");
             console.error("Failed to add category:", error);
         }
     };
 
-    const handleDeleteCategory = async (categoriesToDelete: string[]) => {
+    const handleDeleteCategory = async (categoriesToDeleteIds: string[]) => {
         try {
-            await Promise.all(categoriesToDelete.map((category) => categoryUseCases.deleteCategory(category)));
-            const updatedCategories = allCategories.filter((category) => !categoriesToDelete.includes(category));
-            setAllCategories(updatedCategories);
-            setSelectedCategories(selectedCategories.filter((c) => !categoriesToDelete.includes(c)));
+            await Promise.all(categoriesToDeleteIds.map((categoryId) => categoryUseCases.deleteCategory(categoryId)));
+            const updatedCategories = allCategories.filter((category) => !categoriesToDeleteIds.includes(category._id));
+            // setAllCategories(updatedCategories);
+            setSelectedCategories(selectedCategories.filter((c) => !categoriesToDeleteIds.includes(c)));
             message.success("Categories deleted successfully!");
         } catch (error) {
-            message.error("Failed to delete categories!");
+            message.error((error as Error).message || "Failed to delete categories!");
             console.error("Failed to delete categories:", error);
         }
     };
@@ -132,6 +141,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
                         onChange={handleDifficultyChange}
                         className={styles.difficultyFilter}
                         optionLabelProp="label"
+                        allowClear
                         options={[
                             {
                                 value: FILTER_DIFFICULTY_TEXT.ALL,

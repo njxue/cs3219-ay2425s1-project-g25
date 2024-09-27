@@ -8,6 +8,7 @@ import { difficultyOptions, initialQuestionInput } from "presentation/utils/Ques
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
+import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
 
 interface NewQuestionFormProps {
@@ -17,6 +18,9 @@ interface NewQuestionFormProps {
 export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) => {
     const [form] = Form.useForm();
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]); // To store the full category objects
+    const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
+    const [editorValue, setEditorValue] = useState<string>(initialQuestionInput.description || ""); // Track editor value state
 
     const validateMessages = {
         required: "${label} is required",
@@ -27,15 +31,20 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
     useEffect(() => {
         const fetchCategories = async () => {
+            setLoadingCategories(true);
             try {
-                const categories = await categoryUseCases.getAllCategories();
-                const options = categories.map((category) => ({
-                    value: category,
-                    label: category
+                const fetchedCategories: Category[] = await categoryUseCases.getAllCategories();
+                const options = fetchedCategories.map((category) => ({
+                    value: category._id,
+                    label: category.name
                 }));
                 setCategoryOptions(options);
+                setCategories(fetchedCategories); // Store full categories for later mapping
             } catch (error) {
                 console.error("Failed to fetch categories", error);
+                toast.error("Failed to load categories.");
+            } finally {
+                setLoadingCategories(false);
             }
         };
 
@@ -44,20 +53,30 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
     async function handleSubmit(question: IQuestionInput) {
         try {
-            const res = await questionUseCases.createQuestion(question);
-            const status = res?.status;
-            const data = res?.data;
-            if (status === 201) {
-                const newQuestion = data?.question;
-                toast.success(data?.message);
-                onSubmit?.(newQuestion);
-                form.resetFields();
-            } else {
-                toast.error(data?.message);
-                console.error(data?.message);
-            }
+            // Get selected category IDs from the form
+            const selectedCategoryIds = form.getFieldValue("categories");
+
+            // Map the selected category IDs back to their names
+            const selectedCategoryNames = categories
+                .filter(category => selectedCategoryIds.includes(category._id))
+                .map(category => category.name);
+
+            // Prepare the updated question object
+            const questionWithDescription = {
+                ...question,
+                description: editorValue,
+                categories: selectedCategoryNames, // Send category names instead of _id
+            };
+
+            const data = await questionUseCases.createQuestion(questionWithDescription);
+            const newQuestion = data?.question;
+            toast.success(data?.message);
+            onSubmit?.(newQuestion);
+            form.resetFields();
+            setEditorValue("");
         } catch (err) {
             console.error(err);
+            toast.error("An unexpected error occurred.");
         }
     }
 
@@ -104,6 +123,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                                 allowClear
                                 mode="multiple"
                                 options={categoryOptions}
+                                loading={loadingCategories}
                             />
                         </Form.Item>
                     </Col>
@@ -122,8 +142,8 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
-                                onChange={(description) => form.setFieldValue(FIELD_DESCRIPTION.name, description)}
+                                value={editorValue}
+                                onChange={(description) => setEditorValue(description || "")}
                                 overflow={false}
                                 enableScroll
                                 height={300}
@@ -131,9 +151,11 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                         </Form.Item>
                     </Col>
                 </Row>
-                <Button type="primary" htmlType="submit">
-                    Create
-                </Button>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit">
+                        Create
+                    </Button>
+                </Form.Item>
             </Form>
         </div>
     );

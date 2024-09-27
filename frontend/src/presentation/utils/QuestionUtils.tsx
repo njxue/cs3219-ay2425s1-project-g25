@@ -46,21 +46,6 @@ export const difficultyOptions: {
 	},
 ];
 
-// TODO: Consider storing this in BE
-export const categoryOptions: { value: string; label: string }[] = [
-	{ value: "Strings", label: "Strings" },
-	{
-		value: "Bit Manipulation",
-		label: "Bit Manipulation",
-	},
-	{ value: "Algorithms", label: "Algorithms" },
-	{ value: "Recursion", label: "Recursion" },
-	{ value: "Databases", label: "Databases" },
-	{ value: "Arrays", label: "Arrays" },
-	{ value: "Brainteaser", label: "Brainteaser" },
-	{ value: "Data Structures", label: "Data Structures" },
-];
-
 const templateQuestionDescription: string = `
 ### Problem
 
