@@ -8,83 +8,62 @@ import { EditQuestionForm } from "./EditQuestionForm/EditQuestionForm";
 
 interface QuestionDetailProps {
     question: Question;
+    onEdit?: (updatedQuestion: Question) => void;
 }
 
-export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question }) => {
+export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-
+    const onEditQuestion = (updatedQuestion: Question) => {
+        setIsEditModalOpen(false);
+        onEdit?.(updatedQuestion);
+    };
     return (
-        <div className={styles.cardWrapper}>
-            <Card className={styles.card}>
-                <div className={styles.header}>
-                    <div className={styles.titleContainer}>
-                        <div className={styles.titleAndLink}>
-                            <h2>{question.title}</h2>
-                            {question.url && (
-                                <a
-                                    href={question?.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <img
-                                        src="/icons/external-link.svg"
-                                        width={24}
-                                    />
-                                </a>
-                            )}
-                        </div>
-
-                        <img
-                            src="/icons/pencil.svg"
-                            width={24}
-                            onClick={() => setIsEditModalOpen(true)}
-                        />
+        <>
+            <div className={styles.card}>
+                <div className={styles.titleContainer}>
+                    <div className={styles.titleAndLink}>
+                        <h2>{question.title}</h2>
+                        {question.url && (
+                            <a href={question?.url} target="_blank" rel="noopener noreferrer">
+                                <img src="/icons/external-link.svg" width={24} />
+                            </a>
+                        )}
                     </div>
+
+                    <img src="/icons/pencil.svg" width={24} onClick={() => setIsEditModalOpen(true)} />
                 </div>
+
                 <Divider className={styles.divider} />
                 <div className={styles.content}>
                     <MDEditor.Markdown source={question.description} />
                     <div className={styles.metaContainer}>
                         <div className={styles.difficultyContainer}>
-                            <span className={styles.metaLabel}>
-                                Difficulty:
-                            </span>
-                            <Tag
-                                color={getDifficultyColor(question.difficulty)}
-                                className={styles.difficultyTag}
-                            >
+                            <span className={styles.metaLabel}>Difficulty:</span>
+                            <Tag color={getDifficultyColor(question.difficulty)} className={styles.difficultyTag}>
                                 {question.difficulty}
                             </Tag>
                         </div>
                         <div className={styles.categoriesContainer}>
-                            <span className={styles.metaLabel}>
-                                Categories:
-                            </span>
+                            <span className={styles.metaLabel}>Categories:</span>
                             {question.categories.map((category, idx) => (
-                                <Tag
-                                    key={idx}
-                                    color="blue"
-                                    className={styles.categoryTag}
-                                >
+                                <Tag key={idx} color="blue" className={styles.categoryTag}>
                                     {category}
                                 </Tag>
                             ))}
                         </div>
                     </div>
                 </div>
-            </Card>
+            </div>
             <Modal
                 open={isEditModalOpen}
                 onCancel={() => setIsEditModalOpen(false)}
                 title="Edit question"
                 footer={null}
-                width={"75vw"}
+                width={"90vw"}
+                centered
             >
-                <EditQuestionForm
-                    question={question}
-                    onSubmit={() => setIsEditModalOpen(false)}
-                />
+                <EditQuestionForm question={question} onSubmit={onEditQuestion} />
             </Modal>
-        </div>
+        </>
     );
 };

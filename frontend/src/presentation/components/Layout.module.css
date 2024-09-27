@@ -1,31 +1,24 @@
 .layout {
-    min-height: 100vh;
+    max-height: 100vh;
+    max-width: 100vw;
     display: flex;
     flex-direction: column;
     background: rgba(255, 255, 255, 0.2);
-    max-width: 1200px;
     margin: 0 auto;
 }
 
 .header {
-    backdrop-filter: blur(10px);
-    background-color: rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: white;
+    border-bottom: 1px solid black;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 50px;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-}
-
-.menu {
-    background: transparent;
-    border: none;
+    padding: 0 32px;
+    position: fixed;
+    top: 0;
+    height: 64px;
+    width: 100%;
+    z-index: 999;
 }
 
 .content {
@@ -35,27 +28,7 @@
     justify-content: flex-start;
     align-items: center;
     overflow-y: auto;
-}
-
-.glassContainer {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px);
-    padding: 30px;
+    margin-top: 64px;
     width: 100%;
-    max-width: 1200px;
-    min-height: calc(100% - 60px);
-    margin: 0 auto;
-    text-align: center;
-}
-
-.footer {
-    text-align: center;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 1);
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    color: #000;
+    height: calc(100vh - 64px);
 }
