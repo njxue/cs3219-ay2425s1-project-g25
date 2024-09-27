@@ -7,5 +7,5 @@ export interface Question {
     description: string,
     difficulty: string,
     categories: Category[],
-    url: string
+    url?: string
 }

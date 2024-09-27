@@ -55,8 +55,8 @@ export async function createQuestion(
             description,
             difficulty,
             categories: categoryIds,
-            url,
         });
+        if (url) newQuestion.url = url; // Add url only if it's provided
 
         await newQuestion.save();
 
@@ -74,7 +74,7 @@ export async function updateQuestion(
     response: Response,
     next: NextFunction
 ) {
-    const { code } = request.params;
+    const { id } = request.params;
     let { categories, ...updateData } = request.body;
 
     try {
@@ -97,7 +97,7 @@ export async function updateQuestion(
 
         const updatedQuestion = await questionModel
             .findOneAndUpdate(
-                { code },
+                { _id: id },
                 { $set: updateData },
                 { new: true, runValidators: true } // return the updated document and apply validation
             )
@@ -105,12 +105,12 @@ export async function updateQuestion(
 
         if (!updatedQuestion) {
             return response.status(404).json({
-                message: `Question with code ${code} not found.`,
+                message: `Question with _id ${id} not found.`,
             });
         }
 
         response.status(200).json({
-            message: `Question ${code} updated successfully.`,
+            message: `Question ${id} updated successfully.`,
             updatedQuestion,
         });
     } catch (error) {
@@ -123,19 +123,19 @@ export async function deleteQuestion(
     response: Response,
     next: NextFunction
 ) {
-    const { code } = request.params;
+    const { id } = request.params;
 
     try {
-        const deletedQuestion = await questionModel.findOneAndDelete({ code });
+        const deletedQuestion = await questionModel.findOneAndDelete({ _id: id });
 
         if (!deletedQuestion) {
             return response.status(404).json({
-                message: `Question with code ${code} not found.`,
+                message: `Question with _id ${id} not found.`,
             });
         }
 
         response.status(200).json({
-            message: `Question ${code} deleted successfully.`,
+            message: `Question ${id} deleted successfully.`,
         });
     } catch (error) {
         next(error);
@@ -147,13 +147,13 @@ export async function getQuestion(
     response: Response,
     next: NextFunction
 ) {
-    const { code } = request.params;
+    const { id } = request.params;
 
     try {
-        const question = await questionModel.findOne({ code });
+        const question = await questionModel.findOne({ _id: id });
         if (!question) {
             return response.status(404).json({
-                message: `Question with code ${code} not found.`,
+                message: `Question with _id ${id} not found.`,
             });
         }
 

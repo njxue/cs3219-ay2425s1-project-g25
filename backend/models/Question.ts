@@ -8,7 +8,7 @@ export interface Question extends mongoose.Document {
   description: string;
   difficulty: string;
   categories: Types.ObjectId[]; // Reference ObjectId from Category
-  url: string;
+  url?: string;
 }
 
 const questionSchema: Schema = new Schema<Question>({
