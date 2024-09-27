@@ -51,6 +51,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                 const newQuestion = data?.question;
                 toast.success(data?.message);
                 onSubmit?.(newQuestion);
+                form.resetFields();
             } else {
                 toast.error(data?.message);
                 console.error(data?.message);
