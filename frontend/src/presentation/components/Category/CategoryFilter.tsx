@@ -1,6 +1,6 @@
 // CategoryFilter.tsx
 import React, { useState } from 'react';
-import { Input, Tag, Button, Modal } from 'antd';
+import { Input, Tag, Button, Modal, message } from 'antd';
 import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import styles from './CategoryFilter.module.css';
 import { Category } from 'domain/entities/Category';
@@ -75,8 +75,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         });
     };
 
-    const filteredCategories = allCategories.filter((category) =>
-        category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
+    const filteredCategories = allCategories.filter(
+        (category) => 
+            category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
     );
 
     console.log("CategoryFilter received allCategories:", allCategories); // Debugging line
@@ -92,25 +93,35 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 allowClear
             />
 
+            {/* Instructional Text for Delete Mode */}
+            {deletingMode && (
+                <div className={styles.instructionText}>
+                    Select categories to delete
+                </div>
+            )}
+
             <div className={styles.categoriesGrid}>
-                {filteredCategories.map((category) => (
-                    <CheckableTag
-                        key={category._id}
-                        checked={
-                            deletingMode
-                                ? categoriesToDelete.includes(category._id)
-                                : selectedCategories.includes(category._id)
-                        }
-                        onChange={(checked) =>
-                            deletingMode
-                                ? handleCategoryToDeleteChange(category._id, checked)
-                                : onCategoryChange(category._id, checked)
-                        }
-                        className={styles.checkableTag}
-                    >
-                        {category.name}
-                    </CheckableTag>
-                ))}
+                {filteredCategories.map((category) => {
+                    const isSelectedForDeletion = deletingMode && categoriesToDelete.includes(category._id);
+                    return (
+                        <CheckableTag
+                            key={category._id}
+                            checked={
+                                deletingMode
+                                    ? categoriesToDelete.includes(category._id)
+                                    : selectedCategories.includes(category._id)
+                            }
+                            onChange={(checked) =>
+                                deletingMode
+                                    ? handleCategoryToDeleteChange(category._id, checked)
+                                    : onCategoryChange(category._id, checked)
+                            }
+                            className={`${styles.checkableTag} ${isSelectedForDeletion ? styles.deleteSelectedTag : ''}`}
+                        >
+                            {category.name}
+                        </CheckableTag>
+                    );
+                })}
             </div>
 
             <div className={styles.addCategoryContainer}>
