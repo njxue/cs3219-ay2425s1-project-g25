@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Tag, Divider, Modal } from "antd";
+import { Tag, Divider, Modal } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { getDifficultyColor } from "../utils/QuestionUtils";
 import styles from "./QuestionDetail.module.css";

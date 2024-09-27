@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Select, Dropdown, Button, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
-import { FILTER_DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from "presentation/utils/constants";
+import { FILTER_DIFFICULTY_TEXT } from "presentation/utils/constants";
 import { getDifficultyColor } from "presentation/utils/QuestionUtils";
 import { CategoryFilter } from "./Category/CategoryFilter";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
