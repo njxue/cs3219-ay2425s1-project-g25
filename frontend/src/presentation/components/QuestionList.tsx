@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { List, Spin, Alert } from 'antd';
-import { Question } from '../../domain/entities/Question';
-import { QuestionCard } from './QuestionCard';
-import { QuestionFilters } from './QuestionFilters';
-import styles from './QuestionList.module.css';
-import { QUESTIONS_LIST_TEXT } from 'presentation/utils/constants';
-import { categoryUseCases } from 'domain/usecases/CategoryUseCases';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { List, Spin, Alert } from "antd";
+import { Question } from "../../domain/entities/Question";
+import { QuestionCard } from "./QuestionCard";
+import { QuestionFilters } from "./QuestionFilters";
+import styles from "./QuestionList.module.css";
+import { QUESTIONS_LIST_TEXT } from "presentation/utils/constants";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 
 interface QuestionListProps {
     questions: Question[];
@@ -22,12 +22,12 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     onSelectQuestion,
     isNarrow,
     isLoading,
-    error,
+    error
 }) => {
     const [filters, setFilters] = useState({
-        selectedDifficulty: 'All',
+        selectedDifficulty: "All",
         selectedCategories: [] as string[],
-        searchTerm: '',
+        searchTerm: ""
     });
 
     const [allCategories, setAllCategories] = useState<string[]>([]);
@@ -45,26 +45,22 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         fetchCategories();
     }, []);
 
-    const handleFiltersChange = (newFilters: React.SetStateAction<{ 
-        selectedDifficulty: string; 
-        selectedCategories: string[]; 
-        searchTerm: string; 
-    }>) => {
+    const handleFiltersChange = (
+        newFilters: React.SetStateAction<{
+            selectedDifficulty: string;
+            selectedCategories: string[];
+            searchTerm: string;
+        }>
+    ) => {
         setFilters(newFilters);
     };
 
     const filteredQuestions = useMemo(() => {
         return questions.filter((question) => {
-            if (
-                filters.selectedDifficulty !== 'All' &&
-                question.difficulty !== filters.selectedDifficulty
-            ) {
+            if (filters.selectedDifficulty !== "All" && question.difficulty !== filters.selectedDifficulty) {
                 return false;
             }
-            if (
-                filters.searchTerm &&
-                !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
-            ) {
+            if (filters.searchTerm && !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
                 return false;
             }
             if (filters.selectedCategories.length > 0) {
@@ -79,17 +75,14 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         });
     }, [questions, filters]);
 
-    const renderItem = useCallback(
-        (question: Question) => (
-            <QuestionCard
-                key={question.questionId}
-                question={question}
-                isSelected={selectedQuestionId === question.questionId}
-                onClick={() => onSelectQuestion(question.questionId)}
-                isNarrow={isNarrow}
-            />
-        ),
-        [selectedQuestionId, onSelectQuestion, isNarrow]
+    const renderItem = (question: Question) => (
+        <QuestionCard
+            key={question.questionId}
+            question={question}
+            isSelected={selectedQuestionId === question.questionId}
+            onClick={() => onSelectQuestion(question.questionId)}
+            isNarrow={isNarrow}
+        />
     );
 
     if (isLoading) {
@@ -103,13 +96,9 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     if (error) {
         return <Alert message="Error" description={error} type="error" showIcon />;
     }
-
     return (
         <div className={styles.questionListContainer}>
-            <QuestionFilters
-                allCategories={allCategories}
-                onFiltersChange={handleFiltersChange}
-            />
+            <QuestionFilters allCategories={allCategories} onFiltersChange={handleFiltersChange} />
             <div className={styles.listContainer}>
                 {filteredQuestions.length === 0 ? (
                     <Alert
