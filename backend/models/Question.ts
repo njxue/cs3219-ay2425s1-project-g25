@@ -8,7 +8,7 @@ export interface Question extends mongoose.Document {
   description: string;
   difficulty: string;
   categories: Types.ObjectId[]; // Reference ObjectId from Category
-  url: string;
+  url?: string;
 }
 
 const questionSchema: Schema = new Schema<Question>({
@@ -17,7 +17,7 @@ const questionSchema: Schema = new Schema<Question>({
   description: { type: String, required: true },
   difficulty: { type: String, required: true },
   categories: [{ type: Types.ObjectId, ref: 'category', required: true }],
-  url: { type: String, required: true },
+  url: { type: String, required: false },
 });
 
 const questionModel = mongoose.model<Question>('question', questionSchema);

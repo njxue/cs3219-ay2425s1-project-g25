@@ -1,7 +1,11 @@
 import categoryModel from "../models/Category";
 import { Request, Response, NextFunction } from "express";
 
-export async function getAllCategories(request: Request, response: Response, next: NextFunction) {
+export async function getAllCategories(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
     try {
         const categories = await categoryModel.find();
         response.status(200).json(categories);
@@ -10,19 +14,23 @@ export async function getAllCategories(request: Request, response: Response, nex
     }
 }
 
-export async function createCategory(request: Request, response: Response, next: NextFunction) {
+export async function createCategory(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
     const { name } = request.body;
 
     try {
         const existingCategory = await categoryModel.findOne({ name });
         if (existingCategory) {
             return response.status(400).json({
-                message: "A category with the given name already exists."
+                message: "A category with the given name already exists.",
             });
         }
 
         const newCategory = new categoryModel({
-            name
+            name,
         });
 
         await newCategory.save();
@@ -36,7 +44,11 @@ export async function createCategory(request: Request, response: Response, next:
     }
 }
 
-export async function deleteCategory(request: Request, response: Response, next: NextFunction) {
+export async function deleteCategory(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
     const { _id } = request.params;
 
     try {
@@ -44,12 +56,12 @@ export async function deleteCategory(request: Request, response: Response, next:
 
         if (!deletedCategory) {
             return response.status(404).json({
-                message: `Category with _id ${_id} not found.`
+                message: `Category with _id ${_id} not found.`,
             });
         }
 
         response.status(200).json({
-            message: `Category ${_id} deleted successfully.`
+            message: `Category ${_id} deleted successfully.`,
         });
     } catch (error) {
         next(error);
