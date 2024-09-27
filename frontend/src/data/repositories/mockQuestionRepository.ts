@@ -6,7 +6,8 @@ const { categories } = mockCategoryRemoteDataSource;
 
 const initialQuestions: Question[] = [
     {
-        questionId: "1",
+        _id: "i1",
+        code: "1",
         title: "Reverse a String",
         description: `
 ### Problem
@@ -43,7 +44,8 @@ s = ["h", "e", "l", "l", "o"]
         url: "https://leetcode.com/problems/reverse-string/"
     },
     {
-        questionId: "2",
+        _id: "i2",
+        code: "2",
         title: "Linked List Cycle Detection",
         description: `
 ### Problem
@@ -82,7 +84,8 @@ true
         url: "https://leetcode.com/problems/linked-list-cycle/"
     },
     {
-        questionId: "3",
+        _id: "i3",
+        code: "3",
         title: "Roman to Integer",
         description: "Given a roman numeral, convert it to an integer.",
         difficulty: "Easy",
@@ -92,7 +95,8 @@ true
         url: "https://leetcode.com/problems/roman-to-integer/"
     },
     {
-        questionId: "4",
+        _id: "i4",
+        code: "4",
         title: "Add Binary",
         description: "Given two binary strings a and b, return their sum as a binary string.",
         difficulty: "Easy",
@@ -103,7 +107,8 @@ true
         url: "https://leetcode.com/problems/add-binary/"
     },
     {
-        questionId: "5",
+        _id: "i5",
+        code: "5",
         title: "Fibonacci Number",
         description: `
 The Fibonacci numbers, commonly denoted F(n) form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1. Given n, calculate F(n).`,
@@ -115,7 +120,8 @@ The Fibonacci numbers, commonly denoted F(n) form a sequence, called the Fibonac
         url: "https://leetcode.com/problems/fibonacci-number/"
     },
     {
-        questionId: "6",
+        _id: "i6",
+        code: "6",
         title: "Implement Stack using Queues",
         description: `
 Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (push, top, pop, and empty).`,
@@ -126,7 +132,8 @@ Implement a last-in-first-out (LIFO) stack using only two queues. The implemente
         url: "https://leetcode.com/problems/implement-stack-using-queues/"
     },
     {
-        questionId: "7",
+        _id: "i7",
+        code: "7",
         title: "Combine Two Tables",
         description: `
 Write a SQL solution to report the first name, last name, city, and state of each person in the Person table. If the address of a personId is not present in the Address table, report null instead.`,
@@ -137,7 +144,8 @@ Write a SQL solution to report the first name, last name, city, and state of eac
         url: "https://leetcode.com/problems/combine-two-tables/"
     },
     {
-        questionId: "8",
+        _id: "i8",
+        code: "8",
         title: "Repeated DNA Sequences",
         description: `
 Given a string s that represents a DNA sequence, return all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.`,
@@ -149,7 +157,8 @@ Given a string s that represents a DNA sequence, return all the 10-letter-long s
         url: "https://leetcode.com/problems/repeated-dna-sequences/"
     },
     {
-        questionId: "9",
+        _id: "i9",
+        code: "9",
         title: "Course Schedule",
         description: `
 There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. Return true if you can finish all courses. Otherwise, return false.`,
@@ -161,7 +170,8 @@ There are a total of numCourses courses you have to take, labeled from 0 to numC
         url: "https://leetcode.com/problems/course-schedule/"
     },
     {
-        questionId: "10",
+        _id: "i10",
+        code: "10",
         title: "LRU Cache Design",
         description: "Design and implement an LRU (Least Recently Used) cache.",
         difficulty: "Medium",
@@ -171,7 +181,8 @@ There are a total of numCourses courses you have to take, labeled from 0 to numC
         url: "https://leetcode.com/problems/lru-cache/"
     },
     {
-        questionId: "11",
+        _id: "i11",
+        code: "11",
         title: "Longest Common Subsequence",
         description: `
 Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.`,
@@ -183,7 +194,8 @@ Given two strings text1 and text2, return the length of their longest common sub
         url: "https://leetcode.com/problems/longest-common-subsequence/"
     },
     {
-        questionId: "12",
+        _id: "i12",
+        code: "12",
         title: "Rotate Image",
         description: `
 You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).`,
@@ -195,7 +207,8 @@ You are given an n x n 2D matrix representing an image, rotate the image by 90 d
         url: "https://leetcode.com/problems/rotate-image/"
     },
     {
-        questionId: "13",
+        _id: "i13",
+        code: "13",
         title: "Airplane Seat Assignment Probability",
         description: `
 n passengers board an airplane with exactly n seats. The first passenger has lost the ticket and picks a seat randomly. But after that, the rest of the passengers will take their own seat if it is still available, and pick other seats randomly when they find their seat occupied. Return the probability that the nth person gets his own seat.`,
@@ -206,7 +219,8 @@ n passengers board an airplane with exactly n seats. The first passenger has los
         url: "https://leetcode.com/problems/airplane-seat-assignment-probability/"
     },
     {
-        questionId: "14",
+        _id: "i14",
+        code: "14",
         title: "Validate Binary Search Tree",
         description: "Given the root of a binary tree, determine if it is a valid binary search tree (BST).",
         difficulty: "Medium",
@@ -217,7 +231,8 @@ n passengers board an airplane with exactly n seats. The first passenger has los
         url: "https://leetcode.com/problems/validate-binary-search-tree/"
     },
     {
-        questionId: "15",
+        _id: "i15",
+        code: "15",
         title: "Sliding Window Maximum",
         description: `
 You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position. Return the max sliding window.`,
@@ -229,7 +244,8 @@ You are given an array of integers nums, there is a sliding window of size k whi
         url: "https://leetcode.com/problems/sliding-window-maximum/"
     },
     {
-        questionId: "16",
+        _id: "i16",
+        code: "16",
         title: "N-Queen Problem",
         description: `
 The n-queens puzzle is the problem of placing n queens on an n x n chessboard such that no two queens attack each other. Given an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.`,
@@ -240,7 +256,8 @@ The n-queens puzzle is the problem of placing n queens on an n x n chessboard su
         url: "https://leetcode.com/problems/n-queens/"
     },
     {
-        questionId: "17",
+        _id: "i17",
+        code: "17",
         title: "Serialize and Deserialize a Binary Tree",
         description: `
 Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.`,
@@ -252,7 +269,8 @@ Design an algorithm to serialize and deserialize a binary tree. There is no rest
         url: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/"
     },
     {
-        questionId: "18",
+        _id: "i18",
+        code: "18",
         title: "Wildcard Matching",
         description: `
 Given an input string (s) and a pattern (p), implement wildcard pattern matching with support for '?' and '*' where: '?' Matches any single character. '*' Matches any sequence of characters (including the empty sequence). The matching should cover the entire input string (not partial).`,
@@ -264,7 +282,8 @@ Given an input string (s) and a pattern (p), implement wildcard pattern matching
         url: "https://leetcode.com/problems/wildcard-matching/"
     },
     {
-        questionId: "19",
+        _id: "i19",
+        code: "19",
         title: "Chalkboard XOR Game",
         description: `
 You are given an array of integers nums represents the numbers written on a chalkboard. Alice and Bob take turns erasing exactly one number from the chalkboard, with Alice starting first. If erasing a number causes the bitwise XOR of all the elements of the chalkboard to become 0, then that player loses. Return true if and only if Alice wins the game, assuming both players play optimally.`,
@@ -275,7 +294,8 @@ You are given an array of integers nums represents the numbers written on a chal
         url: "https://leetcode.com/problems/chalkboard-xor-game/"
     },
     {
-        questionId: "20",
+        _id: "i20",
+        code: "20",
         title: "Trips and Users",
         description: `
 Write a SQL solution to find the cancellation rate of requests with unbanned users (both client and driver must not be banned) each day between '2013-10-01' and '2013-10-03'. Round Cancellation Rate to two decimal points.`,
@@ -308,7 +328,7 @@ export class MockQuestionRemoteDataSource {
     async getQuestion(questionId: string): Promise<Question> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                const question = this.questions.find((q) => q.questionId === questionId);
+                const question = this.questions.find((q) => q.code === questionId);
                 if (question) {
                     resolve({ ...question });
                 } else {
@@ -324,28 +344,37 @@ export class MockQuestionRemoteDataSource {
      * @returns Promise resolving with the status and created question.
      */
     async createQuestion(question: IQuestionInput): Promise<{ status: number; data: any }> {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                const invalidCategories = question.categories.filter(
-                    (cat) => !categories.find((category) => category._id === cat._id && category.name === cat.name)
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Resolve categories or create new ones if they don't exist
+                const resolvedCategories = await Promise.all(
+                    question.categories.map(async (catName) => {
+                        let foundCategory = categories.find((cat) => cat.name === catName);
+                        if (!foundCategory) {
+                            console.log(`Category "${catName}" not found, creating new category.`);
+                            foundCategory = await mockCategoryRemoteDataSource.createCategory(catName);
+                        }
+                        return foundCategory;
+                    })
                 );
 
-                if (invalidCategories.length > 0) {
-                    reject(new Error(`Invalid categories: ${invalidCategories.map(cat => cat.name).join(", ")}`));
-                    return;
-                }
-
+                // Create the new question object
                 const questionId = (this.questions.length + 1).toString();
                 const newQuestion: Question = {
                     ...question,
-                    questionId
+                    categories: resolvedCategories, // Reference full category objects (_id, name)
+                    _id: "i" + questionId,
+                    code: questionId
                 };
                 this.questions.push(newQuestion);
+
                 resolve({
                     status: 201,
                     data: { message: "Created new question", question: newQuestion }
                 });
-            }, 300);
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -359,30 +388,39 @@ export class MockQuestionRemoteDataSource {
         questionId: string,
         questionUpdate: IQuestionUpdateInput
     ): Promise<{ status: number; data: any }> {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                const index = this.questions.findIndex((q) => q.questionId === questionId);
+        return new Promise(async (resolve, reject) => {
+            try {
+                const index = this.questions.findIndex((q) => q.code === questionId);
                 if (index !== -1) {
+                    let updatedCategories = this.questions[index].categories;
+
                     if (questionUpdate.categories) {
-                        const invalidCategories = questionUpdate.categories.filter(
-                            (cat) => !categories.find((category) => category._id === cat._id && category.name === cat.name)
+                        // Resolve or create categories if needed
+                        updatedCategories = await Promise.all(
+                            questionUpdate.categories.map(async (catName) => {
+                                let foundCategory = categories.find((cat) => cat.name === catName);
+                                if (!foundCategory) {
+                                    console.log(`Category "${catName}" not found, creating new category.`);
+                                    foundCategory = await mockCategoryRemoteDataSource.createCategory(catName);
+                                }
+                                return foundCategory;
+                            })
                         );
-                        if (invalidCategories.length > 0) {
-                            reject(new Error(`Invalid categories: ${invalidCategories.map(cat => cat.name).join(", ")}`));
-                            return;
-                        }
                     }
 
                     const updatedQuestion = {
                         ...this.questions[index],
-                        ...questionUpdate
+                        ...questionUpdate,
+                        categories: updatedCategories // Use updated categories if provided
                     };
                     this.questions[index] = updatedQuestion;
                     resolve({ status: 200, data: { message: "Updated question", updatedQuestion } });
                 } else {
                     reject(new Error("Question not found"));
                 }
-            }, 300);
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -394,7 +432,7 @@ export class MockQuestionRemoteDataSource {
     async deleteQuestion(questionId: string): Promise<void> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                const index = this.questions.findIndex((q) => q.questionId === questionId);
+                const index = this.questions.findIndex((q) => q.code === questionId);
                 if (index !== -1) {
                     this.questions.splice(index, 1);
                     resolve();

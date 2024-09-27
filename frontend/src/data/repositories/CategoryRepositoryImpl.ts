@@ -3,7 +3,7 @@ import { categoryRemoteDataSource } from './CategoryRemoteDataSource';
 import { mockCategoryRemoteDataSource } from './mockCategoryRepository';
 
 // Set this to true to use the mock API, false to use the real API
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 
 export class CategoryRepositoryImpl {
     private dataSource = USE_MOCK_API ? mockCategoryRemoteDataSource : categoryRemoteDataSource;
@@ -13,6 +13,7 @@ export class CategoryRepositoryImpl {
     }
 
     async createCategory(category: string): Promise<Category> {
+        
         return this.dataSource.createCategory(category);
     }
 

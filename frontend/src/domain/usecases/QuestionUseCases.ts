@@ -12,7 +12,9 @@ export class QuestionUseCases {
      * @returns Promise resolving to an array of Question objects.
      */
     async getAllQuestions(): Promise<Question[]> {
-        return this.questionRepository.getAllQuestions();
+        const allQuestions = this.questionRepository.getAllQuestions();
+        console.log("Fetching all questions", allQuestions);
+        return allQuestions;
     }
 
     /**
@@ -26,6 +28,7 @@ export class QuestionUseCases {
         if (!question) {
             throw new NotFoundError('Question not found');
         }
+        console.log("Fetching 1 question:", question);
         return question;
     }
 
@@ -56,8 +59,7 @@ export class QuestionUseCases {
      * @returns Promise resolving when the question is deleted.
      */
     async deleteQuestion(id: string): Promise<void> {
-        const question = await this.getQuestion(id);
-        await this.questionRepository.deleteQuestion(question.questionId);
+        await this.questionRepository.deleteQuestion(id);
     }
 
     /**

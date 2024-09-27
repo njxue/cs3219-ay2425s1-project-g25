@@ -1,13 +1,14 @@
+// QuestionFilters.tsx
 import React, { useState, useCallback } from "react";
-import { Select, Dropdown, Button, message } from "antd";
+import { Dropdown, Button, Select, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
 import { FILTER_DIFFICULTY_TEXT } from "presentation/utils/constants";
 import { getDifficultyColor } from "presentation/utils/QuestionUtils";
 import { CategoryFilter } from "./Category/CategoryFilter";
-import { categoryUseCases } from "domain/usecases/CategoryUseCases";
-import { SearchBar } from "./SearchBar";
 import { Category } from "domain/entities/Category";
+import { SearchBar } from "./SearchBar";
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 
 interface QuestionFiltersProps {
     allCategories: Category[];
@@ -19,24 +20,27 @@ interface QuestionFiltersProps {
 }
 
 export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
-    allCategories: initialCategories,
+    allCategories,
     onFiltersChange
 }) => {
-    const [allCategories, setAllCategories] = useState<Category[]>(initialCategories);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string>(FILTER_DIFFICULTY_TEXT.ALL);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const triggerFiltersChange = useCallback(
-        (filters: { selectedDifficulty: string; selectedCategories: string[]; searchTerm: string }) => {
-            onFiltersChange?.(filters);
+    const handleFiltersChange = useCallback(
+        (filters: {
+            selectedDifficulty: string;
+            selectedCategories: string[];
+            searchTerm: string;
+        }) => {
+            onFiltersChange(filters);
         },
         [onFiltersChange]
     );
 
     const handleSearch = (term: string) => {
         setSearchTerm(term);
-        triggerFiltersChange({
+        handleFiltersChange({
             selectedDifficulty,
             selectedCategories,
             searchTerm: term
@@ -45,7 +49,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
 
     const handleDifficultyChange = (value: string) => {
         setSelectedDifficulty(value);
-        triggerFiltersChange({
+        handleFiltersChange({
             selectedDifficulty: value,
             selectedCategories,
             searchTerm
@@ -57,7 +61,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
             ? [...selectedCategories, categoryId]
             : selectedCategories.filter((c) => c !== categoryId);
         setSelectedCategories(nextSelectedCategories);
-        triggerFiltersChange({
+        handleFiltersChange({
             selectedDifficulty,
             selectedCategories: nextSelectedCategories,
             searchTerm
@@ -81,7 +85,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
 
         try {
             const newCategory: Category = await categoryUseCases.createCategory(categoryName);
-            setAllCategories([...allCategories, newCategory]);
+            // setAllCategories([...allCategories, newCategory]);
             message.success("Category added successfully!");
         } catch (error) {
             message.error((error as Error).message || "Failed to add category!");
@@ -93,7 +97,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         try {
             await Promise.all(categoriesToDeleteIds.map((categoryId) => categoryUseCases.deleteCategory(categoryId)));
             const updatedCategories = allCategories.filter((category) => !categoriesToDeleteIds.includes(category._id));
-            setAllCategories(updatedCategories);
+            // setAllCategories(updatedCategories);
             setSelectedCategories(selectedCategories.filter((c) => !categoriesToDeleteIds.includes(c)));
             message.success("Categories deleted successfully!");
         } catch (error) {

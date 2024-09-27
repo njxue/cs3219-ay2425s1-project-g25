@@ -34,7 +34,7 @@ export class QuestionRemoteDataSource extends BaseApi {
     async createQuestion(question: IQuestionInput): Promise<any> {
         const payload = {
             ...question,
-            categories: question.categories.map(cat => cat._id),
+            difficulty: question.difficulty as string,
         };
         return await this.post<any>('/', payload);
     }
@@ -46,11 +46,10 @@ export class QuestionRemoteDataSource extends BaseApi {
      * @returns Promise resolving with the updated question.
      */
     async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<any> {
-        // If categories are being updated, transform them to IDs
-        const payload: any = { ...questionUpdate };
-        if (questionUpdate.categories) {
-            payload.categories = questionUpdate.categories.map(cat => cat._id);
-        }
+        const payload = { 
+            ...questionUpdate,
+            difficulty: questionUpdate.difficulty as string,
+        };
         return await this.put<any>(`/${id}`, payload);
     }
 

@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+// CategoryFilter.tsx
+import React, { useState } from 'react';
 import { Input, Tag, Button, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import styles from './CategoryFilter.module.css';
@@ -25,13 +26,6 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     const [newCategory, setNewCategory] = useState('');
     const [deletingMode, setDeletingMode] = useState(false);
     const [categoriesToDelete, setCategoriesToDelete] = useState<string[]>([]);
-
-    const filteredCategories = useMemo(() => {
-        const lowerSearchTerm = categorySearchTerm.toLowerCase();
-        return allCategories.filter((category) =>
-            category.name.toLowerCase().includes(lowerSearchTerm)
-        );
-    }, [allCategories, categorySearchTerm]);
 
     const handleCategorySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCategorySearchTerm(e.target.value);
@@ -80,6 +74,13 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
             },
         });
     };
+
+    const filteredCategories = allCategories.filter((category) =>
+        category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
+    );
+
+    console.log("CategoryFilter received allCategories:", allCategories); // Debugging line
+    console.log("CategoryFilter filteredCategories:", filteredCategories); // Debugging line
 
     return (
         <div className={styles.categoryDropdownContainer}>

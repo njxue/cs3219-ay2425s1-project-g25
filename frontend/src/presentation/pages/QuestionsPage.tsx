@@ -15,16 +15,12 @@ import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
-
-    const selectedQuestionId: string | null = searchParams.get("code");
-    const selectedQuestion: Question | undefined = questions.find(
-        (question) => question.questionId === selectedQuestionId
-    );
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -41,18 +37,15 @@ const QuestionsPage: React.FC = () => {
         fetchQuestions();
     }, []);
 
-    const handleSelectQuestion = (questionId: string) => {
-        setError(null);
-        if (selectedQuestionId === questionId) {
-            setSearchParams({});
-        } else {
-            setSearchParams({ code: questionId });
-        }
+    const handleSelectQuestion = (question: Question) => {
+        setSelectedQuestion(question);
+        setSearchParams({ code: question.code });
     };
 
     const handleBreadcrumbClick = (item: string) => () => {
         if (item === ROUTES.QUESTIONS) {
             setSearchParams({});
+            setSelectedQuestion(null);
         }
     };
 
@@ -67,15 +60,17 @@ const QuestionsPage: React.FC = () => {
     const onCreateQuestion = (createdQuestion: Question) => {
         handleCloseModal();
         setQuestions((questions) => [...questions, createdQuestion]);
-        setSearchParams({ code: createdQuestion.questionId });
+        setSearchParams({ code: createdQuestion.code });
+        setSelectedQuestion(createdQuestion);
     };
 
-    // TODO: fix this
     const onEditQuestion = (updatedQuestion: Question) => {
         setQuestions((prevQuestions) =>
-            prevQuestions.map((q) => (q.questionId === updatedQuestion.questionId ? { ...updatedQuestion } : q))
+            prevQuestions.map((q) => (q.code === updatedQuestion.code ? updatedQuestion : q))
         );
-        setSearchParams({ code: updatedQuestion.questionId });
+        setSearchParams({ code: updatedQuestion.code });
+        setSelectedQuestion(updatedQuestion);
+        console.log(updatedQuestion)
     };
 
     const renderBreadcrumb = () => {
@@ -113,21 +108,19 @@ const QuestionsPage: React.FC = () => {
                 <Row className={styles.contentRow} gutter={32}>
                     <Col span={8} className={styles.transitionCol}>
                         <QuestionList
-                            isNarrow={selectedQuestionId !== null}
+                            isNarrow={selectedQuestion !== null}
                             questions={questions}
-                            selectedQuestionId={selectedQuestionId || null}
+                            selectedQuestion={selectedQuestion}
                             onSelectQuestion={handleSelectQuestion}
                             isLoading={isLoading}
                             error={error}
                         />
-                        {selectedQuestionId && (
-                            <div className={styles.addButtonWrapper}>
-                                <AddQuestionButton
-                                    label={QUESTIONS_PAGE_TEXT.ADD_QUESTION}
-                                    onClick={handleAddQuestion}
-                                />
-                            </div>
-                        )}
+                        <div className={styles.addButtonWrapper}>
+                            <AddQuestionButton
+                                label={QUESTIONS_PAGE_TEXT.ADD_QUESTION}
+                                onClick={handleAddQuestion}
+                            />
+                        </div>
                     </Col>
                     <Col span={16} className={styles.transitionCol}>
                         {selectedQuestion ? (

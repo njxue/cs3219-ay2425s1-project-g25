@@ -13,7 +13,7 @@ export class CategoryRemoteDataSource extends BaseApi {
     }
 
     async createCategory(category: string): Promise<Category> {
-        return await this.post<Category>('/', { category });
+        return await this.post<Category>('/', { name: category });
     }
 
     async deleteCategory(category: string): Promise<void> {

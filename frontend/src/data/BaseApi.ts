@@ -1,5 +1,3 @@
-// src/data/BaseApi.ts
-
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 export class BaseApi {
@@ -7,7 +5,7 @@ export class BaseApi {
 
     constructor(baseUrl: string) {
         this.axiosInstance = axios.create({
-            baseURL: baseUrl,
+            baseURL: "http://localhost:3001" + baseUrl,
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',

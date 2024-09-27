@@ -10,7 +10,9 @@ export class CategoryUseCases {
      * @returns Promise resolving to an array of Category objects.
      */
     async getAllCategories(): Promise<Category[]> {
-        return this.categoryRepository.getAllCategories();
+        const allCategories = this.categoryRepository.getAllCategories();
+		console.log("Fetching all categories", allCategories);
+		return allCategories;
     }
 
     /**

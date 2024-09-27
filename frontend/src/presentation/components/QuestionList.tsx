@@ -6,12 +6,12 @@ import { QuestionFilters } from "./QuestionFilters";
 import styles from "./QuestionList.module.css";
 import { QUESTIONS_LIST_TEXT } from "presentation/utils/constants";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
-import { Category } from 'domain/entities/Category';
+import { Category } from "domain/entities/Category";
 
 interface QuestionListProps {
     questions: Question[];
-    selectedQuestionId: string | null;
-    onSelectQuestion: (questionId: string) => void;
+    selectedQuestion: Question | null;
+    onSelectQuestion: (question: Question) => void;
     isNarrow: boolean;
     isLoading: boolean;
     error: string | null;
@@ -19,7 +19,7 @@ interface QuestionListProps {
 
 export const QuestionList: React.FC<QuestionListProps> = ({
     questions,
-    selectedQuestionId,
+    selectedQuestion,
     onSelectQuestion,
     isNarrow,
     isLoading,
@@ -46,30 +46,30 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         fetchCategories();
     }, []);
 
-    const handleFiltersChange = (
-        newFilters: React.SetStateAction<{
-            selectedDifficulty: string;
-            selectedCategories: string[];
-            searchTerm: string;
-        }>
-    ) => {
+    const handleFiltersChange = (newFilters: {
+        selectedDifficulty: string;
+        selectedCategories: string[];
+        searchTerm: string;
+    }) => {
         setFilters(newFilters);
     };
 
     const filteredQuestions = useMemo(() => {
         return questions.filter((question) => {
             if (
-                filters.selectedDifficulty !== 'All' &&
+                filters.selectedDifficulty !== "All" &&
                 question.difficulty !== filters.selectedDifficulty
             ) {
                 return false;
             }
+
             if (
                 filters.searchTerm &&
                 !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
             ) {
                 return false;
             }
+
             if (filters.selectedCategories.length > 0) {
                 const hasAllSelectedCategories = filters.selectedCategories.every((categoryId) =>
                     question.categories.some((category) => category._id === categoryId)
@@ -78,40 +78,32 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                     return false;
                 }
             }
+
             return true;
         });
     }, [questions, filters]);
 
-    useEffect(() => {
-        console.log("Filtered Questions Updated:", filteredQuestions);
-    }, [filteredQuestions]);
-
     const renderItem = (question: Question) => (
         <QuestionCard
-            key={question.questionId}
+            key={question._id}
             question={question}
-            isSelected={selectedQuestionId === question.questionId}
-            onClick={() => onSelectQuestion(question.questionId)}
+            isSelected={selectedQuestion?.code === question.code}
+            onClick={() => onSelectQuestion(question)}
             isNarrow={isNarrow}
         />
     );
 
-    if (isLoading) {
-        return (
-            <div className={styles.centerContent}>
-                <Spin size="large" />
-            </div>
-        );
-    }
-
-    if (error) {
-        return <Alert message="Error" description={error} type="error" showIcon />;
-    }
     return (
         <div className={styles.questionListContainer}>
             <QuestionFilters allCategories={allCategories} onFiltersChange={handleFiltersChange} />
             <div className={styles.listContainer}>
-                {filteredQuestions.length === 0 ? (
+                {isLoading ? (
+                    <div className={styles.centerContent}>
+                        <Spin size="large" />
+                    </div>
+                ) : error ? (
+                    <Alert message="Error" description={error} type="error" showIcon />
+                ) : filteredQuestions.length === 0 ? (
                     <Alert
                         message={QUESTIONS_LIST_TEXT.NO_QUESTIONS}
                         description={QUESTIONS_LIST_TEXT.NO_QUESTIONS_DESCRIPTION}

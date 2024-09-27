@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button } from "antd";
 import MdEditor from "@uiw/react-md-editor";
@@ -19,7 +18,9 @@ interface NewQuestionFormProps {
 export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) => {
     const [form] = Form.useForm();
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]); // To store the full category objects
     const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
+    const [editorValue, setEditorValue] = useState<string>(initialQuestionInput.description || ""); // Track editor value state
 
     const validateMessages = {
         required: "${label} is required",
@@ -32,12 +33,13 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
         const fetchCategories = async () => {
             setLoadingCategories(true);
             try {
-                const categories: Category[] = await categoryUseCases.getAllCategories();
-                const options = categories.map((category) => ({
+                const fetchedCategories: Category[] = await categoryUseCases.getAllCategories();
+                const options = fetchedCategories.map((category) => ({
                     value: category._id,
                     label: category.name
                 }));
                 setCategoryOptions(options);
+                setCategories(fetchedCategories); // Store full categories for later mapping
             } catch (error) {
                 console.error("Failed to fetch categories", error);
                 toast.error("Failed to load categories.");
@@ -51,7 +53,22 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
     async function handleSubmit(question: IQuestionInput) {
         try {
-            const res = await questionUseCases.createQuestion(question);
+            // Get selected category IDs from the form
+            const selectedCategoryIds = form.getFieldValue("categories");
+
+            // Map the selected category IDs back to their names
+            const selectedCategoryNames = categories
+                .filter(category => selectedCategoryIds.includes(category._id))
+                .map(category => category.name);
+
+            // Prepare the updated question object
+            const questionWithDescription = {
+                ...question,
+                description: editorValue,
+                categories: selectedCategoryNames, // Send category names instead of _id
+            };
+
+            const res = await questionUseCases.createQuestion(questionWithDescription);
             const status = res?.status;
             const data = res?.data;
             if (status === 201) {
@@ -59,6 +76,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                 toast.success(data?.message);
                 onSubmit?.(newQuestion);
                 form.resetFields();
+                setEditorValue(""); // Clear the editor value after submission
             } else {
                 toast.error(data?.message || "Failed to create question.");
                 console.error(data?.message);
@@ -131,8 +149,8 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
-                                onChange={(description) => form.setFieldsValue({ [FIELD_DESCRIPTION.name]: description })}
+                                value={editorValue}
+                                onChange={(description) => setEditorValue(description || "")} // Use editorValue for tracking
                                 overflow={false}
                                 enableScroll
                                 height={300}
