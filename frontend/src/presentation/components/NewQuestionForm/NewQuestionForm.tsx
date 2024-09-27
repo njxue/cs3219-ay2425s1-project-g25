@@ -51,6 +51,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                 const newQuestion = data?.question;
                 toast.success(data?.message);
                 onSubmit?.(newQuestion);
+                form.resetFields();
             } else {
                 toast.error(data?.message);
                 console.error(data?.message);
@@ -61,16 +62,17 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     }
 
     return (
-        <div className={styles.questionForm}>
+        <div>
             <Form
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={initialQuestionInput}
                 validateMessages={validateMessages}
                 scrollToFirstError
+                form={form}
             >
-                <Row>
-                    <Col span={24}>
+                <Row gutter={16} className={styles.formRow}>
+                    <Col span={20}>
                         <Form.Item
                             label={FIELD_TITLE.label}
                             name={FIELD_TITLE.name}
@@ -80,9 +82,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             <Input placeholder={FIELD_TITLE.label} />
                         </Form.Item>
                     </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={6}>
+                    <Col span={4}>
                         <Form.Item
                             label={FIELD_DIFFICULTY.label}
                             name={FIELD_DIFFICULTY.name}
@@ -91,7 +91,9 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             <Select placeholder={FIELD_DIFFICULTY.label} options={difficultyOptions} />
                         </Form.Item>
                     </Col>
-                    <Col span={18}>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={16}>
                         <Form.Item
                             label={FIELD_CATEGORIES.label}
                             name={FIELD_CATEGORIES.name}
@@ -105,14 +107,13 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             />
                         </Form.Item>
                     </Col>
-                </Row>
-                <Row>
-                    <Col span={24}>
+                    <Col span={8}>
                         <Form.Item label={FIELD_URL.label} name={FIELD_URL.name}>
                             <Input type="text" placeholder={FIELD_URL.label} />
                         </Form.Item>
                     </Col>
                 </Row>
+
                 <Row>
                     <Col span={24}>
                         <Form.Item
@@ -124,8 +125,8 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                                 value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
                                 onChange={(description) => form.setFieldValue(FIELD_DESCRIPTION.name, description)}
                                 overflow={false}
-                                height={500}
                                 enableScroll
+                                height={300}
                             />
                         </Form.Item>
                     </Col>

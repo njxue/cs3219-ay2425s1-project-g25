@@ -15,52 +15,31 @@ import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const selectedQuestionId = searchParams.get("code");
-
-    const fetchQuestions = async () => {
-        setIsLoading(true);
-        try {
-            const fetchedQuestions = await questionUseCases.getAllQuestions();
-            setQuestions(fetchedQuestions);
-        } catch (err) {
-            setError(handleError(err, ERRORS.FAILED_TO_LOAD_QUESTIONS));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const selectedQuestionId: string | null = searchParams.get("code");
+    const selectedQuestion: Question | undefined = questions.find(
+        (question) => question.questionId === selectedQuestionId
+    );
 
     useEffect(() => {
-        fetchQuestions();
-    }, []);
-
-    useEffect(() => {
-        const fetchSelectedQuestion = async () => {
-            if (selectedQuestionId) {
-                setIsQuestionLoading(true);
-                try {
-                    const question = await questionUseCases.getQuestion(selectedQuestionId);
-                    setSelectedQuestion(question);
-                } catch (err) {
-                    setError(handleError(err, ERRORS.FAILED_TO_LOAD_SELECTED_QUESTION));
-                    setSelectedQuestion(null);
-                } finally {
-                    setIsQuestionLoading(false);
-                }
-            } else {
-                setSelectedQuestion(null);
+        const fetchQuestions = async () => {
+            setIsLoading(true);
+            try {
+                const fetchedQuestions = await questionUseCases.getAllQuestions();
+                setQuestions(fetchedQuestions);
+            } catch (err) {
+                setError(handleError(err, ERRORS.FAILED_TO_LOAD_QUESTIONS));
+            } finally {
+                setIsLoading(false);
             }
         };
-
-        fetchSelectedQuestion();
-    }, [selectedQuestionId]);
+        fetchQuestions();
+    }, []);
 
     const handleSelectQuestion = (questionId: string) => {
         setError(null);
@@ -99,7 +78,6 @@ const QuestionsPage: React.FC = () => {
         setSearchParams({ code: updatedQuestion.questionId });
     };
 
-    
     const renderBreadcrumb = () => {
         const breadcrumbItems = [
             {
@@ -107,8 +85,8 @@ const QuestionsPage: React.FC = () => {
                     <Button type="link" onClick={handleBreadcrumbClick(ROUTES.QUESTIONS)}>
                         {ROUTES.QUESTIONS}
                     </Button>
-                ),
-            },
+                )
+            }
         ];
 
         if (selectedQuestion) {
@@ -117,11 +95,15 @@ const QuestionsPage: React.FC = () => {
                     <Button type="link" disabled>
                         {selectedQuestion.title}
                     </Button>
-                ),
+                )
             });
         }
 
-        return <Breadcrumb className={styles.breadcrumb} items={breadcrumbItems} />;
+        return (
+            <div className={styles.breadcrumb}>
+                <Breadcrumb items={breadcrumbItems} />
+            </div>
+        );
     };
 
     return (
@@ -129,15 +111,7 @@ const QuestionsPage: React.FC = () => {
             {renderBreadcrumb()}
             <div className={styles.scrollContainer}>
                 <Row className={styles.contentRow} gutter={32}>
-                    <Col
-                        span={8}
-                        className={styles.transitionCol}
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            overflow: "hidden"
-                        }}
-                    >
+                    <Col span={8} className={styles.transitionCol}>
                         <QuestionList
                             isNarrow={selectedQuestionId !== null}
                             questions={questions}
@@ -155,27 +129,9 @@ const QuestionsPage: React.FC = () => {
                             </div>
                         )}
                     </Col>
-                    <Col
-                        span={16}
-                        className={styles.transitionCol}
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            overflow: "hidden"
-                        }}
-                    >
-                        {selectedQuestionId ? (
-                            isQuestionLoading ? (
-                                <div className={styles.centerContent}>
-                                    <Spin size="large" />
-                                </div>
-                            ) : selectedQuestion ? (
-                                <QuestionDetail question={selectedQuestion} />
-                            ) : (
-                                <div className={styles.centerContent}>
-                                    <Alert message="Error" description={error} type="error" showIcon />
-                                </div>
-                            )
+                    <Col span={16} className={styles.transitionCol}>
+                        {selectedQuestion ? (
+                            <QuestionDetail question={selectedQuestion} onEdit={onEditQuestion} />
                         ) : (
                             <LandingComponent onAddQuestion={handleAddQuestion} />
                         )}
@@ -188,13 +144,13 @@ const QuestionsPage: React.FC = () => {
                 open={isModalVisible}
                 onCancel={handleCloseModal}
                 footer={null}
-                width={1200}
+                width={"90vw"}
+                centered
             >
                 <NewQuestionForm onSubmit={onCreateQuestion} />
             </Modal>
         </div>
     );
-
 };
 
 export default QuestionsPage;
