@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Tag, Divider, Modal } from "antd";
+import { Tag, Divider, Modal } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { getDifficultyColor } from "../utils/QuestionUtils";
 import styles from "./QuestionDetail.module.css";
@@ -25,12 +25,12 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
                         <h2>{question.title}</h2>
                         {question.url && (
                             <a href={question?.url} target="_blank" rel="noopener noreferrer">
-                                <img src="/icons/external-link.svg" width={24} />
+                                <img src="/icons/external-link.svg" width={24} alt="External Link" />
                             </a>
                         )}
                     </div>
 
-                    <img src="/icons/pencil.svg" width={24} onClick={() => setIsEditModalOpen(true)} />
+                    <img src="/icons/pencil.svg" width={24} alt="Edit" onClick={() => setIsEditModalOpen(true)} />
                 </div>
 
                 <Divider className={styles.divider} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { List, Spin, Alert } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { QuestionCard } from "./QuestionCard";

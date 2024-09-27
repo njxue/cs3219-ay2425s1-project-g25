@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { Select, Input, Dropdown, Button, message } from "antd";
+import { Select, Dropdown, Button, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
-import { FILTER_DIFFICULTY_TEXT, QUESTIONS_FILTER_TEXT } from "presentation/utils/constants";
+import { FILTER_DIFFICULTY_TEXT } from "presentation/utils/constants";
 import { getDifficultyColor } from "presentation/utils/QuestionUtils";
 import { CategoryFilter } from "./Category/CategoryFilter";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
+import { SearchBar } from "./SearchBar";
 
 interface QuestionFiltersProps {
     allCategories: string[];
@@ -32,13 +33,12 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         [onFiltersChange]
     );
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchTerm(value);
+    const handleSearch = (term: string) => {
+        setSearchTerm(term);
         triggerFiltersChange({
             selectedDifficulty,
             selectedCategories,
-            searchTerm: value
+            searchTerm: term
         });
     };
 
@@ -167,13 +167,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
             </div>
 
             <div className={styles.searchBarContainer}>
-                <Input.Search
-                    placeholder={QUESTIONS_FILTER_TEXT.SELECT_TITLE}
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className={styles.searchBar}
-                    allowClear
-                />
+                <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
             </div>
         </div>
     );
