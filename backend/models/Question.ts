@@ -17,7 +17,7 @@ const questionSchema: Schema = new Schema<Question>({
   description: { type: String, required: true },
   difficulty: { type: String, required: true },
   categories: [{ type: Types.ObjectId, ref: 'category', required: true }],
-  url: { type: String, required: true },
+  url: { type: String, required: false },
 });
 
 const questionModel = mongoose.model<Question>('question', questionSchema);
