@@ -1,5 +1,5 @@
 import questionModel from "../models/Question";
-import categoryModel, { Category } from "../models/Category";
+import categoryModel from "../models/Category";
 import { Request, Response, NextFunction } from "express";
 
 export async function getAllQuestions(
@@ -30,13 +30,14 @@ export async function createQuestion(
             });
         }
 
+        // Find or create categories based on names
         const categoryIds = await Promise.all(
-            categories.map(async (requestCategory: Category) => {
+            categories.map(async (categoryName: string) => {
                 let category = await categoryModel.findOne({
-                    name: requestCategory.name,
+                    name: categoryName,
                 });
                 if (!category) {
-                    category = new categoryModel({ name: requestCategory.name });
+                    category = new categoryModel({ name: categoryName });
                     await category.save();
                 }
                 return category._id;
@@ -55,7 +56,7 @@ export async function createQuestion(
             difficulty,
             categories: categoryIds,
         });
-        if (url) newQuestion.url = url;
+        if (url) newQuestion.url = url; // Add url only if it's provided
 
         await newQuestion.save();
 
@@ -78,19 +79,20 @@ export async function updateQuestion(
 
     try {
         if (categories) {
+            // If categories are being updated, map names to ObjectId references
             const categoryIds = await Promise.all(
-                categories.map(async (requestCategory: Category) => {
+                categories.map(async (categoryName: string) => {
                     let category = await categoryModel.findOne({
-                        name: requestCategory.name,
+                        name: categoryName,
                     });
                     if (!category) {
-                        category = new categoryModel({ name: requestCategory.name });
+                        category = new categoryModel({ name: categoryName });
                         await category.save();
                     }
                     return category._id;
                 })
             );
-            updateData = { ...updateData, categories: categoryIds };
+            updateData = { ...updateData, categories: categoryIds }; // Update categories with ObjectId references
         }
 
         const updatedQuestion = await questionModel
