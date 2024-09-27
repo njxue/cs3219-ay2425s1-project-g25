@@ -16,8 +16,16 @@ const app: Express = express();
 
 app.use(express.json());
 
-app.use(cors());
-
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin.match(/localhost/) || origin.match(/127\.0\.0\.1/)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // Enable credentials if necessary (for cookies, auth)
+}));
 app.use('/api/questions', questionsRoutes);
 app.use('/api/categories', categoriesRoutes);
 
