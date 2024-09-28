@@ -6,11 +6,12 @@ import styles from "../NewQuestionForm/NewQuestionForm.module.css";
 import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
-import { categoryUseCases } from "domain/usecases/CategoryUseCases"; 
+import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { toast } from "react-toastify";
 import { Category } from "domain/entities/Category";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
+import { ReactMarkdown } from "../common/ReactMarkdown";
 
 interface EditQuestionFormProps {
     question: Question;
@@ -61,14 +62,14 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
 
             // Map the selected category IDs back to their names
             const selectedCategoryNames = categories
-                .filter(category => selectedCategoryIds.includes(category._id))
-                .map(category => category.name);
+                .filter((category) => selectedCategoryIds.includes(category._id))
+                .map((category) => category.name);
 
             // Prepare the updated question object, including the editorValue for description
             const updatedQuestion = {
                 ...questionUpdate,
                 categories: selectedCategoryNames, // Send category names instead of _id
-                description: editorValue,          // Use the editor's value for the description
+                description: editorValue // Use the editor's value for the description
             };
 
             const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
@@ -99,7 +100,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     onFinish={handleSubmit}
                     initialValues={{
                         ...questionUpdateInput,
-                        categories: initialCategoryIds, // Pre-fill categories
+                        categories: initialCategoryIds // Pre-fill categories
                     }}
                     validateMessages={validateMessages}
                     scrollToFirstError
@@ -163,12 +164,9 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                                 name={FIELD_DESCRIPTION.name}
                                 rules={[{ required: true, whitespace: true }]}
                             >
-                                <MdEditor
+                                <ReactMarkdown
                                     value={editorValue}
                                     onChange={(description) => setEditorValue(description || "")}
-                                    overflow={false}
-                                    enableScroll
-                                    height={300}
                                 />
                             </Form.Item>
                         </Col>

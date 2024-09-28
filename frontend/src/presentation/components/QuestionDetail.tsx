@@ -6,6 +6,7 @@ import styles from "./QuestionDetail.module.css";
 import MDEditor from "@uiw/react-md-editor";
 import { EditQuestionForm } from "./EditQuestionForm/EditQuestionForm";
 import { EditOutlined } from "@ant-design/icons";
+import { ReactMarkdown } from "./common/ReactMarkdown";
 
 interface QuestionDetailProps {
     question: Question;
@@ -55,25 +56,18 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
 
                 <Divider className={styles.divider} />
                 <div className={styles.content}>
-                    <MDEditor.Markdown source={question.description} />
+                    <ReactMarkdown isReadOnly value={question.description} />
                     <div className={styles.metaContainer}>
                         <div className={styles.difficultyContainer}>
                             <span className={styles.metaLabel}>Difficulty:</span>
-                            <Tag
-                                color={getDifficultyColor(question.difficulty)}
-                                className={styles.difficultyTag}
-                            >
+                            <Tag color={getDifficultyColor(question.difficulty)} className={styles.difficultyTag}>
                                 {question.difficulty}
                             </Tag>
                         </div>
                         <div className={styles.categoriesContainer}>
                             <span className={styles.metaLabel}>Categories:</span>
                             {question.categories.map((category) => (
-                                <Tag
-                                    key={category._id}
-                                    color="blue"
-                                    className={styles.categoryTag}
-                                >
+                                <Tag key={category._id} color="blue" className={styles.categoryTag}>
                                     {category.name}
                                 </Tag>
                             ))}

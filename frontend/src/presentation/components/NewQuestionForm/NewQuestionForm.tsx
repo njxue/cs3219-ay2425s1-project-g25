@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button } from "antd";
-import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
@@ -10,6 +9,7 @@ import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
+import { ReactMarkdown } from "../common/ReactMarkdown";
 
 interface NewQuestionFormProps {
     onSubmit?: (createdQuestion: Question) => void;
@@ -58,14 +58,14 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
             // Map the selected category IDs back to their names
             const selectedCategoryNames = categories
-                .filter(category => selectedCategoryIds.includes(category._id))
-                .map(category => category.name);
+                .filter((category) => selectedCategoryIds.includes(category._id))
+                .map((category) => category.name);
 
             // Prepare the updated question object
             const questionWithDescription = {
                 ...question,
                 description: editorValue,
-                categories: selectedCategoryNames, // Send category names instead of _id
+                categories: selectedCategoryNames // Send category names instead of _id
             };
 
             const data = await questionUseCases.createQuestion(questionWithDescription);
@@ -141,12 +141,9 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             name={FIELD_DESCRIPTION.name}
                             rules={[{ required: true, whitespace: true }]}
                         >
-                            <MdEditor
+                            <ReactMarkdown
                                 value={editorValue}
                                 onChange={(description) => setEditorValue(description || "")}
-                                overflow={false}
-                                enableScroll
-                                height={300}
                             />
                         </Form.Item>
                     </Col>
