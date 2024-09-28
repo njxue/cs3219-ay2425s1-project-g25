@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
+import axios from "axios";
 
 interface NewQuestionFormProps {
     onSubmit?: (createdQuestion: Question) => void;
@@ -72,8 +73,11 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
             onSubmit?.(newQuestion);
             form.resetFields();
         } catch (err) {
-            console.error(err);
-            toast.error("An unexpected error occurred.");
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Unable to create question");
+            }
         }
     }
 

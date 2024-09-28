@@ -8,6 +8,7 @@ import { EditQuestionForm } from "./EditQuestionForm/EditQuestionForm";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 interface QuestionDetailProps {
     question: Question;
@@ -32,8 +33,12 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
             setIsDeleteModalOpen(false);
             onDelete?.(question);
         } catch (err) {
-            console.error("Error deleting question:", err);
-            toast.error(`Failed to delete ${question.title}!`);
+            console.error(err);
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Unable to delete question");
+            }
         }
     };
 

@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { Category } from "domain/entities/Category";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
+import axios from "axios";
 
 interface EditQuestionFormProps {
     question: Question;
@@ -72,9 +73,12 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
             toast.success(data?.message || "Question updated successfully!");
             onSubmit?.(data?.updatedQuestion);
         } catch (err) {
-            const message = (err as Error).message || "Failed to update question!";
-            console.error("Error updating question:", err);
-            toast.error(message);
+            console.error(err);
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Unable to edit question");
+            }
         }
     }
 
