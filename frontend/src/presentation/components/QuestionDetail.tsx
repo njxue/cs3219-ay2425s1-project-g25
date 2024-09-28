@@ -29,7 +29,7 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
         try {
             await questionUseCases.deleteQuestion(question._id);
             // BE returns _id in message, so use question title for better readability
-            toast.success(`Delete ${question.title}`);
+            toast.success(`Deleted question: ${question.title}`);
             setIsDeleteModalOpen(false);
             onDelete?.(question);
         } catch (err) {

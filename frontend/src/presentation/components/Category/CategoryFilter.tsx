@@ -80,9 +80,6 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
             category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
     );
 
-    console.log("CategoryFilter received allCategories:", allCategories); // Debugging line
-    console.log("CategoryFilter filteredCategories:", filteredCategories); // Debugging line
-
     return (
         <div className={styles.categoryDropdownContainer}>
             <Input

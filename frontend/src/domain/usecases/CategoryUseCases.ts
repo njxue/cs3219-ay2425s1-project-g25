@@ -11,7 +11,6 @@ export class CategoryUseCases {
      */
     async getAllCategories(): Promise<Category[]> {
         const allCategories = this.categoryRepository.getAllCategories();
-		console.log("Fetching all categories", allCategories);
 		return allCategories;
     }
 
