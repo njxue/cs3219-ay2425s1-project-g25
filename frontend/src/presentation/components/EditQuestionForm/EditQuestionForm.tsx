@@ -55,21 +55,32 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
+        // Compare and only get the changed fields. Can shallow compare, for now
+        for (const field in questionUpdate) {
+            if (questionUpdate[field as keyof IQuestionUpdateInput] === question[field as keyof Question]) {
+                delete questionUpdate[field as keyof IQuestionUpdateInput];
+            }
+        }
+
         try {
             // Get the selected category IDs from the form
             const selectedCategoryIds = form.getFieldValue("categories");
+            const isCategoriesUpdated =
+                selectedCategoryIds.length !== question.categories.length ||
+                !selectedCategoryIds.every((cid: string) =>
+                    question.categories.some((category) => category._id === cid)
+                );
+            if (isCategoriesUpdated) {
+                // Map the selected category IDs back to their names
+                const selectedCategoryNames = categories
+                    .filter((category) => selectedCategoryIds.includes(category._id))
+                    .map((category) => category.name);
 
-            // Map the selected category IDs back to their names
-            const selectedCategoryNames = categories
-                .filter((category) => selectedCategoryIds.includes(category._id))
-                .map((category) => category.name);
-
-            const updatedQuestion = {
-                ...questionUpdate,
-                categories: selectedCategoryNames // Send category names instead of _id
-            };
-
-            const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
+                questionUpdate.categories = selectedCategoryNames; // Send category names instead of _id
+            } else {
+                delete questionUpdate.categories;
+            }
+            const data = await questionUseCases.updateQuestion(question._id, questionUpdate);
             toast.success(data?.message || "Question updated successfully!");
             onSubmit?.(data?.updatedQuestion);
         } catch (err) {
