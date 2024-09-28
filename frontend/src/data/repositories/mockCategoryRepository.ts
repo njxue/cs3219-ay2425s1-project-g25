@@ -43,7 +43,6 @@ export class MockCategoryRemoteDataSource {
                         name: categoryName
                     };
                     this.categories.push(newCategory);
-                    console.log(`Category "${categoryName}" added. Current categories:`, this.categories); 
                     resolve(newCategory);
                 }
             }, 300);

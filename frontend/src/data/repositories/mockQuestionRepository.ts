@@ -350,7 +350,6 @@ export class MockQuestionRemoteDataSource {
                     question.categories.map(async (catName) => {
                         let foundCategory = categories.find((cat) => cat.name === catName);
                         if (!foundCategory) {
-                            console.log(`Category "${catName}" not found, creating new category.`);
                             foundCategory = await mockCategoryRemoteDataSource.createCategory(catName);
                         }
                         return foundCategory;
@@ -397,7 +396,6 @@ export class MockQuestionRemoteDataSource {
                             questionUpdate.categories.map(async (catName) => {
                                 let foundCategory = categories.find((cat) => cat.name === catName);
                                 if (!foundCategory) {
-                                    console.log(`Category "${catName}" not found, creating new category.`);
                                     foundCategory = await mockCategoryRemoteDataSource.createCategory(catName);
                                 }
                                 return foundCategory;
