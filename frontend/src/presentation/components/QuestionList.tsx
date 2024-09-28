@@ -10,7 +10,7 @@ import { Category } from "domain/entities/Category";
 
 interface QuestionListProps {
     questions: Question[];
-    selectedQuestion: Question | null;
+    selectedQuestion: Question | undefined;
     onSelectQuestion: (question: Question) => void;
     isNarrow: boolean;
     isLoading: boolean;
@@ -56,17 +56,11 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 
     const filteredQuestions = useMemo(() => {
         return questions.filter((question) => {
-            if (
-                filters.selectedDifficulty !== "All" &&
-                question.difficulty !== filters.selectedDifficulty
-            ) {
+            if (filters.selectedDifficulty !== "All" && question.difficulty !== filters.selectedDifficulty) {
                 return false;
             }
 
-            if (
-                filters.searchTerm &&
-                !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
-            ) {
+            if (filters.searchTerm && !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
                 return false;
             }
 
