@@ -60,9 +60,11 @@ export async function createQuestion(
 
         await newQuestion.save();
 
+        const populatedQuestion = await newQuestion.populate("categories")
+
         res.status(201).json({
             message: `New question ${code}: ${title} created.`,
-            question: newQuestion,
+            question: populatedQuestion
         });
     } catch (error) {
         next(error);
@@ -78,6 +80,16 @@ export async function updateQuestion(
     let { categories, ...updateData } = request.body;
 
     try {
+        // Check for uniqueness of title if updating title
+        if (updateData.title) {
+            const existingTitle = await questionModel.findOne({ title: updateData.title, _id: { $ne: id } });
+            if (existingTitle) {
+                return response.status(400).json({
+                    message: "A question with the given title already exists."
+                });
+            }
+        }
+
         if (categories) {
             // If categories are being updated, map names to ObjectId references
             const categoryIds = await Promise.all(
@@ -157,7 +169,9 @@ export async function getQuestion(
             });
         }
 
-        response.status(200).json(question);
+        const populatedQuestion = await question.populate("categories");
+
+        response.status(200).json(populatedQuestion);
     } catch (error) {
         next(error);
     }
