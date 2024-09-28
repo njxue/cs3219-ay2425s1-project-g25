@@ -55,6 +55,13 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
+        // Compare and only get the changed fields. Can shallow compare, for now
+        for (const field in questionUpdate) {
+            if (questionUpdate[field as keyof IQuestionUpdateInput] === question[field as keyof Question]) {
+                delete questionUpdate[field as keyof IQuestionUpdateInput];
+            }
+        }
+
         try {
             // Get the selected category IDs from the form
             const selectedCategoryIds = form.getFieldValue("categories");
