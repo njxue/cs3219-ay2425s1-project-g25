@@ -1,5 +1,3 @@
-/* CategoryFilter.module.css */
-
 .categoryDropdownContainer {
     padding: 16px;
     box-shadow: none;
@@ -23,35 +21,33 @@
 .checkableTag {
     display: flex;
     align-items: center;
-    padding: 4px 8px; /* Adjusted padding for thinner vertical appearance */
+    padding: 4px 8px;
     cursor: pointer;
-    /* Removed borders and added minimal styling */
     border: none;
     border-radius: 4px;
-    background-color: #ffffff; /* Light gray background for default state */
-    color: rgba(0, 0, 0, 0.85); /* Default text color */
-    transition: background-color 0.2s, color 0.2s; /* Smooth transitions */
-    font-size: 14px; /* Maintain readable font size */
-    height: 24px; /* Reduced height for thinner appearance */
-    line-height: 16px; /* Adjusted line height */
+    background-color: #ffffff;
+    color: rgba(0, 0, 0, 0.85);
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 14px;
+    height: 24px;
+    line-height: 16px;
 }
 
 .checkableTag:hover {
-    background-color: #d9d9d9; /* Slightly darker gray on hover */
+    background-color: #d9d9d9;
 }
 
 .deleteSelectedTag {
-    background-color: #ff4d4f !important; /* Red background */
-    color: #fff !important; /* White text */
-    border: none !important; /* Remove border */
-    /* Ensure the height and padding remain consistent */
+    background-color: #ff4d4f !important;
+    color: #fff !important;
+    border: none !important;
     height: 24px !important;
     padding: 4px 8px !important;
 }
 
 .instructionText {
     margin: 10px 0;
-    color: #ff4d4f; /* Red color */
+    color: #ff4d4f;
     font-weight: bold;
     text-align: center;
 }

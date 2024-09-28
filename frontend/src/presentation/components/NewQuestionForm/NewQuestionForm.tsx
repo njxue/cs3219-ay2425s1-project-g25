@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button } from "antd";
 import styles from "./NewQuestionForm.module.css";
@@ -19,7 +20,7 @@ interface NewQuestionFormProps {
 export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) => {
     const [form] = Form.useForm();
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]); // To store the full category objects
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
 
     const validateMessages = {
@@ -39,7 +40,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                     label: category.name
                 }));
                 setCategoryOptions(options);
-                setCategories(fetchedCategories); // Store full categories for later mapping
+                setCategories(fetchedCategories);
             } catch (error) {
                 console.error("Failed to fetch categories", error);
                 toast.error("Failed to load categories.");
@@ -53,18 +54,15 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
     async function handleSubmit(question: IQuestionInput) {
         try {
-            // Get selected category IDs from the form
             const selectedCategoryIds = form.getFieldValue("categories");
 
-            // Map the selected category IDs back to their names
             const selectedCategoryNames = categories
                 .filter((category) => selectedCategoryIds.includes(category._id))
                 .map((category) => category.name);
 
-            // Prepare the updated question object
             const questionWithDescription = {
                 ...question,
-                categories: selectedCategoryNames // Send category names instead of _id
+                categories: selectedCategoryNames
             };
 
             const data = await questionUseCases.createQuestion(questionWithDescription);
