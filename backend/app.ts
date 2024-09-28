@@ -24,7 +24,7 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true,
+  credentials: true, // Enable credentials if necessary (for cookies, auth)
 }));
 app.use('/api/questions', questionsRoutes);
 app.use('/api/categories', categoriesRoutes);

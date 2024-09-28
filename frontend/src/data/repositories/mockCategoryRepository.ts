@@ -60,8 +60,8 @@ export class MockCategoryRemoteDataSource {
             setTimeout(() => {
                 const index = this.categories.findIndex(category => category._id === _id);
                 if (index !== -1) {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const deletedCategory = this.categories.splice(index, 1)[0];
+                    console.log(`Category "${deletedCategory.name}" deleted. Current categories:`, this.categories); // TODO: Remove when submitting
                     resolve();
                 } else {
                     console.error(`Category with _id "${_id}" not found.`);

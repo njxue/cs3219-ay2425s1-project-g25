@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button, Spin, Alert } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
@@ -32,6 +31,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
 
     const { code: _, categories: questionCategories, ...questionUpdateInput } = question;
 
+    // Transform question categories to an array of their _id values
     const initialCategoryIds = questionCategories.map((cat) => cat._id);
 
     useEffect(() => {
@@ -56,15 +56,17 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
         try {
+            // Get the selected category IDs from the form
             const selectedCategoryIds = form.getFieldValue("categories");
 
+            // Map the selected category IDs back to their names
             const selectedCategoryNames = categories
                 .filter((category) => selectedCategoryIds.includes(category._id))
                 .map((category) => category.name);
 
             const updatedQuestion = {
                 ...questionUpdate,
-                categories: selectedCategoryNames
+                categories: selectedCategoryNames // Send category names instead of _id
             };
 
             const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
@@ -80,6 +82,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
         }
     }
 
+    // Map categories to Select options
     const categoryOptions = categories.map((category) => ({
         label: category.name,
         value: category._id
@@ -97,7 +100,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     onFinish={handleSubmit}
                     initialValues={{
                         ...questionUpdateInput,
-                        categories: initialCategoryIds
+                        categories: initialCategoryIds // Pre-fill categories
                     }}
                     validateMessages={validateMessages}
                     scrollToFirstError

@@ -1,3 +1,4 @@
+// QuestionList.tsx
 import React, { useState, useEffect } from "react";
 import { List, Spin, Alert, message } from "antd";
 import { Question } from "../../domain/entities/Question";
@@ -37,6 +38,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         const fetchCategories = async () => {
             try {
                 const categories: Category[] = await categoryUseCases.getAllCategories();
+                // Filter out any categories without a valid name or _id
                 const validCategories = categories.filter(
                     (category) => 
                         typeof category.name === 'string' && 
@@ -54,6 +56,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         fetchCategories();
     }, []);
 
+    // Handler to add a new category
     const handleAddCategory = async (categoryName: string) => {
         if (!categoryName || categoryName.trim() === "") {
             message.error("Category cannot be empty!");
@@ -73,18 +76,19 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 
         try {
             const response = await categoryUseCases.createCategory(categoryName);
-            const { category } = response;
+            const { category } = response; // Extract the category from the response
 
+            // Ensure that category has valid _id and name
             if (!category || typeof category._id !== 'string' || typeof category.name !== 'string') {
                 message.error("Invalid category data received from backend.");
                 console.error("Invalid category data:", category);
                 return;
             }
 
-            setAllCategories([...allCategories, category]);
+            setAllCategories([...allCategories, category]); // Update the categories state
             setFilters({
                 ...filters,
-                searchTerm: ''
+                searchTerm: '' // Reset search term to show all categories including the new one
             });
 
             message.success("Category added successfully!");
@@ -94,10 +98,11 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         }
     };
 
+    // Handler to delete categories
     const handleDeleteCategory = async (categoriesToDeleteIds: string[]) => {
         try {
             await Promise.all(categoriesToDeleteIds.map((categoryId) => categoryUseCases.deleteCategory(categoryId)));
-            setAllCategories(allCategories.filter((category) => !categoriesToDeleteIds.includes(category._id)));
+            setAllCategories(allCategories.filter((category) => !categoriesToDeleteIds.includes(category._id))); // Update categories
             setFilters({
                 ...filters,
                 selectedCategories: filters.selectedCategories.filter(c => !categoriesToDeleteIds.includes(c))
@@ -159,8 +164,8 @@ export const QuestionList: React.FC<QuestionListProps> = ({
             <QuestionFilters
                 allCategories={allCategories}
                 onFiltersChange={handleFiltersChange}
-                onAddCategory={handleAddCategory}
-                onDeleteCategory={handleDeleteCategory}
+                onAddCategory={handleAddCategory} // Pass handler instead of setAllCategories
+                onDeleteCategory={handleDeleteCategory} // Pass handler instead of setAllCategories
             />
             <div className={styles.listContainer}>
                 {isLoading ? (

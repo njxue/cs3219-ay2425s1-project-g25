@@ -22,6 +22,8 @@ const QuestionsPage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const selectedQuestionCode = searchParams.get("code");
 
+    // Search params are strings whereas question coodes are numbers, so need to convert to string
+    // No need to store selectedQuestion as state because changing search params will cause the page to re-render
     const selectedQuestion: Question | undefined = questions.find((q) => q.code.toString() === selectedQuestionCode);
 
     useEffect(() => {
