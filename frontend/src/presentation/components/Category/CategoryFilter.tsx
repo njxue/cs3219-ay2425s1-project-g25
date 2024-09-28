@@ -87,8 +87,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 className={styles.categorySearchBar}
                 allowClear
             />
-
-            {/* Instructional Text for Delete Mode */}
+            
             {deletingMode && <div className={styles.instructionText}>Select categories to delete</div>}
 
             <div className={styles.categoriesGrid}>
