@@ -37,6 +37,11 @@
     background-color: #d9d9d9;
 }
 
+.selectedTag {
+    background-color: #1890ff;
+    color: #fff;
+}
+
 .deleteSelectedTag {
     background-color: #ff4d4f !important;
     color: #fff !important;

@@ -15,6 +15,7 @@ interface QuestionListProps {
     isNarrow: boolean;
     isLoading: boolean;
     error: string | null;
+    onQuestionsUpdated?: (updatedQuestions: Question[]) => void;
 }
 
 export const QuestionList: React.FC<QuestionListProps> = ({
@@ -23,7 +24,8 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     onSelectQuestion,
     isNarrow,
     isLoading,
-    error
+    error,
+    onQuestionsUpdated
 }) => {
     const [filters, setFilters] = useState({
         selectedDifficulty: "All",
@@ -32,14 +34,15 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     });
 
     const [allCategories, setAllCategories] = useState<Category[]>([]);
+    const [localQuestions, setLocalQuestions] = useState<Question[]>(questions);
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const categories: Category[] = await categoryUseCases.getAllCategories();
                 const validCategories = categories.filter(
-                    (category) => 
-                        typeof category.name === 'string' && 
+                    (category) =>
+                        typeof category.name === 'string' &&
                         category.name.trim() !== "" &&
                         typeof category._id === 'string' &&
                         category._id.trim() !== ""
@@ -54,6 +57,10 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         fetchCategories();
     }, []);
 
+    useEffect(() => {
+        setLocalQuestions(questions);
+    }, [questions]);
+
     const handleAddCategory = async (categoryName: string) => {
         if (!categoryName || categoryName.trim() === "") {
             message.error("Category cannot be empty!");
@@ -61,8 +68,8 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         }
 
         const exists = allCategories.some(
-            (category) => 
-                typeof category.name === 'string' && 
+            (category) =>
+                typeof category.name === 'string' &&
                 category.name.toLowerCase() === categoryName.toLowerCase()
         );
 
@@ -102,7 +109,16 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                 ...filters,
                 selectedCategories: filters.selectedCategories.filter(c => !categoriesToDeleteIds.includes(c))
             });
+
+            const updatedQuestions = localQuestions.map(question => ({
+                ...question,
+                categories: question.categories.filter(category => !categoriesToDeleteIds.includes(category._id))
+            }));
+
+            setLocalQuestions(updatedQuestions);
             message.success("Categories deleted successfully!");
+
+            onQuestionsUpdated?.(updatedQuestions);
         } catch (error) {
             message.error((error as Error).message || "Failed to delete categories!");
             console.error("Failed to delete categories:", error);
@@ -117,7 +133,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         setFilters(newFilters);
     };
 
-    const filteredQuestions = questions.filter((question) => {
+    const filteredQuestions = localQuestions.filter((question) => {
         if (
             filters.selectedDifficulty !== "All" &&
             question.difficulty !== filters.selectedDifficulty

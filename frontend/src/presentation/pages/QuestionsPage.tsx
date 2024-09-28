@@ -75,6 +75,10 @@ const QuestionsPage: React.FC = () => {
         setSearchParams({});
     };
 
+    const handleQuestionsUpdated = (updatedQuestions: Question[]) => {
+        setQuestions(updatedQuestions);
+    };
+
     const renderBreadcrumb = () => {
         const breadcrumbItems = [
             {
@@ -110,12 +114,13 @@ const QuestionsPage: React.FC = () => {
                 <Row className={styles.contentRow} gutter={32}>
                     <Col span={8} className={styles.transitionCol}>
                         <QuestionList
-                            isNarrow={selectedQuestion !== null}
+                            isNarrow={selectedQuestion !== undefined}
                             questions={questions}
                             selectedQuestion={selectedQuestion}
                             onSelectQuestion={handleSelectQuestion}
                             isLoading={isLoading}
                             error={error}
+                            onQuestionsUpdated={handleQuestionsUpdated}
                         />
                         <div className={styles.addButtonWrapper}>
                             <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />

@@ -32,14 +32,21 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
 
     const { code: _, categories: questionCategories, ...questionUpdateInput } = question;
 
-    const initialCategoryIds = questionCategories.map((cat) => cat._id);
+    const [initialCategoryIds, setInitialCategoryIds] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             setIsLoadingCategories(true);
             try {
                 const fetchedCategories: Category[] = await categoryUseCases.getAllCategories();
+
+                const validCategoryIds = fetchedCategories.map(cat => cat._id);
+
+                const filteredQuestionCategories = questionCategories
+                    .filter(cat => validCategoryIds.includes(cat._id));
+
                 setCategories(fetchedCategories);
+                setInitialCategoryIds(filteredQuestionCategories.map(cat => cat._id));
             } catch (error) {
                 const message = (error as Error).message || "Failed to fetch categories";
                 setCategoriesError(message);
@@ -50,7 +57,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
             }
         };
         fetchCategories();
-    }, []);
+    }, [questionCategories]);
 
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
