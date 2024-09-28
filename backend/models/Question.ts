@@ -13,7 +13,7 @@ export interface Question extends mongoose.Document {
 
 const questionSchema: Schema = new Schema<Question>({
   code: { type: Number, required: true, unique: true },
-  title: { type: String, required: true },
+  title: { type: String, required: true, unique: true },
   description: { type: String, required: true },
   difficulty: { type: String, required: true },
   categories: [{ type: Types.ObjectId, ref: 'category', required: true }],
