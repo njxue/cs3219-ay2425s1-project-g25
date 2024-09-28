@@ -66,11 +66,16 @@ const QuestionsPage: React.FC = () => {
 
     const onEditQuestion = (updatedQuestion: Question) => {
         setQuestions((prevQuestions) =>
-            prevQuestions.map((q) => (q.code === updatedQuestion.code ? updatedQuestion : q))
+            prevQuestions.map((q) => (q._id === updatedQuestion._id ? updatedQuestion : q))
         );
         setSearchParams({ code: updatedQuestion.code });
         setSelectedQuestion(updatedQuestion);
-        console.log(updatedQuestion)
+    };
+
+    const onDeleteQuestion = (deletedQuestion: Question) => {
+        setQuestions((prevQuestions) => prevQuestions.filter((q) => q._id !== deletedQuestion._id));
+        setSearchParams({});
+        setSelectedQuestion(null);
     };
 
     const renderBreadcrumb = () => {
@@ -116,15 +121,16 @@ const QuestionsPage: React.FC = () => {
                             error={error}
                         />
                         <div className={styles.addButtonWrapper}>
-                            <AddQuestionButton
-                                label={QUESTIONS_PAGE_TEXT.ADD_QUESTION}
-                                onClick={handleAddQuestion}
-                            />
+                            <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />
                         </div>
                     </Col>
                     <Col span={16} className={styles.transitionCol}>
                         {selectedQuestion ? (
-                            <QuestionDetail question={selectedQuestion} onEdit={onEditQuestion} />
+                            <QuestionDetail
+                                question={selectedQuestion}
+                                onEdit={onEditQuestion}
+                                onDelete={onDeleteQuestion}
+                            />
                         ) : (
                             <LandingComponent onAddQuestion={handleAddQuestion} />
                         )}
