@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Breadcrumb, Button, Modal } from "antd";
+import { Row, Col, Breadcrumb, Button, Modal, Spin } from "antd";
 import { QuestionList } from "../components/QuestionList";
 import { QuestionDetail } from "../components/QuestionDetail";
 import { LandingComponent } from "../components/LandingComponent";
@@ -15,12 +15,16 @@ import { useSearchParams } from "react-router-dom";
 
 const QuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const selectedQuestionCode = searchParams.get("code");
+
+    // Search params are strings whereas question coodes are numbers, so need to convert to string
+    // No need to store selectedQuestion as state because changing search params will cause the page to re-render
+    const selectedQuestion: Question | undefined = questions.find((q) => q.code.toString() === selectedQuestionCode);
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -38,14 +42,12 @@ const QuestionsPage: React.FC = () => {
     }, []);
 
     const handleSelectQuestion = (question: Question) => {
-        setSelectedQuestion(question);
         setSearchParams({ code: question.code });
     };
 
     const handleBreadcrumbClick = (item: string) => () => {
         if (item === ROUTES.QUESTIONS) {
             setSearchParams({});
-            setSelectedQuestion(null);
         }
     };
 
@@ -61,16 +63,18 @@ const QuestionsPage: React.FC = () => {
         handleCloseModal();
         setQuestions((questions) => [...questions, createdQuestion]);
         setSearchParams({ code: createdQuestion.code });
-        setSelectedQuestion(createdQuestion);
     };
 
     const onEditQuestion = (updatedQuestion: Question) => {
         setQuestions((prevQuestions) =>
-            prevQuestions.map((q) => (q.code === updatedQuestion.code ? updatedQuestion : q))
+            prevQuestions.map((q) => (q._id === updatedQuestion._id ? updatedQuestion : q))
         );
         setSearchParams({ code: updatedQuestion.code });
-        setSelectedQuestion(updatedQuestion);
-        console.log(updatedQuestion)
+    };
+
+    const onDeleteQuestion = (deletedQuestion: Question) => {
+        setQuestions((prevQuestions) => prevQuestions.filter((q) => q._id !== deletedQuestion._id));
+        setSearchParams({});
     };
 
     const renderBreadcrumb = () => {
@@ -116,15 +120,18 @@ const QuestionsPage: React.FC = () => {
                             error={error}
                         />
                         <div className={styles.addButtonWrapper}>
-                            <AddQuestionButton
-                                label={QUESTIONS_PAGE_TEXT.ADD_QUESTION}
-                                onClick={handleAddQuestion}
-                            />
+                            <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />
                         </div>
                     </Col>
                     <Col span={16} className={styles.transitionCol}>
-                        {selectedQuestion ? (
-                            <QuestionDetail question={selectedQuestion} onEdit={onEditQuestion} />
+                        {isLoading ? (
+                            <Spin size="large" />
+                        ) : selectedQuestion ? (
+                            <QuestionDetail
+                                question={selectedQuestion}
+                                onEdit={onEditQuestion}
+                                onDelete={onDeleteQuestion}
+                            />
                         ) : (
                             <LandingComponent onAddQuestion={handleAddQuestion} />
                         )}

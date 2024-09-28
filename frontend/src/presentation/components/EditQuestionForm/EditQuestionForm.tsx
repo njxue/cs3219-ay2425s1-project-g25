@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button, Spin, Alert } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
-import MdEditor from "@uiw/react-md-editor";
 import styles from "../NewQuestionForm/NewQuestionForm.module.css";
 import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
@@ -12,6 +11,7 @@ import { Category } from "domain/entities/Category";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
 import { ReactMarkdown } from "../common/ReactMarkdown";
+import axios from "axios";
 
 interface EditQuestionFormProps {
     question: Question;
@@ -23,7 +23,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
-    const [editorValue, setEditorValue] = useState<string>(question.description || "");
 
     const validateMessages = {
         required: "${label} is required",
@@ -65,20 +64,21 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                 .filter((category) => selectedCategoryIds.includes(category._id))
                 .map((category) => category.name);
 
-            // Prepare the updated question object, including the editorValue for description
             const updatedQuestion = {
                 ...questionUpdate,
-                categories: selectedCategoryNames, // Send category names instead of _id
-                description: editorValue // Use the editor's value for the description
+                categories: selectedCategoryNames // Send category names instead of _id
             };
 
             const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
             toast.success(data?.message || "Question updated successfully!");
             onSubmit?.(data?.updatedQuestion);
         } catch (err) {
-            const message = (err as Error).message || "Failed to update question!";
-            console.error("Error updating question:", err);
-            toast.error(message);
+            console.error(err);
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Unable to edit question");
+            }
         }
     }
 
@@ -165,8 +165,10 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                                 rules={[{ required: true, whitespace: true }]}
                             >
                                 <ReactMarkdown
-                                    value={editorValue}
-                                    onChange={(description) => setEditorValue(description || "")}
+                                    value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
+                                    onChange={(description) =>
+                                        form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
+                                    }
                                 />
                             </Form.Item>
                         </Col>

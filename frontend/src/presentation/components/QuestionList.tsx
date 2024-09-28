@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { List, Spin, Alert } from "antd";
+// QuestionList.tsx
+import React, { useState, useEffect } from "react";
+import { List, Spin, Alert, message } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionFilters } from "./QuestionFilters";
@@ -10,7 +11,7 @@ import { Category } from "domain/entities/Category";
 
 interface QuestionListProps {
     questions: Question[];
-    selectedQuestion: Question | null;
+    selectedQuestion: Question | undefined;
     onSelectQuestion: (question: Question) => void;
     isNarrow: boolean;
     isLoading: boolean;
@@ -37,14 +38,81 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         const fetchCategories = async () => {
             try {
                 const categories: Category[] = await categoryUseCases.getAllCategories();
-                setAllCategories(categories);
+                // Filter out any categories without a valid name or _id
+                const validCategories = categories.filter(
+                    (category) => 
+                        typeof category.name === 'string' && 
+                        category.name.trim() !== "" &&
+                        typeof category._id === 'string' &&
+                        category._id.trim() !== ""
+                );
+                setAllCategories(validCategories);
             } catch (error) {
                 console.error("Failed to fetch categories", error);
+                message.error("Failed to fetch categories.");
             }
         };
 
         fetchCategories();
     }, []);
+
+    // Handler to add a new category
+    const handleAddCategory = async (categoryName: string) => {
+        if (!categoryName || categoryName.trim() === "") {
+            message.error("Category cannot be empty!");
+            return;
+        }
+
+        const exists = allCategories.some(
+            (category) => 
+                typeof category.name === 'string' && 
+                category.name.toLowerCase() === categoryName.toLowerCase()
+        );
+
+        if (exists) {
+            message.error("Category already exists!");
+            return;
+        }
+
+        try {
+            const response = await categoryUseCases.createCategory(categoryName);
+            const { category } = response; // Extract the category from the response
+
+            // Ensure that category has valid _id and name
+            if (!category || typeof category._id !== 'string' || typeof category.name !== 'string') {
+                message.error("Invalid category data received from backend.");
+                console.error("Invalid category data:", category);
+                return;
+            }
+
+            setAllCategories([...allCategories, category]); // Update the categories state
+            setFilters({
+                ...filters,
+                searchTerm: '' // Reset search term to show all categories including the new one
+            });
+
+            message.success("Category added successfully!");
+        } catch (error) {
+            message.error((error as Error).message || "Failed to add category!");
+            console.error("Failed to add category:", error);
+        }
+    };
+
+    // Handler to delete categories
+    const handleDeleteCategory = async (categoriesToDeleteIds: string[]) => {
+        try {
+            await Promise.all(categoriesToDeleteIds.map((categoryId) => categoryUseCases.deleteCategory(categoryId)));
+            setAllCategories(allCategories.filter((category) => !categoriesToDeleteIds.includes(category._id))); // Update categories
+            setFilters({
+                ...filters,
+                selectedCategories: filters.selectedCategories.filter(c => !categoriesToDeleteIds.includes(c))
+            });
+            message.success("Categories deleted successfully!");
+        } catch (error) {
+            message.error((error as Error).message || "Failed to delete categories!");
+            console.error("Failed to delete categories:", error);
+        }
+    };
 
     const handleFiltersChange = (newFilters: {
         selectedDifficulty: string;
@@ -54,34 +122,32 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         setFilters(newFilters);
     };
 
-    const filteredQuestions = useMemo(() => {
-        return questions.filter((question) => {
-            if (
-                filters.selectedDifficulty !== "All" &&
-                question.difficulty !== filters.selectedDifficulty
-            ) {
+    const filteredQuestions = questions.filter((question) => {
+        if (
+            filters.selectedDifficulty !== "All" &&
+            question.difficulty !== filters.selectedDifficulty
+        ) {
+            return false;
+        }
+
+        if (
+            filters.searchTerm &&
+            !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
+        ) {
+            return false;
+        }
+
+        if (filters.selectedCategories.length > 0) {
+            const hasAllSelectedCategories = filters.selectedCategories.every((categoryId) =>
+                question.categories.some((category) => category._id === categoryId)
+            );
+            if (!hasAllSelectedCategories) {
                 return false;
             }
+        }
 
-            if (
-                filters.searchTerm &&
-                !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
-            ) {
-                return false;
-            }
-
-            if (filters.selectedCategories.length > 0) {
-                const hasAllSelectedCategories = filters.selectedCategories.every((categoryId) =>
-                    question.categories.some((category) => category._id === categoryId)
-                );
-                if (!hasAllSelectedCategories) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-    }, [questions, filters]);
+        return true;
+    });
 
     const renderItem = (question: Question) => (
         <QuestionCard
@@ -95,7 +161,12 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 
     return (
         <div className={styles.questionListContainer}>
-            <QuestionFilters allCategories={allCategories} onFiltersChange={handleFiltersChange} />
+            <QuestionFilters
+                allCategories={allCategories}
+                onFiltersChange={handleFiltersChange}
+                onAddCategory={handleAddCategory} // Pass handler instead of setAllCategories
+                onDeleteCategory={handleDeleteCategory} // Pass handler instead of setAllCategories
+            />
             <div className={styles.listContainer}>
                 {isLoading ? (
                     <div className={styles.centerContent}>

@@ -11,7 +11,6 @@ export class CategoryUseCases {
      */
     async getAllCategories(): Promise<Category[]> {
         const allCategories = this.categoryRepository.getAllCategories();
-		console.log("Fetching all categories", allCategories);
 		return allCategories;
     }
 
@@ -21,7 +20,7 @@ export class CategoryUseCases {
      * @returns Promise resolving to the newly created Category object.
      * @throws Error if the category name is empty.
      */
-    async createCategory(name: string): Promise<Category> {
+    async createCategory(name: string): Promise<any> {
         if (!name || name.trim() === "") {
             throw new Error("Category name cannot be empty");
         }
