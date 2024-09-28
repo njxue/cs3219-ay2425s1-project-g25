@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button, Spin, Alert } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import { IeSquareFilled, LoadingOutlined } from "@ant-design/icons";
 import styles from "../NewQuestionForm/NewQuestionForm.module.css";
 import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
@@ -65,18 +65,22 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
         try {
             // Get the selected category IDs from the form
             const selectedCategoryIds = form.getFieldValue("categories");
+            const isCategoriesUpdated =
+                selectedCategoryIds.length !== question.categories.length ||
+                !selectedCategoryIds.every((cid: string) =>
+                    question.categories.some((category) => category._id === cid)
+                );
+            if (isCategoriesUpdated) {
+                // Map the selected category IDs back to their names
+                const selectedCategoryNames = categories
+                    .filter((category) => selectedCategoryIds.includes(category._id))
+                    .map((category) => category.name);
 
-            // Map the selected category IDs back to their names
-            const selectedCategoryNames = categories
-                .filter((category) => selectedCategoryIds.includes(category._id))
-                .map((category) => category.name);
-
-            const updatedQuestion = {
-                ...questionUpdate,
-                categories: selectedCategoryNames // Send category names instead of _id
-            };
-
-            const data = await questionUseCases.updateQuestion(question._id, updatedQuestion);
+                questionUpdate.categories = selectedCategoryNames; // Send category names instead of _id
+            } else {
+                delete questionUpdate.categories;
+            }
+            const data = await questionUseCases.updateQuestion(question._id, questionUpdate);
             toast.success(data?.message || "Question updated successfully!");
             onSubmit?.(data?.updatedQuestion);
         } catch (err) {
