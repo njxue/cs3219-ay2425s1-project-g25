@@ -1,9 +1,9 @@
 // CategoryFilter.tsx
-import React, { useState } from 'react';
-import { Input, Tag, Button, Modal, message } from 'antd';
-import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import styles from './CategoryFilter.module.css';
-import { Category } from 'domain/entities/Category';
+import React, { useState } from "react";
+import { Input, Tag, Button, Modal } from "antd";
+import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import styles from "./CategoryFilter.module.css";
+import { Category } from "domain/entities/Category";
 
 const { CheckableTag } = Tag;
 
@@ -20,10 +20,10 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     selectedCategories,
     onCategoryChange,
     onAddCategory,
-    onDeleteCategory,
+    onDeleteCategory
 }) => {
-    const [categorySearchTerm, setCategorySearchTerm] = useState('');
-    const [newCategory, setNewCategory] = useState('');
+    const [categorySearchTerm, setCategorySearchTerm] = useState("");
+    const [newCategory, setNewCategory] = useState("");
     const [deletingMode, setDeletingMode] = useState(false);
     const [categoriesToDelete, setCategoriesToDelete] = useState<string[]>([]);
 
@@ -38,7 +38,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     const handleAddCategoryClick = () => {
         if (newCategory.trim()) {
             onAddCategory(newCategory.trim());
-            setNewCategory('');
+            setNewCategory("");
         }
     };
 
@@ -57,27 +57,26 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     const confirmDeletion = () => {
         if (categoriesToDelete.length === 0) {
             Modal.info({
-                title: 'No Categories Selected',
-                content: 'Please select at least one category to delete.',
+                title: "No Categories Selected",
+                content: "Please select at least one category to delete."
             });
             return;
         }
 
         Modal.confirm({
-            title: 'Confirm Deletion',
+            title: "Confirm Deletion",
             icon: <ExclamationCircleOutlined />,
             content: `Are you sure you want to delete the selected ${categoriesToDelete.length} category(ies)?`,
             onOk: () => {
                 onDeleteCategory(categoriesToDelete);
                 setDeletingMode(false);
                 setCategoriesToDelete([]);
-            },
+            }
         });
     };
 
-    const filteredCategories = allCategories.filter(
-        (category) => 
-            category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
+    const filteredCategories = allCategories.filter((category) =>
+        category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
     );
 
     return (
@@ -91,11 +90,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
             />
 
             {/* Instructional Text for Delete Mode */}
-            {deletingMode && (
-                <div className={styles.instructionText}>
-                    Select categories to delete
-                </div>
-            )}
+            {deletingMode && <div className={styles.instructionText}>Select categories to delete</div>}
 
             <div className={styles.categoriesGrid}>
                 {filteredCategories.map((category) => {
@@ -113,7 +108,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                                     ? handleCategoryToDeleteChange(category._id, checked)
                                     : onCategoryChange(category._id, checked)
                             }
-                            className={`${styles.checkableTag} ${isSelectedForDeletion ? styles.deleteSelectedTag : ''}`}
+                            className={`${styles.checkableTag} ${
+                                isSelectedForDeletion ? styles.deleteSelectedTag : ""
+                            }`}
                         >
                             {category.name}
                         </CheckableTag>
@@ -147,7 +144,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     onClick={toggleDeleteMode}
                     className={styles.toggleDeleteButton}
                 >
-                    {deletingMode ? 'Cancel Delete' : 'Delete Categories'}
+                    {deletingMode ? "Cancel Delete" : "Delete Categories"}
                 </Button>
                 {deletingMode && (
                     <Button

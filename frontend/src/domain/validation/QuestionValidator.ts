@@ -1,7 +1,6 @@
 import { ValidationError } from '../../presentation/utils/errors';
 import { ERRORS } from '../../presentation/utils/constants';
 import { IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/IQuestionRepository';
-import { QuestionDifficulty } from 'domain/entities/QuestionDifficulty';
 
 export class QuestionValidator {
     static validateQuestionInput(questionInput: IQuestionInput): void {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button, Spin, Alert } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
-import MdEditor from "@uiw/react-md-editor";
 import styles from "../NewQuestionForm/NewQuestionForm.module.css";
 import { Question } from "domain/entities/Question";
 import { IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
@@ -11,6 +10,7 @@ import { toast } from "react-toastify";
 import { Category } from "domain/entities/Category";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
+import { ReactMarkdown } from "../common/ReactMarkdown";
 import axios from "axios";
 
 interface EditQuestionFormProps {
@@ -164,14 +164,11 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                                 name={FIELD_DESCRIPTION.name}
                                 rules={[{ required: true, whitespace: true }]}
                             >
-                                <MdEditor
+                                <ReactMarkdown
                                     value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
                                     onChange={(description) =>
                                         form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
                                     }
-                                    overflow={false}
-                                    enableScroll
-                                    height={300}
                                 />
                             </Form.Item>
                         </Col>

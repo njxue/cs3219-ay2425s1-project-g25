@@ -3,8 +3,8 @@ import { Tag, Divider, Modal, Button, Card } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { getDifficultyColor } from "../utils/QuestionUtils";
 import styles from "./QuestionDetail.module.css";
-import MDEditor from "@uiw/react-md-editor";
 import { EditQuestionForm } from "./EditQuestionForm/EditQuestionForm";
+import { ReactMarkdown } from "./common/ReactMarkdown";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
@@ -72,7 +72,7 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
 
                 <Divider className={styles.divider} />
                 <div className={styles.content}>
-                    <MDEditor.Markdown source={question.description} />
+                    <ReactMarkdown isReadOnly value={question.description} />
                     <div className={styles.metaContainer}>
                         <div className={styles.difficultyContainer}>
                             <span className={styles.metaLabel}>Difficulty:</span>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button } from "antd";
-import MdEditor from "@uiw/react-md-editor";
 import styles from "./NewQuestionForm.module.css";
 import { IQuestionInput } from "domain/repositories/IQuestionRepository";
 import { QUESTION_FORM_FIELDS } from "presentation/utils/constants";
@@ -10,6 +9,7 @@ import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
+import { ReactMarkdown } from "../common/ReactMarkdown";
 import axios from "axios";
 
 interface NewQuestionFormProps {
@@ -142,14 +142,11 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             name={FIELD_DESCRIPTION.name}
                             rules={[{ required: true, whitespace: true }]}
                         >
-                            <MdEditor
+                            <ReactMarkdown
                                 value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
                                 onChange={(description) =>
                                     form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
                                 }
-                                overflow={false}
-                                enableScroll
-                                height={300}
                             />
                         </Form.Item>
                     </Col>
