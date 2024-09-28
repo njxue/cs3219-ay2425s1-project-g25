@@ -13,7 +13,6 @@ export class QuestionUseCases {
      */
     async getAllQuestions(): Promise<Question[]> {
         const allQuestions = this.questionRepository.getAllQuestions();
-        console.log("Fetching all questions", allQuestions);
         return allQuestions;
     }
 
@@ -28,7 +27,6 @@ export class QuestionUseCases {
         if (!question) {
             throw new NotFoundError('Question not found');
         }
-        console.log("Fetching 1 question:", question);
         return question;
     }
 

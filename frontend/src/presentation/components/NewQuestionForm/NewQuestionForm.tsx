@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
+import axios from "axios";
 
 interface NewQuestionFormProps {
     onSubmit?: (createdQuestion: Question) => void;
@@ -20,7 +21,6 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
     const [categories, setCategories] = useState<Category[]>([]); // To store the full category objects
     const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
-    const [editorValue, setEditorValue] = useState<string>(initialQuestionInput.description || ""); // Track editor value state
 
     const validateMessages = {
         required: "${label} is required",
@@ -58,14 +58,13 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
             // Map the selected category IDs back to their names
             const selectedCategoryNames = categories
-                .filter(category => selectedCategoryIds.includes(category._id))
-                .map(category => category.name);
+                .filter((category) => selectedCategoryIds.includes(category._id))
+                .map((category) => category.name);
 
             // Prepare the updated question object
             const questionWithDescription = {
                 ...question,
-                description: editorValue,
-                categories: selectedCategoryNames, // Send category names instead of _id
+                categories: selectedCategoryNames // Send category names instead of _id
             };
 
             const data = await questionUseCases.createQuestion(questionWithDescription);
@@ -73,10 +72,12 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
             toast.success(data?.message);
             onSubmit?.(newQuestion);
             form.resetFields();
-            setEditorValue("");
         } catch (err) {
-            console.error(err);
-            toast.error("An unexpected error occurred.");
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Unable to create question");
+            }
         }
     }
 
@@ -142,8 +143,10 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <MdEditor
-                                value={editorValue}
-                                onChange={(description) => setEditorValue(description || "")}
+                                value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
+                                onChange={(description) =>
+                                    form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
+                                }
                                 overflow={false}
                                 enableScroll
                                 height={300}

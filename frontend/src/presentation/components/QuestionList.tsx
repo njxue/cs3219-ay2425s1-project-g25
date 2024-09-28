@@ -11,7 +11,7 @@ import { Category } from "domain/entities/Category";
 
 interface QuestionListProps {
     questions: Question[];
-    selectedQuestion: Question | null;
+    selectedQuestion: Question | undefined;
     onSelectQuestion: (question: Question) => void;
     isNarrow: boolean;
     isLoading: boolean;
@@ -47,7 +47,6 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                         category._id.trim() !== ""
                 );
                 setAllCategories(validCategories);
-                console.log("Fetched and set allCategories:", validCategories);
             } catch (error) {
                 console.error("Failed to fetch categories", error);
                 message.error("Failed to fetch categories.");
@@ -109,7 +108,6 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                 selectedCategories: filters.selectedCategories.filter(c => !categoriesToDeleteIds.includes(c))
             });
             message.success("Categories deleted successfully!");
-            console.log("Deleted categories:", categoriesToDeleteIds);
         } catch (error) {
             message.error((error as Error).message || "Failed to delete categories!");
             console.error("Failed to delete categories:", error);
