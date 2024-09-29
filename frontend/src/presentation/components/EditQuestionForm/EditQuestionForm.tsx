@@ -182,7 +182,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                                 <ReactMarkdown
                                     value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
                                     onChange={(description) =>
-                                        form.setFieldsValue({ [FIELD_DESCRIPTION.name]: description || "" })
+                                        form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
                                     }
                                 />
                             </Form.Item>
