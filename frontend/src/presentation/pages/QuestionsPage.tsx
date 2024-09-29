@@ -22,8 +22,6 @@ const QuestionsPage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const selectedQuestionCode = searchParams.get("code");
 
-    // Search params are strings whereas question coodes are numbers, so need to convert to string
-    // No need to store selectedQuestion as state because changing search params will cause the page to re-render
     const selectedQuestion: Question | undefined = questions.find((q) => q.code.toString() === selectedQuestionCode);
 
     useEffect(() => {
@@ -77,6 +75,10 @@ const QuestionsPage: React.FC = () => {
         setSearchParams({});
     };
 
+    const handleQuestionsUpdated = (updatedQuestions: Question[]) => {
+        setQuestions(updatedQuestions);
+    };
+
     const renderBreadcrumb = () => {
         const breadcrumbItems = [
             {
@@ -112,12 +114,13 @@ const QuestionsPage: React.FC = () => {
                 <Row className={styles.contentRow} gutter={32}>
                     <Col span={8} className={styles.transitionCol}>
                         <QuestionList
-                            isNarrow={selectedQuestion !== null}
+                            isNarrow={selectedQuestion !== undefined}
                             questions={questions}
                             selectedQuestion={selectedQuestion}
                             onSelectQuestion={handleSelectQuestion}
                             isLoading={isLoading}
                             error={error}
+                            onQuestionsUpdated={handleQuestionsUpdated}
                         />
                         <div className={styles.addButtonWrapper}>
                             <AddQuestionButton label={QUESTIONS_PAGE_TEXT.ADD_QUESTION} onClick={handleAddQuestion} />

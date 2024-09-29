@@ -1,4 +1,3 @@
-// Question.ts (Backend Model)
 import mongoose, { Schema, Types } from 'mongoose';
 
 export interface Question extends mongoose.Document {
@@ -7,7 +6,7 @@ export interface Question extends mongoose.Document {
   title: string;
   description: string;
   difficulty: string;
-  categories: Types.ObjectId[]; // Reference ObjectId from Category
+  categories: Types.ObjectId[];
   url?: string;
 }
 

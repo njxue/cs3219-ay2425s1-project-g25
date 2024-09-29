@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import React, { useState, useEffect } from "react";
 import { Input, Form, Select, Row, Col, Button, Spin, Alert } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
@@ -31,15 +32,21 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
 
     const { code: _, categories: questionCategories, ...questionUpdateInput } = question;
 
-    // Transform question categories to an array of their _id values
-    const initialCategoryIds = questionCategories.map((cat) => cat._id);
+    const [initialCategoryIds, setInitialCategoryIds] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             setIsLoadingCategories(true);
             try {
                 const fetchedCategories: Category[] = await categoryUseCases.getAllCategories();
+
+                const validCategoryIds = fetchedCategories.map(cat => cat._id);
+
+                const filteredQuestionCategories = questionCategories
+                    .filter(cat => validCategoryIds.includes(cat._id));
+
                 setCategories(fetchedCategories);
+                setInitialCategoryIds(filteredQuestionCategories.map(cat => cat._id));
             } catch (error) {
                 const message = (error as Error).message || "Failed to fetch categories";
                 setCategoriesError(message);
@@ -50,12 +57,11 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
             }
         };
         fetchCategories();
-    }, []);
+    }, [questionCategories]);
 
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
-        // Compare and only get the changed fields. Can shallow compare, for now
         for (const field in questionUpdate) {
             if (questionUpdate[field as keyof IQuestionUpdateInput] === question[field as keyof Question]) {
                 delete questionUpdate[field as keyof IQuestionUpdateInput];
@@ -63,7 +69,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
         }
 
         try {
-            // Get the selected category IDs from the form
             const selectedCategoryIds = form.getFieldValue("categories");
             const isCategoriesUpdated =
                 selectedCategoryIds.length !== question.categories.length ||
@@ -71,12 +76,11 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     question.categories.some((category) => category._id === cid)
                 );
             if (isCategoriesUpdated) {
-                // Map the selected category IDs back to their names
                 const selectedCategoryNames = categories
                     .filter((category) => selectedCategoryIds.includes(category._id))
                     .map((category) => category.name);
 
-                questionUpdate.categories = selectedCategoryNames; // Send category names instead of _id
+                questionUpdate.categories = selectedCategoryNames;
             } else {
                 delete questionUpdate.categories;
             }
@@ -93,7 +97,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
         }
     }
 
-    // Map categories to Select options
     const categoryOptions = categories.map((category) => ({
         label: category.name,
         value: category._id
@@ -111,7 +114,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     onFinish={handleSubmit}
                     initialValues={{
                         ...questionUpdateInput,
-                        categories: initialCategoryIds // Pre-fill categories
+                        categories: initialCategoryIds
                     }}
                     validateMessages={validateMessages}
                     scrollToFirstError

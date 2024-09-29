@@ -117,10 +117,8 @@ export class QuestionUseCases {
         };
 
         allQuestions.forEach((question) => {
-            // Count by difficulty
             stats.byDifficulty[question.difficulty] = (stats.byDifficulty[question.difficulty] || 0) + 1;
 
-            // Count by category
             question.categories.forEach((category) => {
                 const categoryName = category.name;
                 stats.byCategory[categoryName] = (stats.byCategory[categoryName] || 0) + 1;

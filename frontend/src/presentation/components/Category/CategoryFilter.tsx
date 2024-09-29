@@ -1,9 +1,8 @@
-// CategoryFilter.tsx
-import React, { useState } from "react";
-import { Input, Tag, Button, Modal } from "antd";
-import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import styles from "./CategoryFilter.module.css";
-import { Category } from "domain/entities/Category";
+import React, { useState } from 'react';
+import { Input, Tag, Button, Modal } from 'antd';
+import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import styles from './CategoryFilter.module.css';
+import { Category } from 'domain/entities/Category';
 
 const { CheckableTag } = Tag;
 
@@ -89,19 +88,20 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 allowClear
             />
 
-            {/* Instructional Text for Delete Mode */}
             {deletingMode && <div className={styles.instructionText}>Select categories to delete</div>}
 
             <div className={styles.categoriesGrid}>
                 {filteredCategories.map((category) => {
                     const isSelectedForDeletion = deletingMode && categoriesToDelete.includes(category._id);
+                    const isSelectedForFiltering = selectedCategories.includes(category._id);
+
                     return (
                         <CheckableTag
                             key={category._id}
                             checked={
                                 deletingMode
-                                    ? categoriesToDelete.includes(category._id)
-                                    : selectedCategories.includes(category._id)
+                                    ? isSelectedForDeletion
+                                    : isSelectedForFiltering
                             }
                             onChange={(checked) =>
                                 deletingMode
@@ -109,7 +109,11 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                                     : onCategoryChange(category._id, checked)
                             }
                             className={`${styles.checkableTag} ${
-                                isSelectedForDeletion ? styles.deleteSelectedTag : ""
+                                isSelectedForDeletion
+                                    ? styles.deleteSelectedTag
+                                    : isSelectedForFiltering
+                                    ? styles.selectedTag
+                                    : ""
                             }`}
                         >
                             {category.name}
@@ -160,3 +164,4 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         </div>
     );
 };
+
