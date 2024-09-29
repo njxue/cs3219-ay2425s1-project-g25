@@ -62,7 +62,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
-        // Remove fields that haven't changed
         for (const field in questionUpdate) {
             if (questionUpdate[field as keyof IQuestionUpdateInput] === question[field as keyof Question]) {
                 delete questionUpdate[field as keyof IQuestionUpdateInput];
@@ -117,7 +116,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     onFinish={handleSubmit}
                     initialValues={{
                         ...questionUpdateInput,
-                        // categories: initialCategoryIds // Remove from initialValues
                     }}
                     validateMessages={validateMessages}
                     scrollToFirstError
