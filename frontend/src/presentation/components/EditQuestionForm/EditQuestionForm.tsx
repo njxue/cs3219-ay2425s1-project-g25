@@ -32,8 +32,6 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
 
     const { code: _, categories: questionCategories, ...questionUpdateInput } = question;
 
-    const [initialCategoryIds, setInitialCategoryIds] = useState<string[]>([]);
-
     useEffect(() => {
         const fetchCategories = async () => {
             setIsLoadingCategories(true);
@@ -46,7 +44,9 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     .filter(cat => validCategoryIds.includes(cat._id));
 
                 setCategories(fetchedCategories);
-                setInitialCategoryIds(filteredQuestionCategories.map(cat => cat._id));
+                form.setFieldsValue({
+                    categories: filteredQuestionCategories.map(cat => cat._id)
+                });
             } catch (error) {
                 const message = (error as Error).message || "Failed to fetch categories";
                 setCategoriesError(message);
@@ -57,11 +57,12 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
             }
         };
         fetchCategories();
-    }, [questionCategories]);
+    }, [questionCategories, form]);
 
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
     async function handleSubmit(questionUpdate: IQuestionUpdateInput) {
+        // Remove fields that haven't changed
         for (const field in questionUpdate) {
             if (questionUpdate[field as keyof IQuestionUpdateInput] === question[field as keyof Question]) {
                 delete questionUpdate[field as keyof IQuestionUpdateInput];
@@ -69,13 +70,14 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
         }
 
         try {
-            const selectedCategoryIds = form.getFieldValue("categories");
+            const selectedCategoryIds = form.getFieldValue("categories") as string[] | undefined;
             const isCategoriesUpdated =
-                selectedCategoryIds.length !== question.categories.length ||
-                !selectedCategoryIds.every((cid: string) =>
-                    question.categories.some((category) => category._id === cid)
-                );
-            if (isCategoriesUpdated) {
+                selectedCategoryIds &&
+                (selectedCategoryIds.length !== question.categories.length ||
+                    !selectedCategoryIds.every((cid: string) =>
+                        question.categories.some((category) => category._id === cid)
+                    ));
+            if (isCategoriesUpdated && selectedCategoryIds) {
                 const selectedCategoryNames = categories
                     .filter((category) => selectedCategoryIds.includes(category._id))
                     .map((category) => category.name);
@@ -84,8 +86,9 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
             } else {
                 delete questionUpdate.categories;
             }
+
             const data = await questionUseCases.updateQuestion(question._id, questionUpdate);
-            toast.success(data?.message || "Question updated successfully!");
+            toast.success(`Question "${question.title}" updated successfully!`);
             onSubmit?.(data?.updatedQuestion);
         } catch (err) {
             console.error(err);
@@ -114,7 +117,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     onFinish={handleSubmit}
                     initialValues={{
                         ...questionUpdateInput,
-                        categories: initialCategoryIds
+                        // categories: initialCategoryIds // Remove from initialValues
                     }}
                     validateMessages={validateMessages}
                     scrollToFirstError
@@ -181,7 +184,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                                 <ReactMarkdown
                                     value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
                                     onChange={(description) =>
-                                        form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
+                                        form.setFieldsValue({ [FIELD_DESCRIPTION.name]: description || "" })
                                     }
                                 />
                             </Form.Item>
