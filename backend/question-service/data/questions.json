@@ -8,7 +8,7 @@
     },
     {
         "title": "Linked List Cycle Detection",
-        "description": "Implement a function to detect if a linked list contains a cycle.\n\n![Linked List Example](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)",
+        "description": "### Problem\n\nImplement a function to detect if a linked list contains a cycle.\n\n![Linked List Cycle](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)\n\n### Instructions\n\n- Given a linked list, determine if it has a cycle in it.\n- Can you solve it using O(1) memory?\n\n### Example\n\n**Input:**\n```\nhead = [3, 2, 0, -4], pos = 1 (indicating tail connects to node index 1)\n```\n\n**Output:**\n```\ntrue\n```\n\n### Constraints\n\n- The number of nodes in the list is in the range [0, 10^4].\n- `-10^5 <= Node.val <= 10^5`.",
         "difficulty": "Easy",
         "categories": ["Data Structures", "Algorithms"],
         "url": "https://leetcode.com/problems/linked-list-cycle/"

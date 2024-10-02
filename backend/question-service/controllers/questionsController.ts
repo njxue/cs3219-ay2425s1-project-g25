@@ -8,7 +8,7 @@ export async function getAllQuestions(
     next: NextFunction
 ) {
     try {
-        const questions = await questionModel.find().populate("categories"); // Populate categories
+        const questions = await questionModel.find().populate("categories");
         response.status(200).json(questions);
     } catch (error) {
         next(error);
@@ -30,7 +30,6 @@ export async function createQuestion(
             });
         }
 
-        // Find or create categories based on names
         const categoryIds = await Promise.all(
             categories.map(async (categoryName: string) => {
                 let category = await categoryModel.findOne({
@@ -56,7 +55,7 @@ export async function createQuestion(
             difficulty,
             categories: categoryIds,
         });
-        if (url) newQuestion.url = url; // Add url only if it's provided
+        if (url) newQuestion.url = url;
 
         await newQuestion.save();
 
@@ -80,7 +79,6 @@ export async function updateQuestion(
     let { categories, ...updateData } = request.body;
 
     try {
-        // Check for uniqueness of title if updating title
         if (updateData.title) {
             const existingTitle = await questionModel.findOne({ title: updateData.title, _id: { $ne: id } });
             if (existingTitle) {
@@ -91,7 +89,6 @@ export async function updateQuestion(
         }
 
         if (categories) {
-            // If categories are being updated, map names to ObjectId references
             const categoryIds = await Promise.all(
                 categories.map(async (categoryName: string) => {
                     let category = await categoryModel.findOne({
@@ -104,16 +101,16 @@ export async function updateQuestion(
                     return category._id;
                 })
             );
-            updateData = { ...updateData, categories: categoryIds }; // Update categories with ObjectId references
+            updateData = { ...updateData, categories: categoryIds };
         }
 
         const updatedQuestion = await questionModel
             .findOneAndUpdate(
                 { _id: id },
                 { $set: updateData },
-                { new: true, runValidators: true } // return the updated document and apply validation
+                { new: true, runValidators: true }
             )
-            .populate("categories"); // Populate categories in the response
+            .populate("categories");
 
         if (!updatedQuestion) {
             return response.status(404).json({

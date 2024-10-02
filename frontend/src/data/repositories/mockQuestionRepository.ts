@@ -346,23 +346,20 @@ export class MockQuestionRemoteDataSource {
     async createQuestion(question: IQuestionInput): Promise<{ status: number; data: any }> {
         return new Promise(async (resolve, reject) => {
             try {
-                // Resolve categories or create new ones if they don't exist
                 const resolvedCategories = await Promise.all(
                     question.categories.map(async (catName) => {
                         let foundCategory = categories.find((cat) => cat.name === catName);
                         if (!foundCategory) {
-                            console.log(`Category "${catName}" not found, creating new category.`);
                             foundCategory = await mockCategoryRemoteDataSource.createCategory(catName);
                         }
                         return foundCategory;
                     })
                 );
 
-                // Create the new question object
                 const questionId = (this.questions.length + 1).toString();
                 const newQuestion: Question = {
                     ...question,
-                    categories: resolvedCategories, // Reference full category objects (_id, name)
+                    categories: resolvedCategories,
                     _id: "i" + questionId,
                     code: questionId
                 };
@@ -395,12 +392,10 @@ export class MockQuestionRemoteDataSource {
                     let updatedCategories = this.questions[index].categories;
 
                     if (questionUpdate.categories) {
-                        // Resolve or create categories if needed
                         updatedCategories = await Promise.all(
                             questionUpdate.categories.map(async (catName) => {
                                 let foundCategory = categories.find((cat) => cat.name === catName);
                                 if (!foundCategory) {
-                                    console.log(`Category "${catName}" not found, creating new category.`);
                                     foundCategory = await mockCategoryRemoteDataSource.createCategory(catName);
                                 }
                                 return foundCategory;
@@ -411,7 +406,7 @@ export class MockQuestionRemoteDataSource {
                     const updatedQuestion = {
                         ...this.questions[index],
                         ...questionUpdate,
-                        categories: updatedCategories // Use updated categories if provided
+                        categories: updatedCategories
                     };
                     this.questions[index] = updatedQuestion;
                     resolve({ status: 200, data: { message: "Updated question", updatedQuestion } });
