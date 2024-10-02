@@ -39,3 +39,4 @@ Icon
 .Trashes
 ehthumbs.db
 /user-service/user-service/.env
+backend/api-gateway/package-lock.json
