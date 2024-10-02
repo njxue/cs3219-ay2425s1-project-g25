@@ -18,9 +18,8 @@ or just delete the data folder in the root directory manually if you despise the
 
 View databases:
 1. Verify that you have access to `mongosh`. If you installed the latest mongoDB version, you *should* have it.
-2. If in the root .env file, `DB_REQUIRE_AUTH` is false, run `docker exec -it <mongo container name> mongosh --host <DB host>`. By the project's default values, the command will be `docker exec -it peerprep-mongo-container mongosh --host localhost`.
-3. If not, run `docker exec -it <mongo container name> mongosh --host <DB host> -u <mongodb root user username> -p <mongodb root user password> --authenticationDatabase admin`. By the project's default values, the command will be `docker exec -it peerprep-mongo-container mongosh --host localhost -u admin -p password --authenticationDatabase admin`.
-4. In the mongosh:
+2. Run `docker exec -it <mongo container name> mongosh --host <DB host> -u <mongodb root user username> -p <mongodb root user password> --authenticationDatabase admin`. By the project's default values, the command will be `docker exec -it peerprep-mongo-container mongosh --host localhost -u admin -p password --authenticationDatabase admin`.
+3. In the mongosh:
     1. View all databases with `show dbs`.
     2. Navigate into a database with `use <databaseName>`. 
     3. View all collections in the database with `show collections`.
