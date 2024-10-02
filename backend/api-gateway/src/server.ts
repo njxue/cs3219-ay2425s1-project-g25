@@ -1,59 +1,66 @@
-import express, { Request, Response, NextFunction } from 'express';
-import axios, { AxiosResponse } from 'axios';
+import express from 'express';
+import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express'; // Import swagger-ui-express
+import swaggerJsDoc from 'swagger-jsdoc'; // Import swagger-jsdoc
+import logger from './utils/logger';
+import router from './routes/gateway';
+
+// Load environment variables from the .env file
+dotenv.config();
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
-// Microservices URLs (modify these based on your setup)
-const services: Record<string, string> = {
-    serviceA: 'http://localhost:3001',
-    serviceB: 'http://localhost:3002',
+// Swagger configuration
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API Gateway',
+            version: '1.0.0',
+            description: 'API Gateway for routing requests to various microservices',
+        },
+        servers: [
+            {
+                url: `http://localhost:${port}`,
+            },
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+        security: [{ bearerAuth: [] }],
+    },
+    apis: ['./src/gateway.ts', './src/routes/*.ts'], // Path to your route files
 };
 
-// Middleware to parse JSON
+const swaggerDocs = swaggerJsDoc(swaggerOptions); // Generate Swagger documentation
+
+// Middleware to parse JSON requests
 app.use(express.json());
 
-// Error-handling middleware for async routes
-const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
+// Setup Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Gateway route to forward requests to microservices
-app.all(
-    '/:serviceName/*',
-    asyncHandler(async (req: Request, res: Response) => {
-        const { serviceName } = req.params;
-        const serviceUrl = services[serviceName];
+// Use the Gateway router for forwarding requests to microservices
+app.use('/', router);
 
-        if (!serviceUrl) {
-            return res.status(404).json({ error: 'Service not found' });
-        }
+// Global error handler middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
 
-        try {
-            // Forward the request to the respective microservice
-            const serviceResponse: AxiosResponse = await axios({
-                method: req.method,
-                url: `${serviceUrl}/${req.params[0]}`,
-                headers: req.headers,
-                data: req.body,
-            });
-
-            // Forward the response from the microservice back to the client
-            res.status(serviceResponse.status).json(serviceResponse.data);
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: 'Error forwarding the request' });
-        }
-    })
-);
-
-// Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong' });
+    logger.error(`Error: ${message}, Status Code: ${statusCode}`);
+    res.status(statusCode).json({ message });
 });
 
-// Start the API Gateway
+// Start the server
 app.listen(port, () => {
-    console.log(`API Gateway running at http://localhost:${port}`);
+    logger.info(`API Gateway running on http://localhost:${port}`);
+    logger.info(`Swagger UI available at http://localhost:${port}/api-docs`);
 });
