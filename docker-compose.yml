@@ -1,0 +1,26 @@
+# Apparently this attribute is obsolete? But NUS says we need this?
+#version: "3.9"
+
+services:
+    # Frontend Service(s)
+
+    # Backend Service(s)
+
+    # Database Service(s)
+    peerprep-mongodb:
+        image: mongo:latest
+        restart: always
+        ports:
+            - '27017:27017'
+        container_name: peerprep-mongo-container
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: password
+        volumes:
+            - ./data/db:/data/db
+            - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+        networks:
+            - peerprep-network
+
+networks:
+    peerprep-network:

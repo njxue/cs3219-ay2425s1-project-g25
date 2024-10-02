@@ -20,6 +20,9 @@ yarn-error.log*
 /backend/.env
 /backend/*.log
 
+# Docker database files
+/data
+
 # Production
 /build
 /dist
