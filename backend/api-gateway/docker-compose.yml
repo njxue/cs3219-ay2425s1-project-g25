@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge

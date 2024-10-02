@@ -65,8 +65,8 @@ if (true) {
   };
 
   const swaggerDocs = swaggerJsDoc(swaggerOptions);
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-  console.log(`Swagger API Docs available at http://localhost:${port}/api-docs`);
+  app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  console.log(`Swagger API Docs available at http://localhost:${port}/users/swagger`);
 }
 
 
