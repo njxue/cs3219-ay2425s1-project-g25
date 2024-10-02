@@ -1,6 +1,6 @@
 import { BaseApi } from "data/BaseApi";
 
-const API_URL = '/api/users'
+const API_URL = '/users'
 
 export class UserRemoteDataSource extends BaseApi {
     constructor() {
