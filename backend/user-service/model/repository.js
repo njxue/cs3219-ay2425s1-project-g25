@@ -2,7 +2,6 @@ import UserModel from "./user-model.js";
 import "dotenv/config";
 import { connect } from "mongoose";
 
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 export async function connectToDB() {

@@ -2,7 +2,8 @@ Yo, this is Kevin/Nephelite and this file is an informal guide into using docker
 
 Set-up:
 1. Install mongoDB (https://www.mongodb.com/docs/manual/installation/) and Docker (https://docs.docker.com/engine/install/)
-2. Set up .env files (you can just rename the .env.example to .env)
+2. Set up .env files (you can just rename the .env.example to .env). If you make any changes to the .env file in the root such
+that it's different from .env.example, copy and paste the root .env into the other .env files in each microservice.
 3. Ensure the .env variables match the docker-compose.yml and init-mongo.js files because apparently they can't read the .env files?
 4. In the project root folder, run `docker-compose build --no-cache` to build the mongoDB service.
 5. Run `docker-compose up -d` to initialize and run the mongoDB service (and everything else).
@@ -18,9 +19,8 @@ or just delete the data folder in the root directory manually if you despise the
 
 View databases:
 1. Verify that you have access to `mongosh`. If you installed the latest mongoDB version, you *should* have it.
-2. If in the root .env file, `DB_REQUIRE_AUTH` is false, run `docker exec -it <mongo container name> mongosh --host <DB host>`. By the project's default values, the command will be `docker exec -it peerprep-mongo-container mongosh --host localhost`.
-3. If not, run `docker exec -it <mongo container name> mongosh --host <DB host> -u <mongodb root user username> -p <mongodb root user password> --authenticationDatabase admin`. By the project's default values, the command will be `docker exec -it peerprep-mongo-container mongosh --host localhost -u admin -p password --authenticationDatabase admin`.
-4. In the mongosh:
+2. Run `docker exec -it <mongo container name> mongosh --host <DB host> -u <mongodb root user username> -p <mongodb root user password> --authenticationDatabase admin`. By the project's default values, the command will be `docker exec -it peerprep-mongo-container mongosh --host localhost -u admin -p password --authenticationDatabase admin`.
+3. In the mongosh:
     1. View all databases with `show dbs`.
     2. Navigate into a database with `use <databaseName>`. 
     3. View all collections in the database with `show collections`.
