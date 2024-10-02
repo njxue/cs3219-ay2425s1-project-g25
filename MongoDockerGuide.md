@@ -2,7 +2,8 @@ Yo, this is Kevin/Nephelite and this file is an informal guide into using docker
 
 Set-up:
 1. Install mongoDB (https://www.mongodb.com/docs/manual/installation/) and Docker (https://docs.docker.com/engine/install/)
-2. Set up .env files (you can just rename the .env.example to .env)
+2. Set up .env files (you can just rename the .env.example to .env). If you make any changes to the .env file in the root such
+that it's different from .env.example, copy and paste the root .env into the other .env files in each microservice.
 3. Ensure the .env variables match the docker-compose.yml and init-mongo.js files because apparently they can't read the .env files?
 4. In the project root folder, run `docker-compose build --no-cache` to build the mongoDB service.
 5. Run `docker-compose up -d` to initialize and run the mongoDB service (and everything else).
