@@ -1,11 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import API_URL from '../config'
 
 export class BaseApi {
     private axiosInstance: AxiosInstance;
 
     constructor(baseUrl: string) {
         this.axiosInstance = axios.create({
-            baseURL: "http://localhost:3001" + baseUrl,
+            baseURL: API_URL + baseUrl,
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',

@@ -1,13 +1,16 @@
 import cors from 'cors';
 import express, { Express } from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
 import questionsRoutes from './routes/questionsRoutes';
 import categoriesRoutes from './routes/categoriesRoutes';
 import { connectToDatabase } from './utils/database';
 import { errorHandler } from './middlewares/errorHandler';
 import { populateQuestions } from './utils/populateQuestions';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 connectToDatabase();
 
@@ -26,12 +29,13 @@ app.use(cors({
   },
   credentials: true,
 }));
+
 app.use('/api/questions', questionsRoutes);
 app.use('/api/categories', categoriesRoutes);
 
 app.use(errorHandler);
 
-if (process.env.POPULATE_DB) {
+if (process.env.POPULATE_DB === 'true') {
   populateQuestions();
 }
 

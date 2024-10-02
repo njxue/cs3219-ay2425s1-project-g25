@@ -1,15 +1,36 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 export const connectToDatabase = async () => {
-    const url = process.env.MONGODB_URL;
+    const {
+        DB_REQUIRE_AUTH,
+        MONGO_INITDB_ROOT_USERNAME,
+        MONGO_INITDB_ROOT_PASSWORD,
+        DB_HOST = "localhost",
+        DB_PORT = "27017",
+        DATABASE_NAME = "peerprepQuestionServiceDB",
+    } = process.env;
+
+    let mongoURI = "";
+
+    if (DB_REQUIRE_AUTH === "true") {
+        mongoURI = `mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${DB_HOST}:${DB_PORT}/${DATABASE_NAME}?authSource=admin`;
+    } else {
+        mongoURI = `mongodb://${DB_HOST}:${DB_PORT}/${DATABASE_NAME}`;
+    }
+
     const options = {};
 
-    if (!url) {
-        throw new Error('Invalid/Missing environment variable: "MONGODB_URL"');
+    if (!mongoURI) {
+        throw new Error('Invalid/Missing MongoDB connection URI');
     }
 
     try {
-        await mongoose.connect(url, options);
+        await mongoose.connect(mongoURI, options);
         console.log("Successfully connected to MongoDB");
     } catch (error) {
         console.log("Error connecting to MongoDB: ", error);
