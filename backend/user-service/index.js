@@ -9,7 +9,6 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
-const port = process.env.PORT || 3001;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -17,8 +16,6 @@ app.use(cors());
 app.options("*", cors());
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
@@ -91,14 +88,6 @@ app.use((req, res, next) => {
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 
-// Middleware to log incoming requests
-app.use((req, res, next) => {
-  console.log(`Incoming request - Method: ${req.method}, Path: ${req.path}, Body: ${JSON.stringify(req.body)}`);
-  next();
-});
-app.use("/users", userRoutes);
-app.use("/auth", authRoutes);
-
 app.use((req, res, next) => {
   const error = new Error("Route Not Found");
   error.status = 404;
@@ -113,7 +102,6 @@ app.use((error, req, res, next) => {
     },
   });
 });
-
 
 
 export default app;
