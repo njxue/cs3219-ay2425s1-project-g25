@@ -43,3 +43,8 @@ Icon
 ehthumbs.db
 /user-service/user-service/.env
 backend/api-gateway/package-lock.json
+/backend/user-service/.env
+/backend/question-service/package-lock.json
+/backend/user-service/package-lock.json
+/frontend/.env
+/frontend/package-lock.json
