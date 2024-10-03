@@ -6,7 +6,7 @@ COPY . .
 
 # For development environment
 FROM base AS dev
-EXPOSE 3001
+EXPOSE 3002
 CMD ["npm", "run", "dev"]
 
 # For production environment
@@ -20,5 +20,5 @@ COPY --from=build /app/dist ./dist
 COPY package*.json ./
 # Install only production dependencies
 RUN npm install --only=production
-EXPOSE 3001
+EXPOSE 3002
 CMD ["npm", "start"]

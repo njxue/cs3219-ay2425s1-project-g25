@@ -20,7 +20,7 @@ services:
       target: dev
     container_name: question-service
     ports:
-      - 3001:3001
+      - 3002:3002
     volumes:
       - ./backend/question-service:/app
       - /app/node_modules
