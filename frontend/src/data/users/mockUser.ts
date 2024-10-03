@@ -19,18 +19,14 @@ export class MockUser {
      * @param user - the user to be created
      * @returns Promise resolving with the status and created user.
      */
-    async registerUser(user: IUserRegisterInput): Promise<{ status: number; data: any }> {
+    async registerUser(user: IUserRegisterInput): Promise<any> {
         return new Promise((resolve, reject) => {
             try {
-                console.log(this.users)
                 const foundEmail = this.users.find((u) => u.email === user.email);
                 const foundUsername = this.users.find((u) => u.username === user.username);
                 if (foundEmail || foundUsername) {
                     resolve({
-                        status: 409,
-                        data: {
-                            message: "Duplicate username or email encountered"
-                        }
+                        message: "Duplicate username or email encountered"
                     });
                 } else {
                     const userId = (this.users.length + 1).toString();
@@ -44,11 +40,8 @@ export class MockUser {
                     this.users.push(newUser);
 
                     resolve({
-                        status: 201,
-                        data: {
-                            message: `Created new user ${user.username} successfully`,
-                            data: newUser
-                        }
+                        message: `Created new user ${user.username} successfully`,
+                        data: newUser
                     });
                 }
             } catch (error) {
@@ -65,23 +58,16 @@ export class MockUser {
     async loginUser(user: IUserLoginInput) {
         return new Promise((resolve, reject) => {
             try {
-                console.log(this.users)
                 const foundUser = this.users.find((u) => u.email === user.email);
                 if (!foundUser) {
                     resolve({
-                        status: 401,
-                        data: {
-                            message: "Wrong email and/or password"
-                        }
+                        message: "Wrong email and/or password"
                     });
                 } else {
                     foundUser.accessToken = user.email + "TOKEN";
                     resolve({
-                        status: 200,
-                        data: {
-                            message: "User logged in",
-                            data: foundUser
-                        }
+                        message: "User logged in",
+                        data: foundUser
                     });
                 }
             } catch (error) {

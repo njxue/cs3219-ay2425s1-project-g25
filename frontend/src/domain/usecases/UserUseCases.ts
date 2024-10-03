@@ -1,7 +1,7 @@
 import { userImpl } from "data/users/UserImpl";
 import { User } from "domain/entities/User";
 import { IUser, IUserRegisterInput, IUserLoginInput } from "domain/users/IUser";
-import { DuplicateUserError, AuthenticationError } from "presentation/utils/errors";
+import { AuthenticationError } from "presentation/utils/errors";
 
 export class UserUseCases {
     constructor(private user: IUser) { }
@@ -21,8 +21,8 @@ export class UserUseCases {
             password
         };
         const data =  await this.user.registerUser(userInput);
-        if (data.status !== 201) {
-            throw new DuplicateUserError('Email or Username already registered');
+        if (!data.data) {
+            throw new AuthenticationError(data.message);
         }
         return data.data;
     }
@@ -40,8 +40,8 @@ export class UserUseCases {
             password
         };
         const data = await this.user.loginUser(userInput);
-        if (data.status !== 200) {
-            throw new AuthenticationError('Wrong email and/or password');
+        if (!data.data) {
+            throw new AuthenticationError(data.message);
         }
         return data.data;
     }

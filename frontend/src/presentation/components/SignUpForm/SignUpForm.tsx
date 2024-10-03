@@ -1,21 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./SignUpForm.module.css";
 import { userUseCases } from "domain/usecases/UserUseCases";
 import { useNavigate } from "react-router-dom";
 import { handleError } from "presentation/utils/errorHandler";
+import { useUser } from "domain/contexts/userContext";
 
 export const SignUpForm: React.FC = () => {
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const { user, setUser } = useUser();
+
+    // Only navigate to home after user is set
+    useEffect(() => {
+        if (user && user.username) {
+            navigate("/home");
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
             await userUseCases.registerUser(username, email, password);
-            await userUseCases.loginUser(email, password);
-            navigate("/home");
+            const userData = await userUseCases.loginUser(email, password);
+            setUser(userData);
         } catch (error) {
             console.error("Failed to register and log in user", error);
             alert(handleError(error, "Failed to register and log in user"));
