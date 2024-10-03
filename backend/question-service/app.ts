@@ -20,13 +20,7 @@ const app: Express = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin.match(/localhost/) || origin.match(/127\.0\.0\.1/)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*', // Allows all origins
   credentials: true,
 }));
 

@@ -15,4 +15,4 @@ services:
 
 networks:
   peerprep-network:
-    external: true
+    driver: bridge
