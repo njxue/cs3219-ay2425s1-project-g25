@@ -6,7 +6,7 @@ COPY . .
 
 # For development environment
 FROM base AS dev
-EXPOSE 3000
+EXPOSE 3001
 CMD ["npm", "run", "dev"]
 
 # For production environment
