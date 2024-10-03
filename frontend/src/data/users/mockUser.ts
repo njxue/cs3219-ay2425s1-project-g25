@@ -22,7 +22,6 @@ export class MockUser {
     async registerUser(user: IUserRegisterInput): Promise<{ status: number; data: any }> {
         return new Promise((resolve, reject) => {
             try {
-                console.log(this.users)
                 const foundEmail = this.users.find((u) => u.email === user.email);
                 const foundUsername = this.users.find((u) => u.username === user.username);
                 if (foundEmail || foundUsername) {
@@ -65,7 +64,6 @@ export class MockUser {
     async loginUser(user: IUserLoginInput) {
         return new Promise((resolve, reject) => {
             try {
-                console.log(this.users)
                 const foundUser = this.users.find((u) => u.email === user.email);
                 if (!foundUser) {
                     resolve({

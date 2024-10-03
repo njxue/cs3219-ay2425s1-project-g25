@@ -24,7 +24,7 @@ export class UserUseCases {
         if (data.status !== 201) {
             throw new DuplicateUserError('Email or Username already registered');
         }
-        return data.data;
+        return data.data.data;
     }
 
     /**
@@ -43,7 +43,7 @@ export class UserUseCases {
         if (data.status !== 200) {
             throw new AuthenticationError('Wrong email and/or password');
         }
-        return data.data;
+        return data.data.data;
     }
 }
 
