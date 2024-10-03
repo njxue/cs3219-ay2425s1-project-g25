@@ -8,12 +8,28 @@ export class UserRemoteDataSource extends BaseApi {
         super(API_URL);
     }
 
+    /**
+     * Registers a new user.
+     * @param user - The input data for the new user.
+     * @returns Promise resolving with the created user.
+     */
     async registerUser(user: IUserRegisterInput) {
-        return await this.post<any>('/users/register', user);
+        const payload = {
+            ...user
+        }
+        return await this.post<any>('/users', payload);
     }
 
+    /**
+     * Logs in a user.
+     * @param user - The input data for the user.
+     * @returns Promise resolving with the logged in user.
+     */
     async loginUser(user: IUserLoginInput) {
-        return await this.post<any>('/auth/login', user);
+        const payload = {
+            ...user
+        }
+        return await this.post<any>('/auth/login', payload);
     }
 }
 
