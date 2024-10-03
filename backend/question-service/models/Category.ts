@@ -1,10 +1,7 @@
 import mongoose, { Schema, Types, Document } from 'mongoose';
-import { Category as SharedCategory } from '@shared/types/Category';
-
-export interface Category
-  extends Omit<SharedCategory, '_id'>,
-    Document {
+export interface Category extends Document {
   _id: Types.ObjectId;
+  name: string;
 }
 
 const categorySchema: Schema<Category> = new Schema<Category>({

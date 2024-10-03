@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  question-service:
+    build: 
+      context: ./backend/question-service
+      target: dev
+    ports:
+      - 3001:3001
+    volumes:
+      - ./backend/question-service:/app
+      - /app/node_modules
+    environment:
+      MONGODB_URL: mongodb://host.docker.internal:27017/peerprep
