@@ -2,8 +2,7 @@ import http from "http";
 import index from "./index.js";
 import "dotenv/config";
 import { connectToDB } from "./model/repository.js";
-
-const port = process.env.PORT || 3001;
+import { port } from "./index.js";
 
 const server = http.createServer(index);
 

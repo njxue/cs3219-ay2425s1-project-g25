@@ -20,6 +20,9 @@ yarn-error.log*
 /backend/.env
 /backend/*.log
 
+# Docker database files
+/data
+
 # Production
 /build
 /dist
@@ -39,3 +42,4 @@ Icon
 .Trashes
 ehthumbs.db
 /user-service/user-service/.env
+backend/api-gateway/package-lock.json

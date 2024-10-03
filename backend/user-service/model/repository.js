@@ -2,13 +2,44 @@ import UserModel from "./user-model.js";
 import "dotenv/config";
 import { connect } from "mongoose";
 
-export async function connectToDB() {
-  let mongoDBUri =
-    process.env.ENV === "PROD"
-      ? process.env.DB_CLOUD_URI
-      : process.env.DB_LOCAL_URI;
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-  await connect(mongoDBUri);
+export async function connectToDB() {
+  const {
+    DB_REQUIRE_AUTH,
+    MONGO_INITDB_ROOT_USERNAME,
+    MONGO_INITDB_ROOT_PASSWORD,
+    APP_MONGO_USERNAME,
+    APP_MONGO_PASSWORD,
+    DB_HOST = "localhost",
+    DB_PORT = "27017",
+    DATABASE_NAME,
+    ENV,
+    DB_CLOUD_URI,
+  } = process.env;
+
+  let mongoDBUri = "";
+
+  if (ENV === "PROD") {
+    mongoDBUri = DB_CLOUD_URI;
+  } else {
+    if (DB_REQUIRE_AUTH === "true") {
+      mongoDBUri = `mongodb://${APP_MONGO_USERNAME || MONGO_INITDB_ROOT_USERNAME}:${APP_MONGO_PASSWORD || MONGO_INITDB_ROOT_PASSWORD}@${DB_HOST}:${DB_PORT}/${DATABASE_NAME}?authSource=admin`;
+    } else {
+      mongoDBUri = `mongodb://${DB_HOST}:${DB_PORT}/${DATABASE_NAME}`;
+    }
+  }
+
+  try {
+    await connect(mongoDBUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("Successfully connected to MongoDB");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    throw error;
+  }
 }
 
 export async function createUser(username, email, password) {
@@ -50,7 +81,7 @@ export async function updateUserById(userId, username, email, password) {
         password,
       },
     },
-    { new: true },  // return the updated user
+    { new: true },
   );
 }
 
@@ -62,7 +93,7 @@ export async function updateUserPrivilegeById(userId, isAdmin) {
         isAdmin,
       },
     },
-    { new: true },  // return the updated user
+    { new: true },
   );
 }
 
