@@ -8,8 +8,6 @@ import { connectToDatabase } from './utils/database';
 import { errorHandler } from './middlewares/errorHandler';
 import { populateQuestions } from './utils/populateQuestions';
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 connectToDatabase();
