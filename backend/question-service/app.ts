@@ -8,8 +8,6 @@ import { connectToDatabase } from './utils/database';
 import { errorHandler } from './middlewares/errorHandler';
 import { populateQuestions } from './utils/populateQuestions';
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 connectToDatabase();
@@ -20,13 +18,7 @@ const app: Express = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin.match(/localhost/) || origin.match(/127\.0\.0\.1/)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*', // Allows all origins
   credentials: true,
 }));
 

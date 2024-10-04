@@ -10,7 +10,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
@@ -19,6 +18,7 @@ app.options("*", cors());
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
     return res.status(200).json({});
@@ -65,8 +65,8 @@ if (true) {
   };
 
   const swaggerDocs = swaggerJsDoc(swaggerOptions);
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-  console.log(`Swagger API Docs available at http://localhost:${port}/api-docs`);
+  app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  console.log(`Swagger API Docs available at http://localhost:${port}/users/swagger`);
 }
 
 
@@ -80,7 +80,11 @@ app.get("/", (req, res, next) => {
     message: "Hello World from user-service",
   });
 });
-
+// Middleware to log incoming requests
+app.use((req, res, next) => {
+  console.log(`Incoming request - Method: ${req.method}, Path: ${req.path}, Body: ${JSON.stringify(req.body)}`);
+  next();
+});
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 
@@ -98,6 +102,7 @@ app.use((error, req, res, next) => {
     },
   });
 });
+
 
 export default app;
 export { port };
