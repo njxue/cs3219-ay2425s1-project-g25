@@ -8,6 +8,8 @@ export const MESSAGES = {
     WORKING_AREA_TITLE: "Working Area",
     WORKING_AREA_DESCRIPTION:
         "This is where you'll work on the selected question.",
+    SIGN_IN_PROMPT: "Already have an account? Sign in now!",
+    SIGN_UP_PROMPT: "Don't have an account? Sign up now!",
 };
 
 export const HASH = {

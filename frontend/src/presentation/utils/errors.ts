@@ -25,3 +25,10 @@ export class QuestionError extends AppError {
         this.name = 'QuestionError';
     }
 }
+
+export class AuthenticationError extends AppError {
+    constructor(message: string) {
+        super(message);
+        this.name = 'AuthenticationError';
+    }
+}
