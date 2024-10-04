@@ -14,6 +14,25 @@ services:
         networks:
             - peerprep-network
 
+    # Question Service
+    question-service:
+        build: 
+            context: ./backend/question-service
+            target: dev
+        container_name: question-service
+        ports:
+            - "3002:3002"
+        volumes:
+            - ./backend/question-service:/app
+            - /app/node_modules
+        env_file:
+            - ./backend/question-service/.env
+        environment:
+            DB_HOST: peerprep-mongodb # Override localhost
+        depends_on:
+            - peerprep-mongodb
+        networks:
+            - peerprep-network
 
     # Database Service
     peerprep-mongodb:
@@ -28,6 +47,22 @@ services:
         volumes:
             - ./data/db:/data/db
             - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+        networks:
+            - peerprep-network
+
+    # Frontend Service
+    frontend:
+        build: ./frontend
+        container_name: frontend
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./frontend:/app
+            - /app/node_modules
+        env_file:
+            - ./frontend/.env
+        depends_on:
+            - question-service # To change to gateway-service
         networks:
             - peerprep-network
 
