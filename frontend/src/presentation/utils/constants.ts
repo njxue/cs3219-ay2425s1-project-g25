@@ -5,7 +5,7 @@ export const ROUTES = {
 };
 
 export const MESSAGES = {
-    WORKING_AREA_TITLE: "Working Areaxxx",
+    WORKING_AREA_TITLE: "Working Area",
     WORKING_AREA_DESCRIPTION:
         "This is where you'll work on the selected question.",
 };
@@ -56,9 +56,9 @@ export const FILTER_DIFFICULTY_TEXT = {
 };
 
 export const LANDING_CARD_TEXT = {
-    WELCOME: "Welcome to the Questiona",
+    WELCOME: "Welcome to the Question Workspace",
     INSTRUCTIONS:
-        "Select a questionxx from the list or add a new question to get started.",
+        "Select a question from the list or add a new question to get started.",
     ADD_QUESTION: "Add a new question",
 };
 
