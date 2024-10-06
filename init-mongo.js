@@ -1,6 +1,5 @@
 const resetAllDatabases = true;
 
-// I don't think init-mongo.js accepts .env?
 const MONGO_INITDB_ROOT_USERNAME = "admin";
 const MONGO_INITDB_ROOT_PASSWORD = "password";
 const PEERPREP_QUESTION_INITDB_NAME = "peerprepQuestionServiceDB";
@@ -41,7 +40,6 @@ categories.forEach(category => {
     }
 });
 
-// I copied this directly from questions.json
 const questions = 
 [
     {
