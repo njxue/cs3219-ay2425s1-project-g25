@@ -11,9 +11,11 @@ import { ProfileContainer } from 'presentation/components/ProfileContainer';
 import { Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { RecentAttemptsTable } from 'presentation/components/RecentAttemptsTable';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
     const { user } = useUser();
+    const navigate = useNavigate();
 
     return (
         <div className={styles.container}>
@@ -31,6 +33,7 @@ const HomePage: React.FC = () => {
             <div className={styles.rightContainer}>
                 <ProfileContainer />
                 <RecentAttemptsTable />
+                <Button onClick={() => navigate('/questions')} type="primary" className={styles.button}>Go to questions</Button>
             </div>
         </div>
     )

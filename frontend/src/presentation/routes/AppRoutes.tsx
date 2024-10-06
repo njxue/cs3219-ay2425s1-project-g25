@@ -13,7 +13,7 @@ const AppRoutes: React.FC = () => {
         <UserProvider>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<Navigate to="/questions" />} />
+                    <Route path="/" element={<Navigate to="/login" />} />
                     <Route path="/questions" element={<QuestionsPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
