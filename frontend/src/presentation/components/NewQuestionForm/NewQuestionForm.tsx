@@ -53,10 +53,6 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
         fetchCategories();
     }, []);
 
-    useEffect(() => {
-        form.setFieldValue(FIELD_DESCRIPTION, description)
-    }, [description])
-
     async function handleSubmit(question: IQuestionInput) {
         try {
             const selectedCategoryIds = form.getFieldValue("categories");
