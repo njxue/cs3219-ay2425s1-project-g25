@@ -62,7 +62,7 @@ services:
         env_file:
             - ./frontend/.env
         depends_on:
-            - question-service
+            - nginx
         networks:
             - peerprep-network
         environment:
