@@ -22,6 +22,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
+    const [description, setDescription] = useState<string>(initialQuestionInput?.description)
 
     const validateMessages = {
         required: "${label} is required",
@@ -51,6 +52,10 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
 
         fetchCategories();
     }, []);
+
+    useEffect(() => {
+        form.setFieldValue(FIELD_DESCRIPTION, description)
+    }, [description])
 
     async function handleSubmit(question: IQuestionInput) {
         try {
@@ -141,10 +146,8 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
                             rules={[{ required: true, whitespace: true }]}
                         >
                             <ReactMarkdown
-                                value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
-                                onChange={(description) =>
-                                    form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
-                                }
+                                value={description}
+                                onChange={(description) => setDescription(description || "")}
                             />
                         </Form.Item>
                     </Col>
