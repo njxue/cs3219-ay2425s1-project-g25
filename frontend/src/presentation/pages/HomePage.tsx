@@ -1,19 +1,17 @@
 import styles from './HomePage.module.css';
-import { useUser } from "domain/contexts/userContext";
 import React from "react";
 import { FindPeerButton } from 'presentation/components/buttons/FindPeerButton';
-import { Dropdown, Button } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import type { MenuProps } from 'antd';
+import { Button } from "antd";
 import { CategoriesDropdown } from 'presentation/components/CategoriesDropdown';
 import { DifficultiesDropdown } from 'presentation/components/DifficultiesDropdown';
 import { ProfileContainer } from 'presentation/components/ProfileContainer';
 import { Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { RecentAttemptsTable } from 'presentation/components/RecentAttemptsTable';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
-    const { user } = useUser();
+    const navigate = useNavigate();
 
     return (
         <div className={styles.container}>
@@ -31,6 +29,7 @@ const HomePage: React.FC = () => {
             <div className={styles.rightContainer}>
                 <ProfileContainer />
                 <RecentAttemptsTable />
+                <Button onClick={() => navigate('/questions')} type="primary" className={styles.button}>Go to questions</Button>
             </div>
         </div>
     )
