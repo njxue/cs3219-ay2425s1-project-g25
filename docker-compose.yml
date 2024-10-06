@@ -62,9 +62,13 @@ services:
         env_file:
             - ./frontend/.env
         depends_on:
-            - question-service # To change to gateway-service
+            - question-service
         networks:
             - peerprep-network
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+            - WATCHPACK_POLLING=true
+            - WDS_SOCKET_PORT=0
 
     # Nginx API Gateway
     nginx:
