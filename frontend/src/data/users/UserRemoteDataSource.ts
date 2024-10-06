@@ -17,7 +17,7 @@ export class UserRemoteDataSource extends BaseApi {
         const payload = {
             ...user
         }
-        return await this.post<any>('/users', payload);
+        return await this.post<any>('/users/', payload);
     }
 
     /**

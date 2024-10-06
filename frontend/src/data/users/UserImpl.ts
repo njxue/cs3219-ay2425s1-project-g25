@@ -2,7 +2,7 @@ import { IUser, IUserRegisterInput } from "domain/users/IUser";
 import { mockUser } from "./mockUser";
 import { userRemoteDataSource } from "./UserRemoteDataSource";
 
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 export class UserImpl implements IUser {
     private dataSource = USE_MOCK_API ? mockUser : userRemoteDataSource;
 
