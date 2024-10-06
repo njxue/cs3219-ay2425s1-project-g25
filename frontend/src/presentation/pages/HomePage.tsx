@@ -1,10 +1,7 @@
 import styles from './HomePage.module.css';
-import { useUser } from "domain/contexts/userContext";
 import React from "react";
 import { FindPeerButton } from 'presentation/components/buttons/FindPeerButton';
-import { Dropdown, Button } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import type { MenuProps } from 'antd';
+import { Button } from "antd";
 import { CategoriesDropdown } from 'presentation/components/CategoriesDropdown';
 import { DifficultiesDropdown } from 'presentation/components/DifficultiesDropdown';
 import { ProfileContainer } from 'presentation/components/ProfileContainer';
@@ -14,7 +11,6 @@ import { RecentAttemptsTable } from 'presentation/components/RecentAttemptsTable
 import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
-    const { user } = useUser();
     const navigate = useNavigate();
 
     return (
