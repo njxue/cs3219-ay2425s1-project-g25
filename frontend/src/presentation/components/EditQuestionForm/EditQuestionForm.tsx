@@ -24,6 +24,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
+    const [description, setDescription] = useState<string>(question.description)
 
     const validateMessages = {
         required: "${label} is required",
@@ -180,10 +181,8 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                                 rules={[{ required: true, whitespace: true }]}
                             >
                                 <ReactMarkdown
-                                    value={form.getFieldValue(FIELD_DESCRIPTION.name) || ""}
-                                    onChange={(description) =>
-                                        form.setFieldValue(FIELD_DESCRIPTION.name, description || "")
-                                    }
+                                    value={description}
+                                    onChange={(description) => setDescription(description || "")}
                                 />
                             </Form.Item>
                         </Col>
