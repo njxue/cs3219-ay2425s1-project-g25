@@ -28,7 +28,6 @@ export const CategoriesDropdown: React.FC = () => {
                         key: index,
                     }))
                 );
-                console.log(validCategories);
             } catch (error) {
                 console.error("Failed to fetch categories", error);
                 message.error("Failed to fetch categories.");
