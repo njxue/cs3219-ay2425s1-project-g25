@@ -31,7 +31,6 @@ const HomePage: React.FC = () => {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isMatching, setIsMatching] = useState(false);
-    const [matchFound, setMatchFound] = useState(false);
     const [counter, setCounter] = useState(30);
 
     const handleFiltersChange = (newFilters: {
@@ -45,7 +44,6 @@ const HomePage: React.FC = () => {
     const handleFindPeerClick = () => {
         setIsModalVisible(true);
         setIsMatching(true);
-        setMatchFound(false);
         setCounter(3);
     };
 
@@ -59,7 +57,6 @@ const HomePage: React.FC = () => {
         if (counter === 0) {
             // Simulate finding a match after countdown reaches 0
             setIsMatching(false);
-            setMatchFound(true);
         }
 
         return () => {
@@ -70,7 +67,6 @@ const HomePage: React.FC = () => {
     const handleModalClose = () => {
         setIsModalVisible(false);
         setIsMatching(false);
-        setMatchFound(false);
     };
 
     return (
@@ -92,12 +88,7 @@ const HomePage: React.FC = () => {
                 <ProfileContainer />
                 <RecentAttemptsTable />
             </div>
-            <MatchingModal
-                visible={isModalVisible}
-                onClose={handleModalClose}
-                isMatching={isMatching}
-                matchFound={matchFound}
-            />
+            <MatchingModal visible={isModalVisible} onClose={handleModalClose} simulateFoundOrFail={"found" } />
         </div>
     );
 };
