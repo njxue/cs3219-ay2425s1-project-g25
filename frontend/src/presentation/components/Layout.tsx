@@ -19,7 +19,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
         <AntLayout className={styles.layout}>
             <Header className={styles.header}>
-                <img src={PeerPrepLogo} alt="PeerPrep Logo" width="10%" />
+                <div onClick={navigateHome} style={{ cursor: "pointer" }}>
+                    <img src={PeerPrepLogo} alt="PeerPrep Logo" width="15%" />
+                </div>
                 {location.pathname !== "/" && (
                     <ArrowLeftOutlined onClick={navigateHome} className={styles.backButton} />
                 )}
