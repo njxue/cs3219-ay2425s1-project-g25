@@ -75,6 +75,23 @@ export class MockUser {
             }
         });
     }
+
+    async logoutUser(userId: string) {
+        return new Promise((resolve, reject) => {
+            try {
+                const foundUser = this.users.find((u) => u._id === userId);
+                if (!foundUser) {
+                    resolve({ message: "User is not logged in" });
+                } else {
+                    resolve({
+                        message: "User logged out"
+                    });
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
 
 export const mockUser = new MockUser();

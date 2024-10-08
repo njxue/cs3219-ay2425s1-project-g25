@@ -13,4 +13,5 @@ export interface IUserLoginInput {
 export interface IUser {
     registerUser(user: IUserRegisterInput): Promise<any>;
     loginUser(user: IUserLoginInput): Promise<any>;
+    logoutUser(userId: string): Promise<any>
 }

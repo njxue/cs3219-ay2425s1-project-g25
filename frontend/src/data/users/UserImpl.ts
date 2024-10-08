@@ -13,6 +13,10 @@ export class UserImpl implements IUser {
     async loginUser(user: IUserRegisterInput): Promise<any> {
         return this.dataSource.loginUser(user);
     }
+
+    async logoutUser(userId: string): Promise<any> {
+        return this.dataSource.logoutUser(userId)
+    }
 }
 
 export const userImpl = new UserImpl();

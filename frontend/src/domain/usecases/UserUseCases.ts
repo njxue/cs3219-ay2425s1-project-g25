@@ -4,7 +4,7 @@ import { IUser, IUserRegisterInput, IUserLoginInput } from "domain/users/IUser";
 import { AuthenticationError } from "presentation/utils/errors";
 
 export class UserUseCases {
-    constructor(private user: IUser) { }
+    constructor(private user: IUser) {}
 
     /**
      * Registers a new user.
@@ -20,7 +20,7 @@ export class UserUseCases {
             email,
             password
         };
-        const data =  await this.user.registerUser(userInput);
+        const data = await this.user.registerUser(userInput);
         if (!data.data) {
             throw new AuthenticationError(data.message);
         }
@@ -44,6 +44,10 @@ export class UserUseCases {
             throw new AuthenticationError(data.message);
         }
         return data.data;
+    }
+
+    async logoutUser(userId: string): Promise<any> {
+        return await this.user.logoutUser(userId);
     }
 }
 

@@ -42,7 +42,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        if (!user) {
+            // TODO: proper handling
+            return;
+        }
+        const res = await userUseCases.logoutUser(user._id);
+        console.log(res);
         localStorage.removeItem("user");
         setUser(null);
         setIsLoggedIn(false);

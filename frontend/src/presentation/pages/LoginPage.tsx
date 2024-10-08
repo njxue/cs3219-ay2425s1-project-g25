@@ -7,7 +7,6 @@ import { Navigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
     const { isLoggedIn } = useAuth();
-    console.log(isLoggedIn);
     return isLoggedIn === undefined ? (
         <p>Loading...</p>
     ) : isLoggedIn ? (
