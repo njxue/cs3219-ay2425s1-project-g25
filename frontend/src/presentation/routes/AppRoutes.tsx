@@ -8,6 +8,8 @@ import LoginPage from "presentation/pages/LoginPage";
 import HomePage from "presentation/pages/HomePage";
 import { ProtectedRoute } from "presentation/pages/ProtectedRoute";
 import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
+import { UserProvider } from "domain/contexts/userContext";
+import { MatchmakingProvider } from "application/context/MatchmakingContext";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -32,6 +34,18 @@ const AppRoutes: React.FC = () => {
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </Layout>
+            <MatchmakingProvider>
+                <Layout>
+                    <Routes>
+                        <Route path="/questions" element={<QuestionsPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Layout>
+            </MatchmakingProvider>
+        </UserProvider>
     );
 };
 
