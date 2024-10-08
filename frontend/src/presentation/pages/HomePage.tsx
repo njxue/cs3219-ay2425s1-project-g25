@@ -7,6 +7,7 @@ import { ProfileContainer } from "presentation/components/ProfileContainer";
 import { RecentAttemptsTable } from "presentation/components/RecentAttemptsTable";
 import { CustomTooltip } from "presentation/components/common/CustomTooltip";
 import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useUser } from "domain/contexts/userContext";
 import { FindPeerButton } from "presentation/components/buttons/FindPeerButton";
 import { Tooltip } from "antd";
@@ -17,15 +18,66 @@ import { QuestionFilters } from "presentation/components/QuestionFilters";
 import { Category } from "domain/entities/Category";
 import styles from "./HomePage.module.css";
 import { SelectedCategories } from "presentation/components/SelectedCategories";
+import { MatchingModal } from "presentation/components/modals/MatchingModal";
 
 const HomePage: React.FC = () => {
     const { user } = useUser();
+
+    const [filters, setFilters] = useState({
+        selectedDifficulty: "All",
+        selectedCategories: [] as Category[],
+        searchTerm: ""
+    });
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isMatching, setIsMatching] = useState(false);
+    const [matchFound, setMatchFound] = useState(false);
+    const [counter, setCounter] = useState(30);
+
+    const handleFiltersChange = (newFilters: {
+        selectedDifficulty: string;
+        selectedCategories: Category[];
+        searchTerm: string;
+    }) => {
+        setFilters(newFilters);
+    };
+
+    const handleFindPeerClick = () => {
+        setIsModalVisible(true);
+        setIsMatching(true);
+        setMatchFound(false);
+        setCounter(3);
+    };
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout | undefined;
+        if (isModalVisible && counter > 0) {
+            timer = setInterval(() => {
+                setCounter((prevCounter) => prevCounter - 1);
+            }, 1000);
+        }
+        if (counter === 0) {
+            // Simulate finding a match after countdown reaches 0
+            setIsMatching(false);
+            setMatchFound(true);
+        }
+
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [isModalVisible, counter]);
+
+    const handleModalClose = () => {
+        setIsModalVisible(false);
+        setIsMatching(false);
+        setMatchFound(false);
+    };
 
     return (
         <div className={styles.container}>
             <div className={styles.leftContainer}>
                 <h1 className={styles.headline}>Find a peer and practice together!</h1>
-                <FindPeerButton />
+                <FindPeerButton onClick={handleFindPeerClick} />
                 <div className={styles.selectRow}>
                     <QuestionFilters onFiltersChange={handleFiltersChange} showSearchBar={false} />
                 </div>
@@ -40,6 +92,12 @@ const HomePage: React.FC = () => {
                 <ProfileContainer />
                 <RecentAttemptsTable />
             </div>
+            <MatchingModal
+                visible={isModalVisible}
+                onClose={handleModalClose}
+                isMatching={isMatching}
+                matchFound={matchFound}
+            />
         </div>
     );
 };
