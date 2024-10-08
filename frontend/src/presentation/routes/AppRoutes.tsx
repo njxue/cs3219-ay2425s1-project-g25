@@ -11,6 +11,13 @@ import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
 
 const AppRoutes: React.FC = () => {
     return (
+        <UserProvider>
+            <Layout>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/home" />} />
+                    <Route path="/questions" element={<QuestionsPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/login" element={<LoginPage />} />
         <Layout>
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
