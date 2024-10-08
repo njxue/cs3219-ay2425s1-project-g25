@@ -34,6 +34,26 @@ services:
         networks:
             - peerprep-network
 
+    # Matching Service
+    matching-service:
+        build: 
+            context: ./backend/matching-service
+            target: dev
+        container_name: matching-service
+        ports:
+            - "3003:3003"
+        volumes:
+            - ./backend/matching-service:/app
+            - /app/node_modules
+        env_file:
+            - ./backend/matching-service/.env
+        environment:
+            DB_HOST: peerprep-mongodb # Override localhost
+        depends_on:
+            - peerprep-mongodb
+        networks:
+            - peerprep-network
+
     # Database Service
     peerprep-mongodb:
         image: mongo:latest
