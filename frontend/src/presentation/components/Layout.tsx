@@ -27,7 +27,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const handleBackClick = () => {
+    const navigateHome = () => {
         navigate("/");
     };
 
@@ -37,8 +37,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <img src={PeerPrepLogo} alt="PeerPrep Logo" width="7%" />
                 {isLoggedIn && <LogoutOutlined onClick={handleLogout} />}
                 <img src={PeerPrepLogo} alt="PeerPrep Logo" width="7%" />
+                <div onClick={navigateHome} style={{ cursor: "pointer" }}>
+                    <img src={PeerPrepLogo} alt="PeerPrep Logo" width="7%" />
+                </div>
                 {location.pathname !== "/" && (
-                    <ArrowLeftOutlined onClick={handleBackClick} className={styles.backButton} />
+                    <ArrowLeftOutlined onClick={navigateHome} className={styles.backButton} />
                 )}
             </Header>
             <Content className={styles.content}>
