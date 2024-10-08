@@ -7,20 +7,22 @@ import RegisterPage from "presentation/pages/RegisterPage";
 import LoginPage from "presentation/pages/LoginPage";
 import HomePage from "presentation/pages/HomePage";
 import { UserProvider } from "domain/contexts/userContext";
+import { MatchmakingProvider } from "application/context/MatchmakingContext";
 
 const AppRoutes: React.FC = () => {
     return (
         <UserProvider>
-            <Layout>
-                <Routes>
-                    <Route path="/" element={<Navigate to="/home" />} />
-                    <Route path="/questions" element={<QuestionsPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/home" element={<HomePage />} />
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
-            </Layout>
+            <MatchmakingProvider>
+                <Layout>
+                    <Routes>
+                        <Route path="/questions" element={<QuestionsPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Layout>
+            </MatchmakingProvider>
         </UserProvider>
     );
 };
