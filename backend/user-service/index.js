@@ -5,11 +5,13 @@ import swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user-routes.js";
 import authRoutes from "./routes/auth-routes.js";
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
 
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
