@@ -33,8 +33,15 @@ export class UserRemoteDataSource extends BaseApi {
     }
 
     async logoutUser(userId: string) {
-        console.log("LOGGINGOUT");
-        return await this.post<any>("/auth/logout", { userId });
+        return await this.protectedPost<any>("/auth/logout", { userId });
+    }
+
+    async refreshToken() {
+        return await this.protectedGet<any>("/auth/refresh");
+    }
+
+    async verifyToken() {
+        return await this.protectedGet<any>("/auth/verify-token");
     }
 }
 

@@ -34,7 +34,7 @@ export class UserUseCases {
      * @returns Promise resolving with the authenticated user.
      * @throws AuthenticationError if the email or password is incorrect.
      */
-    async loginUser(email: string, password: string): Promise<User> {
+    async loginUser(email: string, password: string): Promise<{ accessToken: string; user: User }> {
         const userInput: IUserLoginInput = {
             email,
             password
@@ -48,6 +48,14 @@ export class UserUseCases {
 
     async logoutUser(userId: string): Promise<any> {
         return await this.user.logoutUser(userId);
+    }
+
+    async refreshToken(): Promise<any> {
+        return await this.user.refreshToken();
+    }
+
+    async verifyToken(): Promise<any> {
+        return await this.user.verifyToken();
     }
 }
 

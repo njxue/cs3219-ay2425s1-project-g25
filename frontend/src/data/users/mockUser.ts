@@ -92,6 +92,20 @@ export class MockUser {
             }
         });
     }
+
+    async refreshToken() {
+        return { accessToken: "TOKEN" };
+    }
+
+    async verifyToken() {
+        return new Promise((resolve, reject) => {
+            try {
+                resolve({ message: "token verified" });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
 
 export const mockUser = new MockUser();

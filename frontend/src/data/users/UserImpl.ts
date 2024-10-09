@@ -15,7 +15,15 @@ export class UserImpl implements IUser {
     }
 
     async logoutUser(userId: string): Promise<any> {
-        return this.dataSource.logoutUser(userId)
+        return this.dataSource.logoutUser(userId);
+    }
+
+    async refreshToken(): Promise<any> {
+        return this.dataSource.refreshToken();
+    }
+
+    async verifyToken(): Promise<any> {
+        return this.dataSource.verifyToken();
     }
 }
 

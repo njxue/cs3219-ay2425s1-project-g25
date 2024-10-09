@@ -1,6 +1,7 @@
 import { User } from "domain/entities/User";
 import { userUseCases } from "domain/usecases/UserUseCases";
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import AuthClientStore from "data/auth/AuthClientStore";
 
 interface AuthContextType {
     user: User | null;
@@ -9,6 +10,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<User>;
     logout: () => void;
     register: (email: string, password: string, username: string) => Promise<User>;
+    refresh: () => any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,24 +20,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | undefined>(undefined);
 
     useEffect(() => {
-        const loggedInUserString = localStorage.getItem("user");
-        if (loggedInUserString != null) {
-            const loggedInUserObj = JSON.parse(loggedInUserString);
-            setUser(loggedInUserObj);
-            setIsLoggedIn(true);
-        } else {
-            setUser(null);
+        const verifyAccessToken = async () => {
+            const res = await userUseCases.verifyToken();
+            const user = res.data;
+            if (!user) {
+                setUser(null);
+                setIsLoggedIn(false);
+            } else {
+                setIsLoggedIn(true);
+                setUser(user);
+            }
+        };
+        if (!AuthClientStore.containsAccessToken()) {
             setIsLoggedIn(false);
+            setUser(null);
+        } else {
+            verifyAccessToken();
         }
     }, []);
 
     const login = async (email: string, password: string): Promise<User> => {
         try {
-            const userData = await userUseCases.loginUser(email, password);
-            localStorage.setItem("user", JSON.stringify(userData));
-            setUser(userData);
+            const userAndAccessToken = await userUseCases.loginUser(email, password);
+            const user = userAndAccessToken.user;
+            const accessToken = userAndAccessToken.accessToken;
+            setUser(user);
             setIsLoggedIn(true);
-            return userData;
+            AuthClientStore.setAccessToken(accessToken);
+            return user;
         } catch (err) {
             console.error(err);
             throw err;
@@ -48,8 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
         const res = await userUseCases.logoutUser(user._id);
-        console.log(res);
-        localStorage.removeItem("user");
+        AuthClientStore.removeAccessToken();
         setUser(null);
         setIsLoggedIn(false);
     };
@@ -57,9 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const register = async (email: string, password: string, username: string): Promise<User> => {
         try {
             const userData = await userUseCases.registerUser(username, email, password);
-            localStorage.setItem("user", JSON.stringify(userData));
-            setUser(userData);
-            setIsLoggedIn(true);
             return userData;
         } catch (err) {
             console.error(err);
@@ -69,8 +77,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const isUserAdmin = isLoggedIn === true && user != null && user.isAdmin;
 
+    // SHOULD DELETE
+    const refresh = async () => {
+        try {
+            const data = await userUseCases.refreshToken();
+            const newAccessToken = data.accessToken;
+            console.log(newAccessToken);
+            localStorage.setItem("user", JSON.stringify({}));
+            return newAccessToken;
+        } catch (err) {
+            console.error(err);
+        }
+    };
     return (
-        <AuthContext.Provider value={{ user, isLoggedIn, isUserAdmin, login, logout, register }}>
+        <AuthContext.Provider value={{ user, isLoggedIn, isUserAdmin, login, logout, register, refresh }}>
             {children}
         </AuthContext.Provider>
     );
