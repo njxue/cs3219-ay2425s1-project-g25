@@ -34,7 +34,7 @@ export async function handleLogin(req, res) {
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: false,
-        sameSite: "None",
+        sameSite: "Lax", // Set to secure=true, sameSite: None in prod
       });
 
       // Save the refresh token in db
@@ -65,7 +65,11 @@ export async function handleLogout(req, res) {
       }
 
       // Destroy refreshToken in cookie
-      res.clearCookie("refreshToken");
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax", // Set to secure=true, sameSite: None in prod
+      });
 
       // Invalidate refresh token
       await invalidateRefreshToken(user.id);
@@ -103,8 +107,13 @@ export async function refresh(req, res) {
     const dbRefreshToken = dbUser.refreshToken;
 
     // Validate refresh token same value as the one in db; check for token revocation
-    if (!dbRefreshToken || dbRefreshToken !== refreshToken) {
-      return res.status(403).json({ message: "Forbidden" });
+    if (!dbRefreshToken) {
+      return res.status(403).json({ message: "Forbidden: Missing refresh token in db" });
+    }
+
+    const refreshTokensMatch = await bcrypt.compare(refreshToken, dbRefreshToken);
+    if (!refreshTokensMatch) {
+      return res.status(403).json({ message: "Forbidden: Invalid refresh token" });
     }
     const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, {
       expiresIn: "10s", // TODO: Short live for testing

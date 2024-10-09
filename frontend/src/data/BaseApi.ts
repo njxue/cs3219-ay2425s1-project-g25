@@ -38,28 +38,29 @@ export class BaseApi {
         };
 
         const protectedResErrMiddleware = async (err: AxiosError) => {
-            const prevRequest = err?.config as { [key: string]: any };
-            if (err?.response?.status === 403 && !prevRequest._retry) {
+            const prevRequest = err?.config;
+            if (prevRequest && err?.response?.status === 403) {
                 try {
-                    prevRequest._retry = true;
+                    // Eject to prevent infinite loop
+                    this.protectedAxiosInstance.interceptors.response.eject(id);
                     const res = await userUseCases.refreshToken();
-
-                    const newAccessToken = res.data.accessToken;
+                    const newAccessToken = res.data;
                     prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-                    //console.log(newAccessToken);
                     AuthClientStore.setAccessToken(newAccessToken);
-                    return await this.protectedAxiosInstance(prevRequest);
+                    return this.protectedAxiosInstance(prevRequest);
                 } catch (err) {
                     console.log(err);
                     return Promise.reject(err);
                 }
             }
-
             return Promise.reject(err);
         };
 
         this.protectedAxiosInstance.interceptors.request.use(protectedReqConfigMiddleware, protectedReqErrMiddleware);
-        this.protectedAxiosInstance.interceptors.response.use((response) => response, protectedResErrMiddleware);
+        const id = this.protectedAxiosInstance.interceptors.response.use(
+            (response) => response,
+            protectedResErrMiddleware
+        );
     }
 
     protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
