@@ -78,7 +78,7 @@ export async function refresh(req, res) {
     }
     const dbUser = await _findUserById(user.id);
     if (!dbUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(401).json({ message: "Unauthorized: User not found" });
     }
     const accessToken = jwt.sign({ id: user.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
     return res.status(200).json({

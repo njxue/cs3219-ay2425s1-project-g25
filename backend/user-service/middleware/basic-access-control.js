@@ -19,7 +19,7 @@ export function verifyAccessToken(req, res, next) {
 
     const dbUser = await _findUserById(user.id);
     if (!dbUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
     req.user = { id: dbUser.id, username: dbUser.username, email: dbUser.email, isAdmin: dbUser.isAdmin };
