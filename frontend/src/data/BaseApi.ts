@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import API_URL from "../config";
 import { userUseCases } from "domain/usecases/UserUseCases";
 import AuthClientStore from "./auth/AuthClientStore";
@@ -6,9 +6,18 @@ import AuthClientStore from "./auth/AuthClientStore";
 export class BaseApi {
     private axiosInstance: AxiosInstance;
     private protectedAxiosInstance: AxiosInstance;
+    private protectedRequestInterceptorId: number;
+    private protectedResponseInterceptorId: number;
 
     constructor(baseUrl: string) {
-        this.axiosInstance = axios.create({
+        this.axiosInstance = this.createAxiosInstance(baseUrl);
+        this.protectedAxiosInstance = this.createAxiosInstance(baseUrl);
+        this.protectedRequestInterceptorId = this.setUpRequestInterceptors(this.protectedAxiosInstance);
+        this.protectedResponseInterceptorId = this.setUpResponseInterceptors(this.protectedAxiosInstance);
+    }
+
+    private createAxiosInstance(baseUrl: string): AxiosInstance {
+        return axios.create({
             baseURL: API_URL + baseUrl,
             timeout: 10000,
             headers: {
@@ -16,50 +25,43 @@ export class BaseApi {
             },
             withCredentials: true
         });
-        this.protectedAxiosInstance = axios.create({
-            baseURL: API_URL + baseUrl,
-            timeout: 10000,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            withCredentials: true
-        });
+    }
 
-        const protectedReqConfigMiddleware = (req: any) => {
-            if (!req.headers["Authorization"]) {
-                const accessToken = AuthClientStore.getAccessToken();
-                req.headers["Authorization"] = `Bearer ${accessToken}`;
-            }
-            return req;
-        };
-
-        const protectedReqErrMiddleware = (err: AxiosError) => {
-            return Promise.reject(err);
-        };
-
-        const protectedResErrMiddleware = async (err: AxiosError) => {
-            const prevRequest = err?.config;
-            if (prevRequest && err?.response?.status === 403) {
-                try {
-                    // Eject to prevent infinite loop
-                    this.protectedAxiosInstance.interceptors.response.eject(id);
-                    const res = await userUseCases.refreshToken();
-                    const newAccessToken = res.data;
-                    prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-                    AuthClientStore.setAccessToken(newAccessToken);
-                    return this.protectedAxiosInstance(prevRequest);
-                } catch (err) {
-                    console.log(err);
-                    return Promise.reject(err);
+    private setUpRequestInterceptors(axiosInstance: AxiosInstance): number {
+        return axiosInstance.interceptors.request.use(
+            (req: InternalAxiosRequestConfig) => {
+                if (!req.headers["Authorization"]) {
+                    const accessToken = AuthClientStore.getAccessToken();
+                    req.headers["Authorization"] = `Bearer ${accessToken}`;
                 }
-            }
-            return Promise.reject(err);
-        };
+                return req;
+            },
+            (err: AxiosError) => Promise.reject(err)
+        );
+    }
 
-        this.protectedAxiosInstance.interceptors.request.use(protectedReqConfigMiddleware, protectedReqErrMiddleware);
-        const id = this.protectedAxiosInstance.interceptors.response.use(
-            (response) => response,
-            protectedResErrMiddleware
+    private setUpResponseInterceptors(axiosInstance: AxiosInstance): number {
+        return axiosInstance.interceptors.response.use(
+            (response: AxiosResponse) => response,
+            async (err: AxiosError) => {
+                const prevRequest = err?.config;
+                if (prevRequest && err?.response?.status === 403) {
+                    try {
+                        // Eject to prevent infinite loop
+                        this.protectedAxiosInstance.interceptors.response.eject(this.protectedResponseInterceptorId);
+                        const res = await userUseCases.refreshToken();
+                        const newAccessToken = res.data;
+                        prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+                        AuthClientStore.setAccessToken(newAccessToken);
+                        return this.protectedAxiosInstance(prevRequest);
+                    } catch (error) {
+                        // Refresh token expired/invalid
+                        console.error(error);
+                        return Promise.reject(error);
+                    }
+                }
+                return Promise.reject(err);
+            }
         );
     }
 
