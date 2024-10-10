@@ -47,17 +47,12 @@ export class UserUseCases {
     }
 
     /**
-     * Logs the user out
-     * @param userId - id of the user
-     * @returns Promise resolving with the success message
-     * @throws AuthenticationError if logout fails
+     * Logs the user out by invalidating their session.
+     * @param userId - The ID of the user to log out.
+     * @returns Promise that resolves when the logout is successful.
      */
-    async logoutUser(userId: string): Promise<string> {
-        const data = await this.user.logoutUser(userId);
-        if (!data.data) {
-            throw new AuthenticationError(data.message);
-        }
-        return data.data;
+    async logoutUser(userId: string): Promise<void> {
+        return await this.user.logoutUser(userId);
     }
 
     /**

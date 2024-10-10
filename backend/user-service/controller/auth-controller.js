@@ -38,20 +38,10 @@ export async function handleLogin(req, res) {
 
 export async function handleLogout(req, res) {
   try {
-    if (!req.cookies[REFRESH_TOKEN_COOKIE_KEY]) {
-      return res.sendStatus(204);
-    }
-    const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
-    jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
-      if (err) {
-        return res.status(401).json({ message: `Unauthorized: ${err.message}` });
-      }
-
-      // Destroy refreshToken in cookie
+    if (req.cookies[REFRESH_TOKEN_COOKIE_KEY]) {
       res.clearCookie(REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions);
-
-      return res.status(200).json({ message: "Successfully logged out" });
-    });
+    }
+    return res.sendStatus(204);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

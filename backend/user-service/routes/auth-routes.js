@@ -121,17 +121,7 @@ router.get("/verify-token", verifyAccessToken, handleVerifyToken);
  *     summary: User logout
  *     responses:
  *       204:
- *         description: No content (No refresh token present)
- *       200:
- *         description: Successful logout
- *         content:
- *           application/json:
- *             type: object
- *             properties:
- *              message:
- *                type: string
- *       401:
- *         description: Unauthorized - Invalid refresh token
+ *         description: No content
  *       500:
  *         description: Internal server error
  */
@@ -169,6 +159,5 @@ router.post("/logout", handleLogout);
  *         description: Internal server error
  */
 router.get("/refresh", refresh);
-
 
 export default router;
