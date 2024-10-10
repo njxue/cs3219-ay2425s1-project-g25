@@ -40,7 +40,6 @@ export class UserUseCases {
             password
         };
         const data = await this.user.loginUser(userInput);
-        console.log(data);
         if (!data.data) {
             throw new AuthenticationError(data.message);
         }
