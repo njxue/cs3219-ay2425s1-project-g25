@@ -9,12 +9,12 @@ export function verifyAccessToken(req, res, next) {
   }
 
   if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized: No token" });
+    return res.status(401).json({ message: "Unauthorized: no token" });
   }
   const token = authHeader.split(" ")[1];
   jwt.verify(token, jwtConfig.accessTokenSecret, async (err, user) => {
     if (err) {
-      return res.status(401).json({ message: "Forbidden: Token error", error: err.message });
+      return res.status(401).json({ message: `Unauthorized: ${err.message}` });
     }
 
     const dbUser = await _findUserById(user.id);

@@ -44,7 +44,7 @@ export async function handleLogout(req, res) {
     const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
     jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
       if (err) {
-        return res.status(401).json({ message: "Forbidden: Token erroeeeeer", error: err.message });
+        return res.status(401).json({ message: `Unauthorized: ${err.message}` });
       }
 
       // Destroy refreshToken in cookie
@@ -69,16 +69,16 @@ export async function handleVerifyToken(req, res) {
 
 export async function refresh(req, res) {
   if (!req.cookies[[REFRESH_TOKEN_COOKIE_KEY]]) {
-    return res.status(401).json({ message: "Unauthorised: No token" });
+    return res.status(401).json({ message: `Unauthorized: no token` });
   }
   const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
   jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
     if (err) {
-      return res.status(401).json({ message: "Forbidden: Token error" });
+      return res.status(401).json({ message: `Unauthorized: ${err.message}` });
     }
     const dbUser = await _findUserById(user.id);
     if (!dbUser) {
-      return res.status(401).json({ message: "Unauthorised: No such user" });
+      return res.status(404).json({ message: "User not found" });
     }
     const accessToken = jwt.sign({ id: user.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
     return res.status(200).json({
