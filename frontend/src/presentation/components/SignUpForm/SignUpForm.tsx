@@ -15,7 +15,7 @@ export const SignUpForm: React.FC = () => {
         event.preventDefault();
         try {
             await register(email, password, username);
-            navigate("/home");
+            navigate("/login");
         } catch (error) {
             console.error("Failed to register and log in user", error);
             alert(handleError(error, "Failed to register and log in user"));

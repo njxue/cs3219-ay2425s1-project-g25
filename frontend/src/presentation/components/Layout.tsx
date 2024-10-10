@@ -11,9 +11,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const navigate = useNavigate();
     const { isLoggedIn, logout } = useAuth();
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate("/login");
+        } catch (err) {}
     };
     return (
         <AntLayout className={styles.layout}>
