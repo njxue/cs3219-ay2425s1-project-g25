@@ -1,11 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-  findUserByEmail as _findUserByEmail,
-  findUserById as _findUserById,
-  invalidateRefreshToken,
-  updateUserRefreshToken,
-} from "../model/repository.js";
+import { findUserByEmail as _findUserByEmail, findUserById as _findUserById } from "../model/repository.js";
 import { formatUserResponse } from "./user-controller.js";
 
 export async function handleLogin(req, res) {
@@ -37,10 +32,6 @@ export async function handleLogin(req, res) {
         sameSite: "Lax", // Set to secure=true, sameSite: None in prod
       });
 
-      // Save the refresh token in db
-      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-      await updateUserRefreshToken(user.id, hashedRefreshToken);
-
       return res.status(200).json({
         message: "User logged in",
         data: { accessToken, user: { ...formatUserResponse(user) } },
@@ -70,9 +61,6 @@ export async function handleLogout(req, res) {
         secure: false,
         sameSite: "Lax", // Set to secure=true, sameSite: None in prod
       });
-
-      // Invalidate refresh token
-      await invalidateRefreshToken(user.id);
 
       return res.status(200).json({ message: "Successfully logged out" });
     });
@@ -104,17 +92,7 @@ export async function refresh(req, res) {
     if (!dbUser) {
       return res.status(401).json({ message: "Unauthorised: No such user" });
     }
-    const dbRefreshToken = dbUser.refreshToken;
 
-    // Validate refresh token same value as the one in db; check for token revocation
-    if (!dbRefreshToken) {
-      return res.status(403).json({ message: "Forbidden: Missing refresh token in db" });
-    }
-
-    const refreshTokensMatch = await bcrypt.compare(refreshToken, dbRefreshToken);
-    if (!refreshTokensMatch) {
-      return res.status(403).json({ message: "Forbidden: Invalid refresh token" });
-    }
     const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, {
       expiresIn: "10s", // TODO: Short live for testing
     });

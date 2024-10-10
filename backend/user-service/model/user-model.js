@@ -26,10 +26,6 @@ const UserModelSchema = new Schema({
     required: true,
     default: false,
   },
-  refreshToken: {
-    type: String,
-    required: false,
-  },
 });
 
 export default mongoose.model("UserModel", UserModelSchema);
