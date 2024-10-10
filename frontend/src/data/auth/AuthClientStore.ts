@@ -2,7 +2,11 @@ const ACCESS_TOKEN_KEY = "accessToken";
 
 class AuthClientStore {
     static getAccessToken() {
-        return localStorage.getItem(ACCESS_TOKEN_KEY);
+        const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+        if (!accessToken) {
+            throw new Error("No access token");
+        }
+        return accessToken;
     }
     static setAccessToken(token: string) {
         localStorage.setItem(ACCESS_TOKEN_KEY, token);
@@ -11,7 +15,7 @@ class AuthClientStore {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
     }
     static containsAccessToken() {
-        return this.getAccessToken() !== null;
+        return localStorage.hasOwnProperty(ACCESS_TOKEN_KEY);
     }
 }
 
