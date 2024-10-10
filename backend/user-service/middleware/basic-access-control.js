@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { findUserById as _findUserById } from "../model/repository.js";
+import { jwtConfig } from "../config/authConfig.js";
 
 export function verifyAccessToken(req, res, next) {
   const authHeader = req.headers.authorization || req.header.Authorization;
@@ -11,7 +12,7 @@ export function verifyAccessToken(req, res, next) {
     return res.status(401).json({ message: "Unauthorized: No token" });
   }
   const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET, async (err, user) => {
+  jwt.verify(token, jwtConfig.accessTokenSecret, async (err, user) => {
     if (err) {
       return res.status(403).json({ message: "Forbidden: Token error", error: err.message });
     }

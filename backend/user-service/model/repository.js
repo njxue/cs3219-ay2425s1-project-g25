@@ -19,7 +19,7 @@ export async function connectToDB() {
 
   let mongoDBUri = "";
 
-  if (ENV === "PROD") {
+  if (ENV === "production") {
     mongoDBUri = DB_CLOUD_URI;
   } else {
     if (DB_REQUIRE_AUTH === "true") {
@@ -97,28 +97,4 @@ export async function updateUserPrivilegeById(userId, isAdmin) {
 
 export async function deleteUserById(userId) {
   return UserModel.findByIdAndDelete(userId);
-}
-
-export async function updateUserRefreshToken(userId, refreshToken) {
-  return UserModel.findByIdAndUpdate(
-    userId,
-    {
-      $set: {
-        refreshToken,
-      },
-    },
-    { new: true }
-  );
-}
-
-export async function invalidateRefreshToken(userId) {
-  return UserModel.findByIdAndUpdate(
-    userId,
-    {
-      $unset: {
-        refreshToken: "",
-      },
-    },
-    { new: true }
-  );
 }

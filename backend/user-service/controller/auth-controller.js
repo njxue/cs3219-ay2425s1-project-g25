@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { findUserByEmail as _findUserByEmail, findUserById as _findUserById } from "../model/repository.js";
 import { formatUserResponse } from "./user-controller.js";
+import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 
 export async function handleLogin(req, res) {
   const { email, password } = req.body;
@@ -18,19 +19,10 @@ export async function handleLogin(req, res) {
       }
 
       // Generate access and refresh token
-      const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, {
-        expiresIn: "10s",
-      });
+      const accessToken = jwt.sign({ id: user.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
+      const refreshToken = jwt.sign({ id: user.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
 
-      const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_TOKEN_SECRET, {
-        expiresIn: "1d",
-      });
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "Lax", // Set to secure=true, sameSite: None in prod
-      });
+      res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
 
       return res.status(200).json({
         message: "User logged in",
@@ -50,17 +42,13 @@ export async function handleLogout(req, res) {
       return res.sendStatus(204);
     }
     const refreshToken = req.cookies.refreshToken;
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async (err, user) => {
+    jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
       if (err) {
         return res.status(403).json({ message: "Forbidden: Token error", error: err.message });
       }
 
       // Destroy refreshToken in cookie
-      res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "Lax", // Set to secure=true, sameSite: None in prod
-      });
+      res.clearCookie(REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions);
 
       return res.status(200).json({ message: "Successfully logged out" });
     });
@@ -84,7 +72,7 @@ export async function refresh(req, res) {
     return res.status(401).json({ message: "Unauthorised: No token" });
   }
   const refreshToken = req.cookies.refreshToken;
-  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async (err, user) => {
+  jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
     if (err) {
       return res.status(403).json({ message: "Forbidden: Token error" });
     }
@@ -92,11 +80,7 @@ export async function refresh(req, res) {
     if (!dbUser) {
       return res.status(401).json({ message: "Unauthorised: No such user" });
     }
-
-    const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, {
-      expiresIn: "10s", // TODO: Short live for testing
-    });
-
+    const accessToken = jwt.sign({ id: user.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
     return res.status(200).json({
       message: "Access token refreshed",
       data: accessToken,
