@@ -21,12 +21,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const verifyAccessToken = async () => {
             try {
-                const res = await userUseCases.verifyToken();
-                const user = res.data;
+                const user = await userUseCases.verifyToken();
                 setUser(user);
                 setIsLoggedIn(true);
             } catch (err) {
                 // Refresh token missing or invalid
+                console.error(err);
                 setUser(null);
                 setIsLoggedIn(false);
             }

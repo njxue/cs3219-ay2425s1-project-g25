@@ -40,22 +40,51 @@ export class UserUseCases {
             password
         };
         const data = await this.user.loginUser(userInput);
+        console.log(data);
         if (!data.data) {
             throw new AuthenticationError(data.message);
         }
         return data.data;
     }
 
-    async logoutUser(userId: string): Promise<any> {
-        return await this.user.logoutUser(userId);
+    /**
+     * Logs the user out
+     * @param userId - id of the user
+     * @returns Promise resolving with the success message
+     * @throws AuthenticationError if logout fails
+     */
+    async logoutUser(userId: string): Promise<string> {
+        const data = await this.user.logoutUser(userId);
+        if (!data.data) {
+            throw new AuthenticationError(data.message);
+        }
+        return data.data;
     }
 
+    /**
+     * Refreshes the user's access token
+     * @returns Promise resolving with the new access token
+     * @throws AuthenticationError if access token cannot be refreshed (refresh token is invalid or expired)
+     */
     async refreshToken(): Promise<any> {
-        return await this.user.refreshToken();
+        const data = await this.user.refreshToken();
+        if (!data.data) {
+            throw new AuthenticationError(data.message);
+        }
+        return data.data;
     }
 
-    async verifyToken(): Promise<any> {
-        return await this.user.verifyToken();
+    /**
+     * Verifies the validity of the user's access token
+     * @returns Promise resolving with the authenticated user
+     * @throws AuthenticationError if access token is invalid or expires
+     */
+    async verifyToken(): Promise<User> {
+        const data = await this.user.verifyToken();
+        if (!data.data) {
+            throw new AuthenticationError(data.message);
+        }
+        return data.data;
     }
 }
 

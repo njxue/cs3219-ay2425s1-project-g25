@@ -49,8 +49,7 @@ export class BaseApi {
                     try {
                         // Eject to prevent infinite loop
                         this.protectedAxiosInstance.interceptors.response.eject(this.protectedResponseInterceptorId);
-                        const res = await userUseCases.refreshToken();
-                        const newAccessToken = res.data;
+                        const newAccessToken = await userUseCases.refreshToken();
                         prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
                         AuthClientStore.setAccessToken(newAccessToken);
                         return this.protectedAxiosInstance(prevRequest);
