@@ -38,13 +38,13 @@ export async function handleLogin(req, res) {
 
 export async function handleLogout(req, res) {
   try {
-    if (!req.cookies.refreshToken) {
+    if (!req.cookies[REFRESH_TOKEN_COOKIE_KEY]) {
       return res.sendStatus(204);
     }
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
     jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
       if (err) {
-        return res.status(403).json({ message: "Forbidden: Token error", error: err.message });
+        return res.status(401).json({ message: "Forbidden: Token erroeeeeer", error: err.message });
       }
 
       // Destroy refreshToken in cookie
@@ -68,13 +68,13 @@ export async function handleVerifyToken(req, res) {
 }
 
 export async function refresh(req, res) {
-  if (!req.cookies.refreshToken) {
+  if (!req.cookies[[REFRESH_TOKEN_COOKIE_KEY]]) {
     return res.status(401).json({ message: "Unauthorised: No token" });
   }
-  const refreshToken = req.cookies.refreshToken;
+  const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
   jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
     if (err) {
-      return res.status(403).json({ message: "Forbidden: Token error" });
+      return res.status(401).json({ message: "Forbidden: Token error" });
     }
     const dbUser = await _findUserById(user.id);
     if (!dbUser) {

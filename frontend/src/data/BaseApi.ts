@@ -45,7 +45,7 @@ export class BaseApi {
             (response: AxiosResponse) => response,
             async (err: AxiosError) => {
                 const prevRequest = err?.config;
-                if (prevRequest && err?.response?.status === 403) {
+                if (prevRequest && err?.response?.status === 401) {
                     try {
                         // Eject to prevent infinite loop
                         this.protectedAxiosInstance.interceptors.response.eject(this.protectedResponseInterceptorId);
