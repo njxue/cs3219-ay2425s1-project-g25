@@ -21,22 +21,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const verifyAccessToken = async () => {
-            const res = await userUseCases.verifyToken();
-            const user = res.data;
-            if (!user) {
+            try {
+                const res = await userUseCases.verifyToken();
+                const user = res.data;
+                setUser(user);
+                setIsLoggedIn(true);
+            } catch (err) {
+                // Refresh token missing or invalid
                 setUser(null);
                 setIsLoggedIn(false);
-            } else {
-                setIsLoggedIn(true);
-                setUser(user);
             }
         };
+
         if (!AuthClientStore.containsAccessToken()) {
             setIsLoggedIn(false);
             setUser(null);
-        } else {
-            verifyAccessToken();
+            return;
         }
+        verifyAccessToken();
     }, []);
 
     const login = async (email: string, password: string): Promise<User> => {
@@ -80,10 +82,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // SHOULD DELETE
     const refresh = async () => {
         try {
-            const data = await userUseCases.refreshToken();
-            const newAccessToken = data.accessToken;
-            console.log(newAccessToken);
-            localStorage.setItem("user", JSON.stringify({}));
+            const res = await userUseCases.refreshToken();
+            const newAccessToken = res.data;
+            AuthClientStore.setAccessToken(newAccessToken);
             return newAccessToken;
         } catch (err) {
             console.error(err);
