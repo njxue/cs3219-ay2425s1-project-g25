@@ -74,6 +74,29 @@ async function findMatch(category: string, difficulty: string, currentUser: stri
     return matchByDifficulty;
 }
 
+// Cancel a match request
+export async function cancelMatch(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
+    try {
+        const { socketId } = request.params;
+        
+        // Find and delete the matching request in MongoDB
+        const deletedRequest = await matchingRequestModel.findOneAndDelete({ socketId });
+
+        if (!deletedRequest) {
+            return response.status(404).json({ message: 'No matching request found to cancel.' });
+        }
+
+        console.log(`User ${socketId} canceled their match request via REST API.`);
+        return response.status(200).json({ message: 'Match request canceled.' });
+    } catch (error) {
+        next(error);
+    }
+}
+
 // Listen for socket connections
 export function setupSocketListeners() {
     const io = getSocket();
