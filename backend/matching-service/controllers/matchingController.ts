@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import matchingRequestModel from "../models/MatchingRequest";
 import { getSocket } from "../utils/socket";
-import { SOCKET_EVENTS } from "utils/socketEventNames";
+import { SOCKET_EVENTS } from "constants/socketEventNames";
 
 export async function getMatch(
     request: Request,

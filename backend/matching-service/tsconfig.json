@@ -119,5 +119,5 @@
     "routes/**/*",
     "utils/**/*",
     "data/**/*.json"
-  ]
+, "constants/socketEventNames.ts"  ]
 }
