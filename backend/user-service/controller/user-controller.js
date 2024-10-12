@@ -1,4 +1,6 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 import { isValidObjectId } from "mongoose";
 import {
   createUser as _createUser,
@@ -15,22 +17,29 @@ import {
 export async function createUser(req, res) {
   try {
     const { username, email, password } = req.body;
-    if (username && email && password) {
-      const existingUser = await _findUserByUsernameOrEmail(username, email);
-      if (existingUser) {
-        return res.status(409).json({ message: "username or email already exists" });
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      const hashedPassword = bcrypt.hashSync(password, salt);
-      const createdUser = await _createUser(username, email, hashedPassword);
-      return res.status(201).json({
-        message: `Created new user ${username} successfully`,
-        data: formatUserResponse(createdUser),
-      });
-    } else {
+    if (!username || !email || !password) {
       return res.status(400).json({ message: "username and/or email and/or password are missing" });
     }
+
+    const existingUser = await _findUserByUsernameOrEmail(username, email);
+    if (existingUser) {
+      return res.status(409).json({ message: "username or email already exists" });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+    const createdUser = await _createUser(username, email, hashedPassword);
+
+    // Generate access and refresh token
+    const accessToken = jwt.sign({ id: createdUser.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
+    const refreshToken = jwt.sign({ id: createdUser.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
+
+    res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
+
+    return res.status(201).json({
+      message: `Created new user ${username} successfully`,
+      data: { accessToken, user: { ...formatUserResponse(createdUser) } },
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Unknown error when creating new user!" });

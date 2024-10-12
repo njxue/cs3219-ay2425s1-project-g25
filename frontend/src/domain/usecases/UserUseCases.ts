@@ -11,10 +11,10 @@ export class UserUseCases {
      * @param username - the username of the user.
      * @param email - the email of the user.
      * @param password - the password of the user.
-     * @returns Promise resolving with the created user.
+     * @returns Promise resolving with the access token and authenticated user.
      * @throws DuplicateUserError if the email or username is already registered.
      */
-    async registerUser(username: string, email: string, password: string): Promise<User> {
+    async registerUser(username: string, email: string, password: string): Promise<{ accessToken: string; user: User }> {
         const userInput: IUserRegisterInput = {
             username,
             email,
@@ -31,7 +31,7 @@ export class UserUseCases {
      * Authenticates and logs a user in.
      * @param email - the email of the user.
      * @param password - the password of the user.
-     * @returns Promise resolving with the authenticated user.
+     * @returns Promise resolving with the access token and authenticated user.
      * @throws AuthenticationError if the email or password is incorrect.
      */
     async loginUser(email: string, password: string): Promise<{ accessToken: string; user: User }> {

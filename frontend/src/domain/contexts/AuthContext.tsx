@@ -9,7 +9,7 @@ interface AuthContextType {
     isUserAdmin: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    register: (email: string, password: string, username: string) => Promise<User>;
+    register: (email: string, password: string, username: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,9 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userAndAccessToken = await userUseCases.loginUser(email, password);
         const user = userAndAccessToken.user;
         const accessToken = userAndAccessToken.accessToken;
-        setUser(user);
-        setIsLoggedIn(true);
-        AuthClientStore.setAccessToken(accessToken);
+        handleSuccessfulAuth(accessToken, user);
     };
 
     const logout = async () => {
@@ -59,9 +57,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoggedIn(false);
     };
 
-    const register = async (email: string, password: string, username: string): Promise<User> => {
-        const userData = await userUseCases.registerUser(username, email, password);
-        return userData;
+    const register = async (email: string, password: string, username: string) => {
+        const userAndAccessToken = await userUseCases.registerUser(username, email, password);
+        const user = userAndAccessToken.user;
+        const accessToken = userAndAccessToken.accessToken;
+        handleSuccessfulAuth(accessToken, user);
+    };
+
+    const handleSuccessfulAuth = (accessToken: string, user: User) => {
+        setUser(user);
+        setIsLoggedIn(true);
+        AuthClientStore.setAccessToken(accessToken);
     };
 
     const isUserAdmin = isLoggedIn === true && user != null && user.isAdmin;
