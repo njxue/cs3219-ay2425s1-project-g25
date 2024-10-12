@@ -50,7 +50,7 @@ export async function handleLogout(req, res) {
 export async function handleVerifyToken(req, res) {
   try {
     const verifiedUser = req.user;
-    return res.status(200).json({ message: "Token verified", data: verifiedUser });
+    return res.status(200).json({ message: "Token verified", data: formatUserResponse(verifiedUser) });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
