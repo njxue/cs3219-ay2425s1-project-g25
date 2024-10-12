@@ -2,19 +2,18 @@
 import { Request, Response, NextFunction } from "express";
 import matchingRequestModel from "../models/MatchingRequest";
 import { getSocket } from "../utils/socket";
+import { SOCKET_EVENTS } from "utils/socketEventNames";
 
-// Get the io instance only when necessary
 export async function getMatch(
     request: Request,
     response: Response,
     next: NextFunction
 ) {
     try {
-        const io = getSocket();  // Fetch io here
+        const io = getSocket();
 
         const { username, email, category, difficulty, socketId } = request.body;
 
-        // Create new matching request and save to MongoDB
         const newRequest = new matchingRequestModel({
             username,
             email,
@@ -29,14 +28,13 @@ export async function getMatch(
         const match = await findMatch(category, difficulty, username);
 
         if (match) {
-            // Notify both users of the match
-            io.to(match.socketId).emit('match-found', {
+            io.to(match.socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with ${username}`,
                 category,
                 difficulty,
             });
 
-            io.to(socketId).emit('match-found', {
+            io.to(socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with ${match.username}`,
                 category,
                 difficulty,
@@ -101,21 +99,21 @@ export async function cancelMatch(
 export function setupSocketListeners() {
     const io = getSocket();
 
-    io.on('connection', (socket) => {
+    io.on(SOCKET_EVENTS.CONNECT, (socket) => {
         console.log(`User connected: ${socket.id}`);
 
-        socket.on('new-match-request', async (requestData) => {
+        socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: any; difficulty: any; username: any; email: any; }) => {
             const { category, difficulty, username, email } = requestData;
             const match = await findMatch(category, difficulty, username);
 
             if (match) {
-                io.to(match.socketId).emit('match-found', {
+                io.to(match.socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
                     message: `You have been matched with ${username}`,
                     category,
                     difficulty,
                 });
 
-                io.to(socket.id).emit('match-found', {
+                io.to(socket.id).emit(SOCKET_EVENTS.MATCH_FOUND, {
                     message: `You have been matched with ${match.username}`,
                     category,
                     difficulty,
@@ -126,12 +124,12 @@ export function setupSocketListeners() {
             }
         });
 
-        socket.on('cancel-match', async (socketId) => {
+        socket.on(SOCKET_EVENTS.CANCEL_MATCHING, async (socketId: any) => {
             await matchingRequestModel.findOneAndDelete({ socketId });
             console.log(`User ${socketId} canceled their match request.`);
         });
 
-        socket.on('disconnect', async () => {
+        socket.on(SOCKET_EVENTS.DISCONNECT, async () => {
             console.log(`User disconnected: ${socket.id}`);
             await matchingRequestModel.findOneAndDelete({ socketId: socket.id });
         });
