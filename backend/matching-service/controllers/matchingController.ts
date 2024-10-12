@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import matchingRequestModel from "../models/MatchingRequest";
 import { getSocket } from "../utils/socket";
 import { SOCKET_EVENTS } from "constants/socketEventNames";
+import { MATCHING_STATUS } from "constants/matchingStatus";
 
 export async function getMatch(
     request: Request,
@@ -44,9 +45,9 @@ export async function getMatch(
             await matchingRequestModel.findByIdAndDelete(match._id);
             await matchingRequestModel.findByIdAndDelete(newRequest._id);
 
-            return response.status(200).json({ message: 'Match found!' });
+            return response.status(200).json({ message: 'Match found!', matchingStatus: MATCHING_STATUS.SUCCESS });
         } else {
-            return response.status(200).json({ message: 'Searching for a match...' });
+            return response.status(200).json({ message: 'Searching for a match...', matchingStatus: MATCHING_STATUS.SEARCHING });
         }
     } catch (error) {
         next(error);
