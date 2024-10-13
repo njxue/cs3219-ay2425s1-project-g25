@@ -64,7 +64,7 @@ export const SignUpForm: React.FC = () => {
                     className={styles.formItem}
                     rules={[{ validator: getPasswordStrengthValidator() }]}
                 >
-                    <Input type="password" placeholder="Password" required className={styles.input} />
+                    <Input.Password placeholder="Password" required className={styles.input} autoComplete="off" />
                 </Form.Item>
                 <Form.Item
                     label={FIELD_CONFIRM_PASSWORD.label}
@@ -72,7 +72,12 @@ export const SignUpForm: React.FC = () => {
                     className={styles.formItem}
                     rules={[{ validator: getEqualityValidator(form, FIELD_PASSWORD.name, "Passwords do not match") }]}
                 >
-                    <Input type="password" placeholder="Confirm password" required className={styles.input} />
+                    <Input.Password
+                        placeholder="Confirm password"
+                        required
+                        className={styles.input}
+                        autoComplete="off"
+                    />
                 </Form.Item>
 
                 <button type="submit" className={styles.button}>

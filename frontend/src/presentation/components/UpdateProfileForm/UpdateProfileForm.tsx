@@ -106,7 +106,7 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
                         className={styles.formItem}
                         rules={[{ validator: passwordStrengthValidator }]}
                     >
-                        <Input type="password" placeholder={FIELD_PASSWORD.label} autoComplete="on" />
+                        <Input.Password placeholder={FIELD_PASSWORD.label} autoComplete="off" />
                     </Form.Item>
                     <Form.Item
                         label={FIELD_CONFIRM_PASSWORD.label}
@@ -114,7 +114,7 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
                         className={styles.formItem}
                         rules={[{ validator: passwordsMatchValidator }]}
                     >
-                        <Input type="password" placeholder={FIELD_CONFIRM_PASSWORD.label} autoComplete="on" />
+                        <Input.Password placeholder={FIELD_CONFIRM_PASSWORD.label} autoComplete="off" />
                     </Form.Item>
                 </div>
             )}
