@@ -26,6 +26,9 @@ export const ERRORS = {
     FAILED_TO_CREATE_QUESTION: "Failed to create the question. Please try again later.",
     FAILED_TO_UPDATE_QUESTION: "Failed to update the question. Please try again later.",
     FAILED_TO_DELETE_QUESTION: "Failed to delete the question. Please try again later.",
+    USER_EMAIL_EMPTY: "Email cannot be empty",
+    USER_USERNAME_EMPTY: "Username cannot be empty",
+    USER_PASSWORD_NOT_STRONG_ENOUGH: "Password is not strong enough",
     GENERAL_ERROR: "An unexpected error occurred. Please try again later."
 };
 
@@ -64,4 +67,18 @@ export const QUESTION_FORM_FIELDS = {
     FIELD_CATEGORIES: { label: "Categories", name: "categories" },
     FIELD_DIFFICULTY: { label: "Difficulty", name: "difficulty" },
     FIELD_URL: { label: "Reference URL", name: "url" }
+};
+
+export const UPDATE_PROFILE_FORM_FIELDS = {
+    FIELD_USERNAME: { label: "Username", name: "username" },
+    FIELD_EMAIL: { label: "Email", name: "email" },
+    FIELD_PASSWORD: { label: "New Password", name: "password" },
+    FIELD_CONFIRM_PASSWORD: { label: "Confirm New Password", name: "confirmPassword" }
+};
+
+export const SIGN_UP_FORM_FIELDS = {
+    FIELD_EMAIL: { label: "Email", name: "email" },
+    FIELD_USERNAME: { label: "Username", name: "username" },
+    FIELD_PASSWORD: { label: "Password", name: "password" },
+    FIELD_CONFIRM_PASSWORD: { label: "Confirm password", name: "confirmPassword" }
 };

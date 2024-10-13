@@ -1,4 +1,4 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Tooltip } from "antd";
 import { CloseOutlined, EditOutlined } from "@ant-design/icons";
 import { User } from "domain/entities/User";
 import { UPDATE_PROFILE_FORM_FIELDS } from "presentation/utils/constants";
@@ -10,6 +10,8 @@ import { handleError } from "presentation/utils/errorHandler";
 import { useForm, useWatch } from "antd/es/form/Form";
 import { IUserUpdateInput } from "domain/users/IUser";
 import { getEqualityValidator, getPasswordStrengthValidator, validateMessages } from "presentation/utils/formUtils";
+import { CustomTooltip } from "../common/CustomTooltip";
+import { PasswordInputLabel } from "../common/PasswordInputLabel/PasswordInputLabel";
 
 interface UpdateProfileFormProps {
     user: User;
@@ -99,10 +101,10 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
             {isUpdatingPassword && (
                 <div>
                     <Form.Item
-                        label={FIELD_PASSWORD.label}
+                        label={<PasswordInputLabel labelText={FIELD_PASSWORD.label} />}
                         name={FIELD_PASSWORD.name}
                         className={styles.formItem}
-                        rules={[{ required: true, whitespace: true }, { validator: passwordStrengthValidator }]}
+                        rules={[{ validator: passwordStrengthValidator }]}
                     >
                         <Input type="password" placeholder={FIELD_PASSWORD.label} autoComplete="on" />
                     </Form.Item>

@@ -7,17 +7,20 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4vh;
+    gap: 16px;
     align-items: center;
-    padding: 10vh;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 0 64px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     background: #fff;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     height: 100%;
     width: 100%;
 }
-
+.formItem {
+    margin-bottom: 0px;
+    width: 100%;
+}
 .title {
     font-size: 32px;
     font-weight: bold;
@@ -40,6 +43,7 @@
     border-radius: 16px;
     background-color: #ebebeb;
     color: #333;
+    width: 100%;
 }
 
 .input::placeholder {
