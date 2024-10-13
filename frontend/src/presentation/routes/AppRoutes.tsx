@@ -7,6 +7,7 @@ import RegisterPage from "presentation/pages/RegisterPage";
 import LoginPage from "presentation/pages/LoginPage";
 import HomePage from "presentation/pages/HomePage";
 import { ProtectedRoute } from "presentation/pages/ProtectedRoute";
+import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -14,7 +15,9 @@ const AppRoutes: React.FC = () => {
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="" element={<ProtectedRoute />}>
-                    <Route path="/questions" element={<QuestionsPage />} />
+                    <Route path="" element={<AdminProtectedRoute />}>
+                        <Route path="/questions" element={<QuestionsPage />} />
+                    </Route>
                     <Route path="/home" element={<HomePage />} />
                 </Route>
                 <Route path="/register" element={<RegisterPage />} />
