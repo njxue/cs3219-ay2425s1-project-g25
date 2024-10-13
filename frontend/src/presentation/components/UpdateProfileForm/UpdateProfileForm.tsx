@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { handleError } from "presentation/utils/errorHandler";
 import { useForm, useWatch } from "antd/es/form/Form";
 import { IUserUpdateInput } from "domain/users/IUser";
+import { getEqualityValidator, getPasswordStrengthValidator, validateMessages } from "presentation/utils/formUtils";
 
 interface UpdateProfileFormProps {
     user: User;
@@ -19,11 +20,6 @@ interface UpdateProfileFormProps {
 export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSubmit, onCancel }) => {
     const [form] = useForm();
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-
-    const validateMessages = {
-        required: "${label} is required",
-        whitespace: "${label} is required"
-    };
 
     const { updateUser } = useAuth();
 
@@ -46,12 +42,8 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
 
     const initialFormValues = { [FIELD_USERNAME.name]: user.username, [FIELD_EMAIL.name]: user.email };
 
-    const passwordsMatchValidator = async (_: any, value: string) => {
-        if (value !== form.getFieldValue("password")) {
-            return Promise.reject(new Error("Passwords do not match"));
-        }
-        return Promise.resolve();
-    };
+    const passwordsMatchValidator = getEqualityValidator(form, FIELD_PASSWORD.name, "Passwords do not match");
+    const passwordStrengthValidator = getPasswordStrengthValidator();
 
     const handleSubmit = async (input: IUserUpdateInput & { [key in typeof FIELD_CONFIRM_PASSWORD.name]: string }) => {
         let payload: IUserUpdateInput = { username: input.username, email: input.email };
@@ -76,6 +68,7 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
             onFinish={handleSubmit}
             initialValues={initialFormValues}
             validateMessages={validateMessages}
+            requiredMark={false}
         >
             <Form.Item
                 label={FIELD_USERNAME.label}
@@ -109,7 +102,7 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
                         label={FIELD_PASSWORD.label}
                         name={FIELD_PASSWORD.name}
                         className={styles.formItem}
-                        rules={[{ required: true, whitespace: true }]}
+                        rules={[{ required: true, whitespace: true }, { validator: passwordStrengthValidator }]}
                     >
                         <Input type="password" placeholder={FIELD_PASSWORD.label} autoComplete="on" />
                     </Form.Item>
