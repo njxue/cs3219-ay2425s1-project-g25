@@ -1,5 +1,5 @@
 import { BaseApi } from "data/BaseApi";
-import { IUserLoginInput, IUserRegisterInput } from "domain/users/IUser";
+import { IUserLoginInput, IUserRegisterInput, IUserUpdateInput } from "domain/users/IUser";
 
 const API_URL = "";
 
@@ -34,6 +34,10 @@ export class UserRemoteDataSource extends BaseApi {
 
     async logoutUser(userId: string) {
         return await this.protectedPost<any>("/auth/logout", { userId });
+    }
+
+    async updateUser(userId: string, userUpdateInput: IUserUpdateInput) {
+        return await this.protectedPatch<any>(`/users/${userId}`, userUpdateInput);
     }
 
     async refreshToken() {

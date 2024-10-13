@@ -95,11 +95,11 @@ export async function updateUser(req, res) {
       if (username || email) {
         let existingUser = await _findUserByUsername(username);
         if (existingUser && existingUser.id !== userId) {
-          return res.status(409).json({ message: "username already exists" });
+          return res.status(409).json({ message: "Username already exists" });
         }
         existingUser = await _findUserByEmail(email);
         if (existingUser && existingUser.id !== userId) {
-          return res.status(409).json({ message: "email already exists" });
+          return res.status(409).json({ message: "Email already exists" });
         }
       }
 

@@ -79,6 +79,11 @@ export class BaseApi {
         return response.data;
     }
 
+    protected async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.axiosInstance.patch<T>(url, data, config);
+        return response.data;
+    }
+
     protected async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.axiosInstance.delete<T>(url, config);
         return response.data;
@@ -95,6 +100,11 @@ export class BaseApi {
 
     protected async protectedPut<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.protectedAxiosInstance.put<T>(url, data, config);
+        return response.data;
+    }
+
+    protected async protectedPatch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+        const response = await this.protectedAxiosInstance.patch<T>(url, data, config);
         return response.data;
     }
 
