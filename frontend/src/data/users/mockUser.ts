@@ -1,6 +1,6 @@
 import AuthClientStore from "data/auth/AuthClientStore";
 import { User } from "domain/entities/User";
-import { IUserRegisterInput, IUserLoginInput } from "domain/users/IUser";
+import { IUserRegisterInput, IUserLoginInput, IUserUpdateInput } from "domain/users/IUser";
 
 const users: User[] = [
     {
@@ -91,6 +91,36 @@ export class MockUser {
                         message: "User logged out"
                     });
                 }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async updateUser(userId: string, userUpdateInput: IUserUpdateInput) {
+        return new Promise((resolve, reject) => {
+            try {
+                const foundUser = this.users.find((u) => u._id === userId);
+                if (!foundUser) {
+                    resolve({ message: "User not found" });
+                    return;
+                }
+                const { email, username } = userUpdateInput;
+                const foundEmail = this.users.find((u) => u.email === email && u._id !== userId);
+                const foundUsername = this.users.find((u) => u.username === username && u._id !== userId);
+                if (foundEmail || foundUsername) {
+                    resolve({
+                        message: "Duplicate username or email encountered"
+                    });
+                    return;
+                }
+
+                foundUser.email = userUpdateInput.email ?? foundUser.email;
+                foundUser.username = userUpdateInput.username ?? foundUser.username;
+                resolve({
+                    message: "User updated",
+                    data: foundUser
+                });
             } catch (error) {
                 reject(error);
             }
