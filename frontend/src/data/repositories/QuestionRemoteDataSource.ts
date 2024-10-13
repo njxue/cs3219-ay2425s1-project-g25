@@ -1,8 +1,8 @@
-import { BaseApi } from '../BaseApi';
-import { Question } from '../../domain/entities/Question';
-import { IQuestionInput, IQuestionUpdateInput } from 'domain/repositories/IQuestionRepository';
+import { BaseApi } from "../BaseApi";
+import { Question } from "../../domain/entities/Question";
+import { IQuestionInput, IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 
-const API_URL = '/api/questions';
+const API_URL = "/api/questions";
 
 export class QuestionRemoteDataSource extends BaseApi {
     constructor() {
@@ -14,7 +14,7 @@ export class QuestionRemoteDataSource extends BaseApi {
      * @returns Promise resolving to an array of Question objects.
      */
     async getAllQuestions(): Promise<Question[]> {
-        return this.get<Question[]>('/');
+        return this.get<Question[]>("/");
     }
 
     /**
@@ -34,9 +34,9 @@ export class QuestionRemoteDataSource extends BaseApi {
     async createQuestion(question: IQuestionInput): Promise<any> {
         const payload = {
             ...question,
-            difficulty: question.difficulty as string,
+            difficulty: question.difficulty as string
         };
-        return await this.post<any>('/', payload);
+        return await this.protectedPost<any>("/", payload);
     }
 
     /**
@@ -46,11 +46,11 @@ export class QuestionRemoteDataSource extends BaseApi {
      * @returns Promise resolving with the updated question.
      */
     async updateQuestion(id: string, questionUpdate: IQuestionUpdateInput): Promise<any> {
-        const payload = { 
+        const payload = {
             ...questionUpdate,
-            difficulty: questionUpdate.difficulty as string,
+            difficulty: questionUpdate.difficulty as string
         };
-        return await this.put<any>(`/${id}`, payload);
+        return await this.protectedPut<any>(`/${id}`, payload);
     }
 
     /**
@@ -59,7 +59,7 @@ export class QuestionRemoteDataSource extends BaseApi {
      * @returns Promise resolving when the question is deleted.
      */
     async deleteQuestion(id: string): Promise<void> {
-        await this.delete<void>(`/${id}`);
+        await this.protectedDelete<void>(`/${id}`);
     }
 }
 

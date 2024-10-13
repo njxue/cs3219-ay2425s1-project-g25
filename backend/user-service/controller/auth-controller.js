@@ -19,7 +19,11 @@ export async function handleLogin(req, res) {
       }
 
       // Generate access and refresh token
-      const accessToken = jwt.sign({ id: user.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
+      const accessToken = jwt.sign(
+        { id: user.id, isAdmin: user.isAdmin },
+        jwtConfig.accessTokenSecret,
+        jwtConfig.accessTokenOptions
+      );
       const refreshToken = jwt.sign({ id: user.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
 
       res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
@@ -69,7 +73,11 @@ export async function refresh(req, res) {
     if (!dbUser) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
-    const accessToken = jwt.sign({ id: user.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
+    const accessToken = jwt.sign(
+      { id: user.id, isAdmin: user.isAdmin },
+      jwtConfig.accessTokenSecret,
+      jwtConfig.accessTokenOptions
+    );
     return res.status(200).json({
       message: "Access token refreshed",
       data: accessToken,

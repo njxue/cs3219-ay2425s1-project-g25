@@ -31,7 +31,11 @@ export async function createUser(req, res) {
     const createdUser = await _createUser(username, email, hashedPassword);
 
     // Generate access and refresh token
-    const accessToken = jwt.sign({ id: createdUser.id }, jwtConfig.accessTokenSecret, jwtConfig.accessTokenOptions);
+    const accessToken = jwt.sign(
+      { id: createdUser.id, isAdmin: createdUser.isAdmin },
+      jwtConfig.accessTokenSecret,
+      jwtConfig.accessTokenOptions
+    );
     const refreshToken = jwt.sign({ id: createdUser.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
 
     res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
