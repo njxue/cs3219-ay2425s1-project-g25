@@ -119,5 +119,5 @@
     "routes/**/*",
     "utils/**/*",
     "data/**/*.json"
-  ]
+, "middlewares/basic-access-control.ts"  ]
 }
