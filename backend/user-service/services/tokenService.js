@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { jwtConfig } from "../config/authConfig";
+import { jwtConfig } from "../config/authConfig.js";
 
 export const generateAccessToken = (user) => {
   const accessToken = jwt.sign(
@@ -9,6 +9,7 @@ export const generateAccessToken = (user) => {
   );
   return accessToken;
 };
+
 export const generateRefreshToken = (user) => {
   const refreshToken = jwt.sign({ id: user.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
   return refreshToken;

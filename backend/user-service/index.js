@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/user-routes.js";
 import authRoutes from "./routes/auth-routes.js";
 import cookieParser from "cookie-parser";
+import redis from "redis";
+
 dotenv.config();
 
 const app = express();
@@ -21,11 +23,24 @@ app.use(
   })
 );
 
+// Create a Redis client
+const redisClient = redis.createClient({
+  url: "redis://peerprep-redis:6379",
+});
+
+redisClient.on("error", (err) => {
+  console.error("Redis error:", err);
+});
+
+redisClient.on("connect", () => {
+  console.log("Connected to Redis");
+});
+
+// Connect to Redis
+redisClient.connect();
+
 app.use((req, res, next) => {
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
@@ -74,9 +89,7 @@ if (true) {
 
   const swaggerDocs = swaggerJsDoc(swaggerOptions);
   app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-  console.log(
-    `Swagger API Docs available at http://localhost:${port}/users/swagger`
-  );
+  console.log(`Swagger API Docs available at http://localhost:${port}/users/swagger`);
 }
 
 // Default route for starting page based on environment
@@ -91,11 +104,7 @@ app.get("/", (req, res, next) => {
 });
 // Middleware to log incoming requests
 app.use((req, res, next) => {
-  console.log(
-    `Incoming request - Method: ${req.method}, Path: ${
-      req.path
-    }, Body: ${JSON.stringify(req.body)}`
-  );
+  console.log(`Incoming request - Method: ${req.method}, Path: ${req.path}, Body: ${JSON.stringify(req.body)}`);
   next();
 });
 app.use("/users", userRoutes);
@@ -118,3 +127,4 @@ app.use((error, req, res, next) => {
 
 export default app;
 export { port };
+export { redisClient };
