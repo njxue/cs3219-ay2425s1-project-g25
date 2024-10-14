@@ -13,7 +13,7 @@ import {
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
 } from "../model/repository.js";
-import { generateAccessToken, generateRefreshToken } from "../service/tokenService.js";
+import { generateAccessToken, generateRefreshToken } from "../services/tokenService.js";
 
 export async function createUser(req, res) {
   try {

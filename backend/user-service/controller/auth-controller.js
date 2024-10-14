@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { findUserByEmail as _findUserByEmail, findUserById as _findUserById } from "../model/repository.js";
 import { formatUserResponse } from "./user-controller.js";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
-import { generateAccessToken, generateRefreshToken } from "../service/tokenService.js";
+import { generateAccessToken, generateRefreshToken } from "../services/tokenService.js";
 
 export async function handleLogin(req, res) {
   const { email, password } = req.body;
