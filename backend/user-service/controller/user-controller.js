@@ -13,6 +13,7 @@ import {
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
 } from "../model/repository.js";
+import { generateAccessToken, generateRefreshToken } from "../service/tokenService.js";
 
 export async function createUser(req, res) {
   try {
@@ -31,12 +32,8 @@ export async function createUser(req, res) {
     const createdUser = await _createUser(username, email, hashedPassword);
 
     // Generate access and refresh token
-    const accessToken = jwt.sign(
-      { id: createdUser.id, isAdmin: createdUser.isAdmin },
-      jwtConfig.accessTokenSecret,
-      jwtConfig.accessTokenOptions
-    );
-    const refreshToken = jwt.sign({ id: createdUser.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
+    const accessToken = generateAccessToken(createdUser);
+    const refreshToken = generateRefreshToken(createdUser);
 
     res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
 
