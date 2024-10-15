@@ -70,7 +70,6 @@ export async function getAllUsers(req, res, next) {
 
     return res.status(200).json({ message: `Found users`, data: users.map(formatUserResponse) });
   } catch (err) {
-    console.error(err);
     next(err);
   }
 }
@@ -157,7 +156,6 @@ export async function deleteUser(req, res, next) {
     await _deleteUserById(userId);
     return res.status(200).json({ message: `Deleted user ${userId} successfully` });
   } catch (err) {
-    console.error(err);
     next(err);
   }
 }

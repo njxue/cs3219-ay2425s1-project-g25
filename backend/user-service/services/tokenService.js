@@ -41,6 +41,7 @@ class TokenService {
     const blacklistTokenKey = this.generateBlacklistedTokenKey(id, jti);
     if (remainingTime > 0) {
       await redisService.setKeyWithExpiration(blacklistTokenKey, "blacklisted", remainingTime);
+      console.log(`Blacklisted token: ${jti}`);
     }
   }
 

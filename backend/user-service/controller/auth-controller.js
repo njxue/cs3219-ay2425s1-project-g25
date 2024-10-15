@@ -47,7 +47,6 @@ export async function handleLogout(req, res, next) {
     await TokenService.blacklistToken(decodedToken);
     return res.sendStatus(204);
   } catch (err) {
-    console.error(err);
     next(err);
   }
 }
@@ -91,7 +90,6 @@ export async function refresh(req, res, next) {
       data: accessToken,
     });
   } catch (err) {
-    console.error(err);
     next(err);
   }
 }
