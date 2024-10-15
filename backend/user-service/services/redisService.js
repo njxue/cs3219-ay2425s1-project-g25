@@ -3,7 +3,7 @@ import redis from "redis";
 class RedisService {
   constructor() {
     this.redisClient = redis.createClient({
-      url: "redis://peerprep-redis:6379",
+      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
     });
     this.redisClient.on("error", (err) => {
       console.error("Redis error:", err);
@@ -12,7 +12,7 @@ class RedisService {
   async connect() {
     try {
       await this.redisClient.connect();
-      console.log("Connected to Redis");
+      console.log("Redis Connected!");
     } catch (error) {
       console.error("Error connecting to Redis:", error);
     }
@@ -20,7 +20,6 @@ class RedisService {
   async setKeyWithExpiration(key, value, expiration) {
     try {
       await this.redisClient.set(key, value, { EX: expiration });
-      console.log(`Set ${key} in Redis with expiration of ${expiration} seconds`);
     } catch (error) {
       console.error("Error setting key in Redis:", error);
     }
