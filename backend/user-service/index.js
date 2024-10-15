@@ -6,7 +6,9 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/user-routes.js";
 import authRoutes from "./routes/auth-routes.js";
 import cookieParser from "cookie-parser";
-import redis from "redis";
+import redisService from "./services/redisService.js";
+import errorHandler from "./middleware/errorHandler.js";
+import { NotFoundError } from "./utils/httpErrors.js";
 
 dotenv.config();
 
@@ -23,21 +25,7 @@ app.use(
   })
 );
 
-// Create a Redis client
-const redisClient = redis.createClient({
-  url: "redis://peerprep-redis:6379",
-});
-
-redisClient.on("error", (err) => {
-  console.error("Redis error:", err);
-});
-
-redisClient.on("connect", () => {
-  console.log("Connected to Redis");
-});
-
-// Connect to Redis
-redisClient.connect();
+redisService.connect();
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -111,20 +99,11 @@ app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 
 app.use((req, res, next) => {
-  const error = new Error("Route Not Found");
-  error.status = 404;
+  const error = new NotFoundError("Route Not Found");
   next(error);
 });
 
-app.use((error, req, res, next) => {
-  res.status(error.status || 500);
-  res.json({
-    error: {
-      message: error.message,
-    },
-  });
-});
+app.use(errorHandler);
 
 export default app;
 export { port };
-export { redisClient };
