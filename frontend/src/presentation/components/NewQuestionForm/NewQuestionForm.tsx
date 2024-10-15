@@ -12,6 +12,7 @@ import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
 import { ReactMarkdown } from "../common/ReactMarkdown";
 import axios from "axios";
+import { validateMessages } from "presentation/utils/formUtils";
 
 interface NewQuestionFormProps {
     onSubmit?: (createdQuestion: Question) => void;
@@ -23,11 +24,6 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     const [categories, setCategories] = useState<Category[]>([]);
     const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
     const [description, setDescription] = useState<string>(initialQuestionInput?.description)
-
-    const validateMessages = {
-        required: "${label} is required",
-        whitespace: "${label} is required"
-    };
 
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 

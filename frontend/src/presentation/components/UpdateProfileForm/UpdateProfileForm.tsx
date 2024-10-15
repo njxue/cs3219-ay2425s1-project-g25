@@ -1,4 +1,4 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Tooltip } from "antd";
 import { CloseOutlined, EditOutlined } from "@ant-design/icons";
 import { User } from "domain/entities/User";
 import { UPDATE_PROFILE_FORM_FIELDS } from "presentation/utils/constants";
@@ -9,6 +9,9 @@ import { toast } from "react-toastify";
 import { handleError } from "presentation/utils/errorHandler";
 import { useForm, useWatch } from "antd/es/form/Form";
 import { IUserUpdateInput } from "domain/users/IUser";
+import { getEqualityValidator, getPasswordStrengthValidator, validateMessages } from "presentation/utils/formUtils";
+import { CustomTooltip } from "../common/CustomTooltip";
+import { PasswordInputLabel } from "../common/PasswordInputLabel/PasswordInputLabel";
 
 interface UpdateProfileFormProps {
     user: User;
@@ -19,11 +22,6 @@ interface UpdateProfileFormProps {
 export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSubmit, onCancel }) => {
     const [form] = useForm();
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-
-    const validateMessages = {
-        required: "${label} is required",
-        whitespace: "${label} is required"
-    };
 
     const { updateUser } = useAuth();
 
@@ -46,12 +44,8 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
 
     const initialFormValues = { [FIELD_USERNAME.name]: user.username, [FIELD_EMAIL.name]: user.email };
 
-    const passwordsMatchValidator = async (_: any, value: string) => {
-        if (value !== form.getFieldValue("password")) {
-            return Promise.reject(new Error("Passwords do not match"));
-        }
-        return Promise.resolve();
-    };
+    const passwordsMatchValidator = getEqualityValidator(form, FIELD_PASSWORD.name, "Passwords do not match");
+    const passwordStrengthValidator = getPasswordStrengthValidator();
 
     const handleSubmit = async (input: IUserUpdateInput & { [key in typeof FIELD_CONFIRM_PASSWORD.name]: string }) => {
         let payload: IUserUpdateInput = { username: input.username, email: input.email };
@@ -76,6 +70,7 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
             onFinish={handleSubmit}
             initialValues={initialFormValues}
             validateMessages={validateMessages}
+            requiredMark={false}
         >
             <Form.Item
                 label={FIELD_USERNAME.label}
@@ -106,12 +101,12 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
             {isUpdatingPassword && (
                 <div>
                     <Form.Item
-                        label={FIELD_PASSWORD.label}
+                        label={<PasswordInputLabel labelText={FIELD_PASSWORD.label} />}
                         name={FIELD_PASSWORD.name}
                         className={styles.formItem}
-                        rules={[{ required: true, whitespace: true }]}
+                        rules={[{ validator: passwordStrengthValidator }]}
                     >
-                        <Input type="password" placeholder={FIELD_PASSWORD.label} autoComplete="on" />
+                        <Input.Password placeholder={FIELD_PASSWORD.label} autoComplete="off" />
                     </Form.Item>
                     <Form.Item
                         label={FIELD_CONFIRM_PASSWORD.label}
@@ -119,7 +114,7 @@ export const UpdateProfileForm: React.FC<UpdateProfileFormProps> = ({ user, onSu
                         className={styles.formItem}
                         rules={[{ validator: passwordsMatchValidator }]}
                     >
-                        <Input type="password" placeholder={FIELD_CONFIRM_PASSWORD.label} autoComplete="on" />
+                        <Input.Password placeholder={FIELD_CONFIRM_PASSWORD.label} autoComplete="off" />
                     </Form.Item>
                 </div>
             )}
