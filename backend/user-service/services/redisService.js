@@ -28,8 +28,8 @@ class RedisService {
 
   async exists(key) {
     try {
-      const result = await this.redisClient.exists(key);
-      return result === 1;
+      const count = await this.redisClient.exists(key);
+      return count === 1;
     } catch (error) {
       console.error("Error checking key existence in Redis:", error);
       return false;

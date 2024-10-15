@@ -4,6 +4,7 @@ import { formatUserResponse } from "./user-controller.js";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 import TokenService from "../services/tokenService.js";
 import { BadRequestError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
+import { decode } from "jsonwebtoken";
 
 export async function handleLogin(req, res, next) {
   const { email, password } = req.body;
@@ -22,7 +23,6 @@ export async function handleLogin(req, res, next) {
       // Generate access and refresh token
       const accessToken = TokenService.generateAccessToken(user);
       const refreshToken = TokenService.generateRefreshToken(user);
-
       res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
 
       return res.status(200).json({
@@ -43,13 +43,8 @@ export async function handleLogout(req, res, next) {
       res.clearCookie(REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions);
     }
     const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
-    const currentTime = Math.floor(Date.now() / 1000);
-    const decoded = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
-    const remainingTime = decoded.exp - currentTime;
-    if (remainingTime > 0) {
-      TokenService.blacklistToken(decoded.id, decoded.jti, remainingTime);
-    }
-
+    const decodedToken = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
+    await TokenService.blacklistToken(decodedToken);
     return res.sendStatus(204);
   } catch (err) {
     console.error(err);
@@ -72,17 +67,31 @@ export async function refresh(req, res, next) {
     if (!refreshToken) {
       throw new UnauthorisedError();
     }
-    const user = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
-    const dbUser = await _findUserById(user.id);
+    const decodedRefreshToken = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
+
+    // Check if refresh token has been blacklisted
+    if (await TokenService.isRefreshTokenBlacklisted(decodedRefreshToken)) {
+      throw new UnauthorisedError(`${decodedRefreshToken.jti} found in token blacklist`);
+    }
+
+    // Check if user exists
+    const dbUser = await _findUserById(decodedRefreshToken.id);
     if (!dbUser) {
       throw new NotFoundError("User not found");
     }
-    const accessToken = TokenService.generateAccessToken(user);
+
+    // Blacklist old refresh token and generate new access and refresh tokens
+    const accessToken = TokenService.generateAccessToken(dbUser);
+    const newRefreshToken = TokenService.generateRefreshToken(dbUser);
+    res.cookie(REFRESH_TOKEN_COOKIE_KEY, newRefreshToken, refreshTokenCookieOptions);
+    await TokenService.blacklistToken(decodedRefreshToken);
+
     return res.status(200).json({
       message: "Access token refreshed",
       data: accessToken,
     });
   } catch (err) {
+    console.error(err);
     next(err);
   }
 }

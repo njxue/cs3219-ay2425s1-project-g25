@@ -34,13 +34,19 @@ class TokenService {
     });
   }
 
-  static async blacklistToken(userId, jti, expiration) {
-    const blacklistTokenKey = this.generateBlacklistedTokenKey(userId, jti);
-    return await redisService.setKeyWithExpiration(blacklistTokenKey, "blacklisted", expiration);
+  static async blacklistToken(decodedRefreshToken) {
+    const { id, jti, exp } = decodedRefreshToken;
+    const currentTime = Math.floor(Date.now() / 1000);
+    const remainingTime = exp - currentTime;
+    const blacklistTokenKey = this.generateBlacklistedTokenKey(id, jti);
+    if (remainingTime > 0) {
+      await redisService.setKeyWithExpiration(blacklistTokenKey, "blacklisted", remainingTime);
+    }
   }
 
-  static async isRefreshTokenBlacklisted(userId, jti) {
-    const blacklistTokenKey = this.generateBlacklistedTokenKey(userId, jti);
+  static async isRefreshTokenBlacklisted(decodedRefreshToken) {
+    const { id, jti } = decodedRefreshToken;
+    const blacklistTokenKey = this.generateBlacklistedTokenKey(id, jti);
     return await redisService.exists(blacklistTokenKey);
   }
 
