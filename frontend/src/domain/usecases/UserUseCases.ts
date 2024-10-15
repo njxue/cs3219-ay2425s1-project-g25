@@ -1,6 +1,7 @@
 import { userImpl } from "data/users/UserImpl";
 import { User } from "domain/entities/User";
-import { IUser, IUserRegisterInput, IUserLoginInput } from "domain/users/IUser";
+import { IUser, IUserRegisterInput, IUserLoginInput, IUserUpdateInput } from "domain/users/IUser";
+import { UserValidator } from "domain/validation/UserValidator";
 import { AuthenticationError } from "presentation/utils/errors";
 
 export class UserUseCases {
@@ -14,7 +15,11 @@ export class UserUseCases {
      * @returns Promise resolving with the access token and authenticated user.
      * @throws DuplicateUserError if the email or username is already registered.
      */
-    async registerUser(username: string, email: string, password: string): Promise<{ accessToken: string; user: User }> {
+    async registerUser(
+        username: string,
+        email: string,
+        password: string
+    ): Promise<{ accessToken: string; user: User }> {
         const userInput: IUserRegisterInput = {
             username,
             email,
@@ -53,6 +58,20 @@ export class UserUseCases {
      */
     async logoutUser(userId: string): Promise<void> {
         return await this.user.logoutUser(userId);
+    }
+
+    /**
+     * Updates the user's credentials.
+     * @param userUpdateInput - The updated user's credentials.
+     * @returns Promise that resolves to an updated user.
+     */
+    async updateUser(userId: string, userUpdateInput: IUserUpdateInput): Promise<User> {
+        UserValidator.validateUserUpdateInput(userUpdateInput);
+        const data = await this.user.updateUser(userId, userUpdateInput);
+        if (!data.data) {
+            throw new AuthenticationError(data.message);
+        }
+        return data.data;
     }
 
     /**

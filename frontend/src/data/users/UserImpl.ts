@@ -1,4 +1,4 @@
-import { IUser, IUserRegisterInput } from "domain/users/IUser";
+import { IUser, IUserRegisterInput, IUserUpdateInput } from "domain/users/IUser";
 import { mockUser } from "./mockUser";
 import { userRemoteDataSource } from "./UserRemoteDataSource";
 
@@ -16,6 +16,10 @@ export class UserImpl implements IUser {
 
     async logoutUser(userId: string): Promise<any> {
         return this.dataSource.logoutUser(userId);
+    }
+
+    async updateUser(userId: string, userUpdateInput: IUserUpdateInput): Promise<any> {
+        return this.dataSource.updateUser(userId, userUpdateInput);
     }
 
     async refreshToken(): Promise<any> {

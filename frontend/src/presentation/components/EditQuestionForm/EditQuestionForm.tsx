@@ -13,6 +13,7 @@ import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
 import { ReactMarkdown } from "../common/ReactMarkdown";
 import axios from "axios";
+import { validateMessages } from "presentation/utils/formUtils";
 
 interface EditQuestionFormProps {
     question: Question;
@@ -24,12 +25,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
-    const [description, setDescription] = useState<string>(question.description)
-
-    const validateMessages = {
-        required: "${label} is required",
-        whitespace: "${label} is required"
-    };
+    const [description, setDescription] = useState<string>(question.description);
 
     const { code: _, categories: questionCategories, ...questionUpdateInput } = question;
 
@@ -39,14 +35,15 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
             try {
                 const fetchedCategories: Category[] = await categoryUseCases.getAllCategories();
 
-                const validCategoryIds = fetchedCategories.map(cat => cat._id);
+                const validCategoryIds = fetchedCategories.map((cat) => cat._id);
 
-                const filteredQuestionCategories = questionCategories
-                    .filter(cat => validCategoryIds.includes(cat._id));
+                const filteredQuestionCategories = questionCategories.filter((cat) =>
+                    validCategoryIds.includes(cat._id)
+                );
 
                 setCategories(fetchedCategories);
                 form.setFieldsValue({
-                    categories: filteredQuestionCategories.map(cat => cat._id)
+                    categories: filteredQuestionCategories.map((cat) => cat._id)
                 });
             } catch (error) {
                 const message = (error as Error).message || "Failed to fetch categories";
@@ -116,7 +113,7 @@ export const EditQuestionForm: React.FC<EditQuestionFormProps> = ({ question, on
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={{
-                        ...questionUpdateInput,
+                        ...questionUpdateInput
                     }}
                     validateMessages={validateMessages}
                     scrollToFirstError

@@ -2,6 +2,7 @@ import { User } from "domain/entities/User";
 import { userUseCases } from "domain/usecases/UserUseCases";
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
 import AuthClientStore from "data/auth/AuthClientStore";
+import { IUserUpdateInput } from "domain/users/IUser";
 
 interface AuthContextType {
     user: User | null;
@@ -10,6 +11,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     register: (email: string, password: string, username: string) => Promise<void>;
+    updateUser: (userUpdateInput: IUserUpdateInput) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,6 +70,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         handleSuccessfulAuth(accessToken, user);
     };
 
+    const updateUser = async (userUpdateInput: IUserUpdateInput) => {
+        if (user) {
+            const updatedUser = await userUseCases.updateUser(user?._id, userUpdateInput);
+            setUser(updatedUser);
+        }
+    };
+
     const handleSuccessfulAuth = (accessToken: string, user: User) => {
         setUser(user);
         setIsLoggedIn(true);
@@ -77,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const isUserAdmin = isLoggedIn === true && user != null && user.isAdmin;
 
     return (
-        <AuthContext.Provider value={{ user, isLoggedIn, isUserAdmin, login, logout, register }}>
+        <AuthContext.Provider value={{ user, isLoggedIn, isUserAdmin, login, logout, register, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
