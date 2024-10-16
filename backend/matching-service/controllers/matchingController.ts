@@ -166,13 +166,10 @@ async function findMatchForUser(userData: any): Promise<string | null> {
     queueKeys.push(generalQueueKey);
 
     try {
-        // Prepare arguments for EVAL command
-        const args = [socketId];
-
-        // Execute the Lua script using redisClient.eval
+        // Execute the Lua script
         const result = await redisClient.eval(luaScript, {
             keys: queueKeys,
-            arguments: args,
+            arguments: [socketId],
         });
 
         const matchedSocketId = result as string | null;
@@ -196,6 +193,13 @@ async function handleMatch(userData: any, matchSocketId: string) {
   
     const matchUserData = await redisClient.hGetAll(`user:${matchSocketId}`);
   
+    // Ensure that matchUserData has required fields
+    if (!matchUserData.username || !matchUserData.email) {
+        console.error(`matchUserData is missing required fields for socketId: ${matchSocketId}`);
+        // Handle error appropriately (e.g., return, throw error)
+        return;
+    }
+    
     // Notify both users
     // io.to(socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
     //     message: `You have been matched with ${matchUserData.username}`,
@@ -226,8 +230,11 @@ async function handleMatch(userData: any, matchSocketId: string) {
     }));
   
     // Remove matched users from all queues and data
-    await removeUserFromQueues(socketId, userData);
-    await removeUserFromQueues(matchSocketId, matchUserData);
+    // await removeUserFromQueues(socketId, userData);
+    // await removeUserFromQueues(matchSocketId, matchUserData);
+
+    await redisClient.set(`matched:${userData.socketId}`, '1', { EX: 60 });
+    await redisClient.set(`matched:${matchSocketId}`, '1', { EX: 60 });
   
     await redisClient.del(`user:${socketId}`);
     await redisClient.del(`user:${matchSocketId}`);
@@ -320,7 +327,10 @@ export function setupSocketListeners() {
     
         socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; username: string; email: string; }) => {
             const { category, difficulty, username, email } = requestData;
-            console.log(requestData)
+            // console.log(requestData)
+            if (!category || !difficulty || !username || username.trim() === '' || !email || email.trim() === '') {
+                console.error("Missing field - All fields must be strings. Empty category/difficulty are to be empty strings. username and email cannot be empty.");
+            }
             const socketId = socket.id;
     
             // Validate the socket ID (optional here since it's from the connected socket)
@@ -347,7 +357,7 @@ export function setupSocketListeners() {
             if (matchSocketId) {
                 await handleMatch(userData, matchSocketId);
             } else {
-            // No match found, add user to queues
+                // No match found, add user to queues
                 await addUserToQueues(userData);
             }
         });
@@ -371,13 +381,17 @@ export function setupSocketListeners() {
             const socketId = socket.id;
             console.log(`User disconnected: ${socketId}`);
             const userKey = `user:${socketId}`;
-    
-            // Remove user from all queues
+        
+            // Check if user is in the middle of matching
             const userData = await redisClient.hGetAll(userKey);
             if (Object.keys(userData).length > 0) {
-                await removeUserFromQueues(socketId, userData);
-                // Delete user data
-                await redisClient.del(userKey);
+                // Determine if the user has already been matched
+                const isMatched = await redisClient.get(`matched:${socketId}`);
+                if (!isMatched) {
+                    await removeUserFromQueues(socketId, userData);
+                    // Delete user data
+                    await redisClient.del(userKey);
+                }
             }
         });
     });
@@ -391,6 +405,10 @@ export async function setupSubscriber() {
     // Subscribe to the MATCH_FOUND channel
     await subscriber.subscribe(SOCKET_EVENTS.MATCH_FOUND, (message) => {
         const { user1, user2 } = JSON.parse(message);
+        console.log("Message received for user 1:")
+        console.log(user1)
+        console.log("Message received for user 2:")
+        console.log(user2)
 
         const io = getSocket();
   
@@ -398,6 +416,9 @@ export async function setupSubscriber() {
         const socket1 = io.sockets.sockets.get(user1.socketId);
         const socket2 = io.sockets.sockets.get(user2.socketId);
   
+        // Add match processing code here in the future
+
+        // Tell the users about the match here
         if (socket1) {
             socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with ${user2.username}`,
@@ -413,8 +434,6 @@ export async function setupSubscriber() {
                 difficulty: user2.difficulty || user1.difficulty || 'Any',
             });
         }
-  
-        // You can perform additional logic here if needed
     });
   
     subscriber.on('error', (err: any) => {

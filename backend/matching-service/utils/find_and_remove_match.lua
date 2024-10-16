@@ -1,19 +1,33 @@
--- KEYS: List of queue keys in order of specificity
--- ARGV[1]: Current user's socketId
+-- find_and_remove_match.lua
+local requesterSocketId = ARGV[1]
+local matchedSocketId = nil
 
-local socketId = ARGV[1]
-
-for i, queueKey in ipairs(KEYS) do
-    local members = redis.call('LRANGE', queueKey, 0, -1)
-    for _, member in ipairs(members) do
-        if member ~= socketId then
+-- Iterate over the queues
+for i = 1, #KEYS do
+    local queueKey = KEYS[i]
+    -- Remove the requester from the queue (if present)
+    redis.call('LREM', queueKey, 0, requesterSocketId)
+    -- Attempt to find another user in the queue
+    local queueLength = redis.call('LLEN', queueKey)
+    if queueLength > 0 then
+        matchedSocketId = redis.call('LINDEX', queueKey, 0)
+        if matchedSocketId and matchedSocketId ~= requesterSocketId then
             -- Remove the matched user from all queues
-            for _, q in ipairs(KEYS) do
-                redis.call('LREM', q, 0, member)
+            for j = 1, #KEYS do
+                redis.call('LREM', KEYS[j], 0, matchedSocketId)
             end
-            return member
+            -- Remove the requester from all queues (in case they are still there)
+            for j = 1, #KEYS do
+                redis.call('LREM', KEYS[j], 0, requesterSocketId)
+            end
+            break
         end
     end
 end
 
-return nil
+if matchedSocketId then
+    return matchedSocketId
+else
+    -- No match found; do not add the requester to the queues here
+    return nil
+end

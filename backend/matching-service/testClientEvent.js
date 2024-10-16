@@ -2,17 +2,22 @@
 const io = require('socket.io-client');
 const { randomInt } = require('crypto');
 
+// Global counter for active clients
+let activeClients = 0;
+
 /**
  * Client class to simulate a user.
  */
 class Client {
   /**
    * @param {string} username - The username of the client.
-   * @param {string} email - The email of the client.
+   * @param {string|undefined} email - The email of the client.
    * @param {string|undefined} category - The category for matching (optional).
    * @param {string|undefined} difficulty - The difficulty level for matching (optional).
    */
   constructor(username, email, category, difficulty) {
+    activeClients++; // Increment active client count
+
     this.username = username;
     this.email = email;
     this.category = category;
@@ -40,21 +45,43 @@ class Client {
     this.socket.on('matchFound', (data) => {
       console.log(`${this.username} received match:`, data);
       this.isMatched = true;
-      this.socket.disconnect();
+
+      // Clear any pending retry timeouts
+      if (this.retryTimeout) {
+        clearTimeout(this.retryTimeout);
+      }
+
+      // Delay disconnect to allow any final processing
+      setTimeout(() => {
+        this.socket.disconnect();
+      }, 1000); // 1-second delay
     });
 
     this.socket.on('cancelMatching', (data) => {
       console.log(`${this.username} match canceled:`, data);
-      this.socket.disconnect();
+
+      // Delay disconnect to allow server to process cancellation
+      setTimeout(() => {
+        this.socket.disconnect();
+      }, 1000); // 1-second delay
     });
 
     this.socket.on('error', (error) => {
       console.error(`${this.username} Socket error:`, error);
+
+      // Disconnect immediately on error
       this.socket.disconnect();
     });
 
     this.socket.on('disconnect', () => {
       console.log(`${this.username} disconnected`);
+      activeClients--; // Decrement active client count
+
+      // Check if all clients have finished
+      if (activeClients === 0) {
+        console.log('All clients have disconnected. Exiting program.');
+        process.exit(0); // Exit the program gracefully
+      }
     });
   }
 
@@ -65,7 +92,7 @@ class Client {
     if (this.isMatched) return; // Do not proceed if already matched
     if (this.attempt >= this.maxRetries) {
       console.log(`${this.username} reached maximum match attempts. Stopping.`);
-      this.cancelMatch();
+      this.cancelMatch(); // This will handle disconnecting after delay
       return;
     }
 
@@ -105,7 +132,12 @@ class Client {
     if (this.retryTimeout) {
       clearTimeout(this.retryTimeout);
     }
-    this.socket.emit('CANCEL_MATCHING');
+    this.socket.emit('cancelMatching');
+
+    // Delay disconnect to allow server to process cancellation
+    setTimeout(() => {
+      this.socket.disconnect();
+    }, 1000); // 1-second delay
   }
 }
 
@@ -126,7 +158,7 @@ function runTests() {
     const user4 = new Client('User4', 'user4@example.com', 'Arrays', 'Easy');
   }, 2000); // Both connect after 2 seconds
 
-  // 3. Cross-Difficulty and Category Matching: Additional Users5 and User6
+  // 3. Cross-Difficulty and Category Matching: User5 and User6
   setTimeout(() => {
     const user5 = new Client('User5', 'user5@example.com', 'Bit Manipulation', 'Easy');
     const user6 = new Client('User6', 'user6@example.com', 'Graphs', 'Hard');
@@ -143,6 +175,9 @@ function runTests() {
   // - User3 and User4 should match
   // - User6 and User8 might match if your matching logic allows partial criteria
   // - User5 and User7 may need to retry until they match or reach max retries
+  // Note: It is technically possible for user 7 and 8 to match, but that would basically require
+  // the planets to align for the race conditions to clash that hard. That said, if they do match 
+  // 7 and 8, it's a sign that the event-based system is working. So it's a good thing.
 }
 
 // Execute the tests
