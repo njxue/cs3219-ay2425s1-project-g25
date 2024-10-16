@@ -7,7 +7,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import matchingRoutes from './routes/matchingRoutes';
 import http from 'http';
 import { initSocket } from './utils/socket';
-import { setupSocketListeners } from './controllers/matchingController';
+import { setupSocketListeners, setupSubscriber } from './controllers/matchingController';
 
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
@@ -34,9 +34,12 @@ app.use(cors({
 app.use(errorHandler);
 
 // Start the server using the HTTP server
-server.listen(port, () => {
+server.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
 
   // Set up socket listeners:
   setupSocketListeners();
+  
+  // Set up the Redis subscriber
+  await setupSubscriber();
 });

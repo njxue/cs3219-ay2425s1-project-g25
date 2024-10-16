@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { getSocket } from "../utils/socket";
 import { SOCKET_EVENTS } from "../constants/socketEventNames";
 import { MATCHING_STATUS } from "../constants/matchingStatus";
-import redisClient, { logAllQueues, luaScript } from "../utils/redisClient";
+import redisClient, { createRedisClient, logAllQueues, luaScript } from "../utils/redisClient";
 import MatchingEventModel from "../models/MatchingEvent";
 import { Server } from "socket.io";
 import { QueueType } from "../constants/queueTypes";
@@ -197,17 +197,17 @@ async function handleMatch(userData: any, matchSocketId: string) {
     const matchUserData = await redisClient.hGetAll(`user:${matchSocketId}`);
   
     // Notify both users
-    io.to(socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
-        message: `You have been matched with ${matchUserData.username}`,
-        category: userData.category || matchUserData.category || 'Any',
-        difficulty: userData.difficulty || matchUserData.difficulty || 'Any',
-    });
+    // io.to(socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
+    //     message: `You have been matched with ${matchUserData.username}`,
+    //     category: userData.category || matchUserData.category || 'Any',
+    //     difficulty: userData.difficulty || matchUserData.difficulty || 'Any',
+    // });
   
-    io.to(matchSocketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
-        message: `You have been matched with ${username}`,
-        category: matchUserData.category || userData.category || 'Any',
-        difficulty: matchUserData.difficulty || userData.difficulty || 'Any',
-    });
+    // io.to(matchSocketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
+    //     message: `You have been matched with ${username}`,
+    //     category: matchUserData.category || userData.category || 'Any',
+    //     difficulty: matchUserData.difficulty || userData.difficulty || 'Any',
+    // });
   
     // Conditionally log the matching event
     if (process.env.ENABLE_LOGGING) {
@@ -219,6 +219,11 @@ async function handleMatch(userData: any, matchSocketId: string) {
         });
         await matchingEvent.save();
     }
+    
+    await redisClient.publish(SOCKET_EVENTS.MATCH_FOUND, JSON.stringify({
+        user1: userData,
+        user2: matchUserData,
+    }));
   
     // Remove matched users from all queues and data
     await removeUserFromQueues(socketId, userData);
@@ -377,3 +382,43 @@ export function setupSocketListeners() {
         });
     });
 }
+
+export async function setupSubscriber() {
+    // Create a new Redis client for subscribing
+    const subscriber = createRedisClient();
+    await subscriber.connect();
+  
+    // Subscribe to the MATCH_FOUND channel
+    await subscriber.subscribe(SOCKET_EVENTS.MATCH_FOUND, (message) => {
+        const { user1, user2 } = JSON.parse(message);
+
+        const io = getSocket();
+  
+        // Get the Socket.IO clients
+        const socket1 = io.sockets.sockets.get(user1.socketId);
+        const socket2 = io.sockets.sockets.get(user2.socketId);
+  
+        if (socket1) {
+            socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
+                message: `You have been matched with ${user2.username}`,
+                category: user1.category || user2.category || 'Any',
+                difficulty: user1.difficulty || user2.difficulty || 'Any',
+            });
+        }
+  
+        if (socket2) {
+            socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
+                message: `You have been matched with ${user1.username}`,
+                category: user2.category || user1.category || 'Any',
+                difficulty: user2.difficulty || user1.difficulty || 'Any',
+            });
+        }
+  
+        // You can perform additional logic here if needed
+    });
+  
+    subscriber.on('error', (err: any) => {
+        console.error('Redis Subscriber Error', err);
+    });
+}
+  

@@ -1,5 +1,5 @@
 // redisClient.ts
-import { createClient } from 'redis';
+import { createClient, RedisClientType } from 'redis';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
@@ -11,7 +11,8 @@ const REDIS_PORT = process.env.REDIS_PORT || '6379';
 
 const redisUrl = `redis://${REDIS_HOST}:${REDIS_PORT}`;
 
-const redisClient = createClient({
+// Regular Redis client for commands and publishing
+const redisClient: RedisClientType = createClient({
     url: redisUrl,
 });
 
@@ -20,6 +21,17 @@ redisClient.on('error', (err) => console.error('Redis Client Error', err));
 (async () => {
     await redisClient.connect();
 })();
+
+// Function to create a new Redis client (used for subscribing)
+export function createRedisClient(): RedisClientType {
+    const client: RedisClientType = createClient({
+        url: redisUrl,
+    });
+
+    client.on('error', (err) => console.error('Redis Client Error', err));
+
+    return client;
+}
 
 export async function logAllQueues() {
     try {
