@@ -49,8 +49,19 @@ services:
             - ./backend/matching-service/.env
         environment:
             DB_HOST: peerprep-mongodb # Override localhost
+            REDIS_HOST: redis # Override localhost
         depends_on:
             - peerprep-mongodb
+            - redis
+        networks:
+            - peerprep-network
+
+    # Redis for queue service
+    redis:
+        container_name: matching-redis
+        image: redis:latest
+        ports:
+            - "6379:6379"
         networks:
             - peerprep-network
 

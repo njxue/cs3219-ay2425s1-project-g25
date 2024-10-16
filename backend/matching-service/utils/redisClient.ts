@@ -1,9 +1,18 @@
+// redisClient.ts
 import { createClient } from 'redis';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
+const REDIS_PORT = process.env.REDIS_PORT || '6379';
+
+const redisUrl = `redis://${REDIS_HOST}:${REDIS_PORT}`;
 
 const redisClient = createClient({
-    url: 'redis://127.0.0.1:6379',
+    url: redisUrl,
 });
 
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
