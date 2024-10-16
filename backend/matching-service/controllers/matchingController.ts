@@ -6,6 +6,8 @@ import { MATCHING_STATUS } from "../constants/matchingStatus";
 import redisClient, { logAllQueues, luaScript } from "../utils/redisClient";
 import MatchingEventModel from "../models/MatchingEvent";
 import { Server } from "socket.io";
+import { QueueType } from "../constants/queueTypes";
+import { generateQueueKey } from "../utils/queueUtils";
 
 export async function getMatch(
     request: Request,
@@ -79,71 +81,102 @@ function isValidSocketId(io: Server, socketId: string): boolean {
 
 async function addUserToQueues(userData: any) {
     const { socketId, difficulty, category } = userData;
-  
+
     const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
     const hasCategory = typeof category === 'string' && category.trim() !== '';
-  
+
     // Define the queues to add the user to
     const queues = [];
-  
+
     if (hasDifficulty && hasCategory) {
-        queues.push(`queue:combined:${difficulty}:${category}`);
-        queues.push(`queue:difficulty:${difficulty}`);
-        queues.push(`queue:category:${category}`);
+        // Add to combined queue
+        const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
+        queues.push(queueKey1);
+        // Add to difficulty queue
+        const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
+        queues.push(queueKey2);
+        // Add to category queue
+        const queueKey3 = generateQueueKey(QueueType.Category, category, undefined);
+        queues.push(queueKey3);
     } else if (hasDifficulty) {
-        queues.push(`queue:difficulty:${difficulty}`);
-        queues.push(`queue:combined:${difficulty}:*`);
+        // Add to difficulty queue
+        const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
+        queues.push(queueKey1);
+        // Add to combined queue with wildcard category
+        const queueKey2 = generateQueueKey(QueueType.All, '*', difficulty);
+        queues.push(queueKey2);
     } else if (hasCategory) {
-        queues.push(`queue:category:${category}`);
-        queues.push(`queue:combined:*:${category}`);
+        // Add to category queue
+        const queueKey1 = generateQueueKey(QueueType.Category, category, undefined);
+        queues.push(queueKey1);
+        // Add to combined queue with wildcard difficulty
+        const queueKey2 = generateQueueKey(QueueType.All, category, '*');
+        queues.push(queueKey2);
     } else {
-        queues.push(`queue:general`);
+        // Add to general queue
+        const queueKey = generateQueueKey(QueueType.General);
+        queues.push(queueKey);
     }
-  
+
     for (const queueKey of queues) {
         const isMember = await redisClient.lPos(queueKey, socketId);
         if (isMember === null) {
             await redisClient.rPush(queueKey, socketId);
+            console.log(`Added ${socketId} to ${queueKey}`);
         }
     }
 }
 
+
 async function findMatchForUser(userData: any): Promise<string | null> {
     const { socketId, difficulty, category } = userData;
-  
+
+    const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
+    const hasCategory = typeof category === 'string' && category.trim() !== '';
+
     // Prepare queue keys in order of specificity
     const queueKeys: string[] = [];
-  
-    // 1. Combined Queue
-    if (difficulty && category) {
-        queueKeys.push(`queue:combined:${difficulty}:${category}`);
+
+    if (hasDifficulty && hasCategory) {
+        // 1. Combined Queue with specific category and difficulty
+        const queueKey = generateQueueKey(QueueType.All, category, difficulty);
+        queueKeys.push(queueKey);
     }
-  
-    // 2. Difficulty Queue
-    if (difficulty) {
-        queueKeys.push(`queue:difficulty:${difficulty}`);
+
+    if (hasDifficulty) {
+        // 2. Combined Queue with wildcard category
+        const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
+        queueKeys.push(queueKey);
+        // 3. Difficulty Only Queue
+        const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
+        queueKeys.push(queueKey2);
     }
-  
-    // 3. Category Queue
-    if (category) {
-        queueKeys.push(`queue:category:${category}`);
+
+    if (hasCategory) {
+        // 4. Combined Queue with wildcard difficulty
+        const queueKey = generateQueueKey(QueueType.All, category, '*');
+        queueKeys.push(queueKey);
+        // 5. Category Only Queue
+        const queueKey2 = generateQueueKey(QueueType.Category, category, undefined);
+        queueKeys.push(queueKey2);
     }
-  
-    // 4. General Queue
-    queueKeys.push('queue:general');
-  
+
+    // 6. General Queue
+    const generalQueueKey = generateQueueKey(QueueType.General);
+    queueKeys.push(generalQueueKey);
+
     try {
         // Prepare arguments for EVAL command
         const args = [socketId];
-    
+
         // Execute the Lua script using redisClient.eval
         const result = await redisClient.eval(luaScript, {
             keys: queueKeys,
             arguments: args,
         });
-    
+
         const matchedSocketId = result as string | null;
-  
+
         if (matchedSocketId) {
             console.log(`Found a match for ${socketId}: ${matchedSocketId}`);
             return matchedSocketId;
@@ -197,21 +230,48 @@ async function handleMatch(userData: any, matchSocketId: string) {
 
 async function removeUserFromQueues(socketId: string, userData: any) {
     const { difficulty, category } = userData;
-  
-    if (difficulty && category) {
-        await redisClient.lRem(`queue:combined:${difficulty}:${category}`, 0, socketId);
-        await redisClient.lRem(`queue:difficulty:${difficulty}`, 0, socketId);
-        await redisClient.lRem(`queue:category:${category}`, 0, socketId);
-    } else if (difficulty) {
-        await redisClient.lRem(`queue:difficulty:${difficulty}`, 0, socketId);
-        await redisClient.lRem(`queue:combined:${difficulty}:*`, 0, socketId);
-    } else if (category) {
-        await redisClient.lRem(`queue:category:${category}`, 0, socketId);
-        await redisClient.lRem(`queue:combined:*:${category}`, 0, socketId);
+
+    const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
+    const hasCategory = typeof category === 'string' && category.trim() !== '';
+
+    // Define the queues to remove the user from
+    const queues = [];
+
+    if (hasDifficulty && hasCategory) {
+        // Remove from combined queue
+        const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
+        queues.push(queueKey1);
+        // Remove from difficulty queue
+        const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
+        queues.push(queueKey2);
+        // Remove from category queue
+        const queueKey3 = generateQueueKey(QueueType.Category, category, undefined);
+        queues.push(queueKey3);
+    } else if (hasDifficulty) {
+        // Remove from difficulty queue
+        const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
+        queues.push(queueKey1);
+        // Remove from combined queue with wildcard category
+        const queueKey2 = generateQueueKey(QueueType.All, '*', difficulty);
+        queues.push(queueKey2);
+    } else if (hasCategory) {
+        // Remove from category queue
+        const queueKey1 = generateQueueKey(QueueType.Category, category, undefined);
+        queues.push(queueKey1);
+        // Remove from combined queue with wildcard difficulty
+        const queueKey2 = generateQueueKey(QueueType.All, category, '*');
+        queues.push(queueKey2);
     } else {
-        await redisClient.lRem(`queue:general`, 0, socketId);
+        // Remove from general queue
+        const queueKey = generateQueueKey(QueueType.General);
+        queues.push(queueKey);
     }
-}  
+
+    for (const queueKey of queues) {
+        await redisClient.lRem(queueKey, 0, socketId);
+        console.log(`Removed ${socketId} from ${queueKey}`);
+    }
+}
 
 export async function cancelMatch(
     request: Request,

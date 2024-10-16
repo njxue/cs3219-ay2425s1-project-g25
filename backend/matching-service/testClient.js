@@ -154,6 +154,10 @@ function runTests() {
     const user7 = new Client('User7', 'user7@example.com', undefined, 'Medium');
     const user8 = new Client('User8', 'user8@example.com', 'Graphs', undefined);
   }, 5000); // Users7 and Users8 connect at 5 seconds
+
+  //Results:
+  //1-2, 3-4, 6-8 match
+  //5-7 retry until they stop.
 }
 
 // Execute the tests
