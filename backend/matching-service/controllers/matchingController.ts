@@ -315,6 +315,7 @@ export function setupSocketListeners() {
     
         socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; username: string; email: string; }) => {
             const { category, difficulty, username, email } = requestData;
+            console.log(requestData)
             const socketId = socket.id;
     
             // Validate the socket ID (optional here since it's from the connected socket)

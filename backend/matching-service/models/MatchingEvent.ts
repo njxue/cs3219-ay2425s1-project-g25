@@ -1,17 +1,17 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface MatchingEvent extends Document {
-    user1: {
+    user1?: {
         username: string;
         email: string;
     };
-    user2: {
+    user2?: {
         username: string;
         email: string;
     };
-    category: string;
-    difficulty: string;
-    matchedAt: Date;
+    category?: string;
+    difficulty?: string;
+    matchedAt?: Date;
 }
 
 const matchingEventSchema: Schema = new Schema({

@@ -1,4 +1,4 @@
-// testClient.js
+// testClientREST.js
 const io = require('socket.io-client');
 const axios = require('axios');
 const { randomInt } = require('crypto');
