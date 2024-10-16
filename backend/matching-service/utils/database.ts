@@ -17,6 +17,7 @@ export const connectToDatabase = async () => {
     } else {
         mongoURI = `mongodb://${DB_HOST}:${DB_PORT}/${DATABASE_NAME}`;
     }
+    console.log(mongoURI)
 
     const options = {};
 
