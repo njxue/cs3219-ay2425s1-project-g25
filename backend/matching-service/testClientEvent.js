@@ -1,6 +1,5 @@
 // testClientSocket.js
 const io = require('socket.io-client');
-const { randomInt } = require('crypto');
 
 // Global counter for active clients
 let activeClients = 0;
@@ -38,7 +37,6 @@ class Client {
     this.socket.on('connect', () => {
       console.log(`${this.username} connected with socket ID: ${this.socket.id}`);
 
-      // Start matching
       this.requestMatch();
     });
 
@@ -46,41 +44,36 @@ class Client {
       console.log(`${this.username} received match:`, data);
       this.isMatched = true;
 
-      // Clear any pending retry timeouts
       if (this.retryTimeout) {
         clearTimeout(this.retryTimeout);
       }
 
-      // Delay disconnect to allow any final processing
       setTimeout(() => {
         this.socket.disconnect();
-      }, 1000); // 1-second delay
+      }, 1000);
     });
 
     this.socket.on('cancelMatching', (data) => {
       console.log(`${this.username} match canceled:`, data);
 
-      // Delay disconnect to allow server to process cancellation
       setTimeout(() => {
         this.socket.disconnect();
-      }, 1000); // 1-second delay
+      }, 1000);
     });
 
     this.socket.on('error', (error) => {
       console.error(`${this.username} Socket error:`, error);
 
-      // Disconnect immediately on error
       this.socket.disconnect();
     });
 
     this.socket.on('disconnect', () => {
       console.log(`${this.username} disconnected`);
-      activeClients--; // Decrement active client count
+      activeClients--;
 
-      // Check if all clients have finished
       if (activeClients === 0) {
         console.log('All clients have disconnected. Exiting program.');
-        process.exit(0); // Exit the program gracefully
+        process.exit(0);
       }
     });
   }
@@ -99,7 +92,6 @@ class Client {
     this.attempt += 1;
     console.log(`${this.username} attempting match (Attempt ${this.attempt})`);
 
-    // Prepare match request data
     const requestData = {
       username: this.username,
       email: this.email,
@@ -113,10 +105,8 @@ class Client {
       requestData.difficulty = this.difficulty.trim();
     }
 
-    // Emit the START_MATCHING event
     this.socket.emit('startMatching', requestData);
 
-    // Set up a retry in case no match is found
     this.retryTimeout = setTimeout(() => {
       if (!this.isMatched) {
         console.log(`${this.username} is still searching for a match. Retrying...`);
@@ -134,10 +124,9 @@ class Client {
     }
     this.socket.emit('cancelMatching');
 
-    // Delay disconnect to allow server to process cancellation
     setTimeout(() => {
       this.socket.disconnect();
-    }, 1000); // 1-second delay
+    }, 1000);
   }
 }
 
@@ -170,15 +159,16 @@ function runTests() {
     const user8 = new Client('User8', 'user8@example.com', 'Graphs', '');
   }, 5000); // Users7 and User8 connect at 5 seconds
 
-  // Expected Results:
-  // - User1 and User2 should match
-  // - User3 and User4 should match
-  // - User6 and User8 might match if your matching logic allows partial criteria
-  // - User5 and User7 may need to retry until they match or reach max retries
-  // Note: It is technically possible for user 7 and 8 to match, but that would basically require
-  // the planets to align for the race conditions to clash that hard. That said, if they do match 
-  // 7 and 8, it's a sign that the event-based system is working. So it's a good thing.
+  /*
+  Expected Results:
+  - User1 and User2 should match
+  - User3 and User4 should match
+  - User6 and User8 might match if your matching logic allows partial criteria
+  - User5 and User7 may need to retry until they match or reach max retries
+  Note: It is technically possible for user 7 and 8 to match, but that would basically require
+  the planets to align for the race conditions to clash that hard. That said, if they do match 
+  7 and 8, it's a sign that the event-based system is working. So it's a good thing.
+  */
 }
 
-// Execute the tests
 runTests();

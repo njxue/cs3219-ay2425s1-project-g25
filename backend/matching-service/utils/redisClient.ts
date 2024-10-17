@@ -1,4 +1,3 @@
-// redisClient.ts
 import { createClient, RedisClientType } from 'redis';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -45,10 +44,8 @@ export async function logAllQueues() {
     }
 }
 
-// Load Lua script
 const luaScript = fs.readFileSync(path.join(__dirname, 'find_and_remove_match.lua'), 'utf8');
 
-// Export the Lua script
 export { luaScript };
 
 export default redisClient;

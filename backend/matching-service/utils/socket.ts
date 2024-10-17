@@ -6,7 +6,7 @@ let io: Server;
 export function initSocket(server: http.Server): Server {
     io = new Server(server, {
         cors: {
-            origin: '*',  // Allow all origins
+            origin: '*',
         },
     });
     return io;

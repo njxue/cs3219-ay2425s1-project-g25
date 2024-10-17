@@ -16,10 +16,8 @@ connectToDatabase();
 const port = process.env.PORT || 3003;
 const app: Express = express();
 
-// Create an HTTP server
 const server = http.createServer(app);
 
-// Initialize Socket.io
 initSocket(server);
 
 app.use(express.json());
@@ -27,19 +25,16 @@ app.use(express.json());
 app.use('/api/match', matchingRoutes);
 
 app.use(cors({
-  origin: '*', // Allows all origins
+  origin: '*',
   credentials: true,
 }));
 
 app.use(errorHandler);
 
-// Start the server using the HTTP server
 server.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
 
-  // Set up socket listeners:
   setupSocketListeners();
   
-  // Set up the Redis subscriber
   await setupSubscriber();
 });

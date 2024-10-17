@@ -1,4 +1,3 @@
-// queueTypes.ts
 export enum QueueType {
     General = 0,          // 000
     Category = 1,         // 001

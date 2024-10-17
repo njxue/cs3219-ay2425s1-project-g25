@@ -1,4 +1,3 @@
-// matchingController.ts
 import { Request, Response, NextFunction } from "express";
 import { getSocket } from "../utils/socket";
 import { SOCKET_EVENTS } from "../constants/socketEventNames";
@@ -18,14 +17,12 @@ export async function getMatch(
         const io = getSocket();
         const { username, email, category, difficulty, socketId } = request.body;
   
-        // Validate the socket ID
         if (!isValidSocketId(io, socketId)) {
             return response.status(400).json({
                 message: "Invalid socket ID. Please ensure you are connected.",
             });
         }
   
-        // Store user data in Redis
         const userKey = `user:${socketId}`;
         const userData: Record<string, string> = {
             username,
@@ -34,7 +31,6 @@ export async function getMatch(
             requestedAt: Date.now().toString(),
         };
         
-        // Conditionally add 'category' and 'difficulty' only if they are provided and are strings
         if (typeof category === 'string' && category.trim() !== '') {
             userData.category = category.trim();
         }
@@ -46,7 +42,6 @@ export async function getMatch(
         console.log("Before matching queue state:");
         await logAllQueues();
   
-        // Try to find a match
         const matchSocketId = await findMatchForUser(userData);
   
         if (matchSocketId) {
@@ -59,7 +54,6 @@ export async function getMatch(
                 matchingStatus: MATCHING_STATUS.SUCCESS,
             });
         } else {
-            // No match found, add user to queues
             await addUserToQueues(userData);
             console.log("No match found, after adding to queue queue state:");
             await logAllQueues();
@@ -74,7 +68,6 @@ export async function getMatch(
     }
 }  
 
-// Redis helper functions
 function isValidSocketId(io: Server, socketId: string): boolean {
     return io.sockets.sockets.has(socketId);
 }
@@ -85,35 +78,33 @@ async function addUserToQueues(userData: any) {
     const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
     const hasCategory = typeof category === 'string' && category.trim() !== '';
 
-    // Define the queues to add the user to
     const queues = [];
 
     if (hasDifficulty && hasCategory) {
-        // Add to combined queue
         const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
         queues.push(queueKey1);
-        // Add to difficulty queue
+
         const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
         queues.push(queueKey2);
-        // Add to category queue
+
         const queueKey3 = generateQueueKey(QueueType.Category, category, undefined);
         queues.push(queueKey3);
     } else if (hasDifficulty) {
-        // Add to difficulty queue
+
         const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
         queues.push(queueKey1);
-        // Add to combined queue with wildcard category
+
         const queueKey2 = generateQueueKey(QueueType.All, '*', difficulty);
         queues.push(queueKey2);
     } else if (hasCategory) {
-        // Add to category queue
+
         const queueKey1 = generateQueueKey(QueueType.Category, category, undefined);
         queues.push(queueKey1);
-        // Add to combined queue with wildcard difficulty
+
         const queueKey2 = generateQueueKey(QueueType.All, category, '*');
         queues.push(queueKey2);
     } else {
-        // Add to general queue
+
         const queueKey = generateQueueKey(QueueType.General);
         queues.push(queueKey);
     }
@@ -134,39 +125,33 @@ async function findMatchForUser(userData: any): Promise<string | null> {
     const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
     const hasCategory = typeof category === 'string' && category.trim() !== '';
 
-    // Prepare queue keys in order of specificity
     const queueKeys: string[] = [];
 
     if (hasDifficulty && hasCategory) {
-        // 1. Combined Queue with specific category and difficulty
         const queueKey = generateQueueKey(QueueType.All, category, difficulty);
         queueKeys.push(queueKey);
     }
 
     if (hasDifficulty) {
-        // 2. Combined Queue with wildcard category
         const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
         queueKeys.push(queueKey);
-        // 3. Difficulty Only Queue
+
         const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
         queueKeys.push(queueKey2);
     }
 
     if (hasCategory) {
-        // 4. Combined Queue with wildcard difficulty
         const queueKey = generateQueueKey(QueueType.All, category, '*');
         queueKeys.push(queueKey);
-        // 5. Category Only Queue
+
         const queueKey2 = generateQueueKey(QueueType.Category, category, undefined);
         queueKeys.push(queueKey2);
     }
 
-    // 6. General Queue
     const generalQueueKey = generateQueueKey(QueueType.General);
     queueKeys.push(generalQueueKey);
 
     try {
-        // Execute the Lua script
         const result = await redisClient.eval(luaScript, {
             keys: queueKeys,
             arguments: [socketId],
@@ -193,10 +178,8 @@ async function handleMatch(userData: any, matchSocketId: string) {
   
     const matchUserData = await redisClient.hGetAll(`user:${matchSocketId}`);
   
-    // Ensure that matchUserData has required fields
     if (!matchUserData.username || !matchUserData.email) {
         console.error(`matchUserData is missing required fields for socketId: ${matchSocketId}`);
-        // Handle error appropriately (e.g., return, throw error)
         return;
     }
     
@@ -213,7 +196,6 @@ async function handleMatch(userData: any, matchSocketId: string) {
     //     difficulty: matchUserData.difficulty || userData.difficulty || 'Any',
     // });
   
-    // Conditionally log the matching event
     if (process.env.ENABLE_LOGGING) {
         const matchingEvent = new MatchingEventModel({
             user1: { username, email },
@@ -246,35 +228,30 @@ async function removeUserFromQueues(socketId: string, userData: any) {
     const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
     const hasCategory = typeof category === 'string' && category.trim() !== '';
 
-    // Define the queues to remove the user from
     const queues = [];
 
     if (hasDifficulty && hasCategory) {
-        // Remove from combined queue
         const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
         queues.push(queueKey1);
-        // Remove from difficulty queue
+
         const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
         queues.push(queueKey2);
-        // Remove from category queue
+
         const queueKey3 = generateQueueKey(QueueType.Category, category, undefined);
         queues.push(queueKey3);
     } else if (hasDifficulty) {
-        // Remove from difficulty queue
         const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
         queues.push(queueKey1);
-        // Remove from combined queue with wildcard category
+
         const queueKey2 = generateQueueKey(QueueType.All, '*', difficulty);
         queues.push(queueKey2);
     } else if (hasCategory) {
-        // Remove from category queue
         const queueKey1 = generateQueueKey(QueueType.Category, category, undefined);
         queues.push(queueKey1);
-        // Remove from combined queue with wildcard difficulty
+
         const queueKey2 = generateQueueKey(QueueType.All, category, '*');
         queues.push(queueKey2);
     } else {
-        // Remove from general queue
         const queueKey = generateQueueKey(QueueType.General);
         queues.push(queueKey);
     }
@@ -294,7 +271,6 @@ export async function cancelMatch(
         const { socketId } = request.params;
         const io = getSocket();
     
-        // Validate the socket ID
         if (!isValidSocketId(io, socketId)) {
             return response.status(400).json({
                 message: "Invalid socket ID. Please ensure you are connected.",
@@ -303,11 +279,9 @@ export async function cancelMatch(
   
         const userKey = `user:${socketId}`;
   
-        // Remove user from all queues
         const userData = await redisClient.hGetAll(userKey);
         if (Object.keys(userData).length > 0) {
             await removeUserFromQueues(socketId, userData);
-            // Delete user data
             await redisClient.del(userKey);
         }
   
@@ -327,19 +301,16 @@ export function setupSocketListeners() {
     
         socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; username: string; email: string; }) => {
             const { category, difficulty, username, email } = requestData;
-            // console.log(requestData)
             if (!category || !difficulty || !username || username.trim() === '' || !email || email.trim() === '') {
                 console.error("Missing field - All fields must be strings. Empty category/difficulty are to be empty strings. username and email cannot be empty.");
             }
             const socketId = socket.id;
     
-            // Validate the socket ID (optional here since it's from the connected socket)
             if (!isValidSocketId(io, socketId)) {
                 socket.emit('error', { message: 'Invalid socket ID. Please ensure you are connected.' });
                 return;
             }
   
-            // Store user data in Redis
             const userKey = `user:${socketId}`;
             const userData = {
                 username,
@@ -351,13 +322,11 @@ export function setupSocketListeners() {
             };
             await redisClient.hSet(userKey, userData);
   
-            // Try to find a match
             const matchSocketId = await findMatchForUser(userData);
     
             if (matchSocketId) {
                 await handleMatch(userData, matchSocketId);
             } else {
-                // No match found, add user to queues
                 await addUserToQueues(userData);
             }
         });
@@ -366,11 +335,9 @@ export function setupSocketListeners() {
             const socketId = socket.id;
             const userKey = `user:${socketId}`;
     
-            // Remove user from all queues
             const userData = await redisClient.hGetAll(userKey);
             if (Object.keys(userData).length > 0) {
                 await removeUserFromQueues(socketId, userData);
-                // Delete user data
                 await redisClient.del(userKey);
             }
     
@@ -385,11 +352,9 @@ export function setupSocketListeners() {
             // Check if user is in the middle of matching
             const userData = await redisClient.hGetAll(userKey);
             if (Object.keys(userData).length > 0) {
-                // Determine if the user has already been matched
                 const isMatched = await redisClient.get(`matched:${socketId}`);
                 if (!isMatched) {
                     await removeUserFromQueues(socketId, userData);
-                    // Delete user data
                     await redisClient.del(userKey);
                 }
             }
@@ -398,11 +363,9 @@ export function setupSocketListeners() {
 }
 
 export async function setupSubscriber() {
-    // Create a new Redis client for subscribing
     const subscriber = createRedisClient();
     await subscriber.connect();
   
-    // Subscribe to the MATCH_FOUND channel
     await subscriber.subscribe(SOCKET_EVENTS.MATCH_FOUND, (message) => {
         const { user1, user2 } = JSON.parse(message);
         console.log("Message received for user 1:")
@@ -412,7 +375,6 @@ export async function setupSubscriber() {
 
         const io = getSocket();
   
-        // Get the Socket.IO clients
         const socket1 = io.sockets.sockets.get(user1.socketId);
         const socket2 = io.sockets.sockets.get(user2.socketId);
   

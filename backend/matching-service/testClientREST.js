@@ -1,7 +1,5 @@
-// testClientREST.js
 const io = require('socket.io-client');
 const axios = require('axios');
-const { randomInt } = require('crypto');
 
 const SOCKET_SERVER_URL = 'http://localhost:3003'; // Replace with your server URL
 const API_URL = 'http://localhost:3003/api/match'; // Replace with your API endpoint
@@ -24,7 +22,6 @@ class Client {
     this.socket = io(SOCKET_SERVER_URL);
     this.socketId = null;
     this.retryInterval = 1000; // 1 second
-    // this.retryInterval = 1000 + randomInt(1000); // 1-2 seconds
     this.maxRetries = 5;
     this.attempt = 0;
     this.isMatched = false;
@@ -73,7 +70,6 @@ class Client {
     this.attempt += 1;
     console.log(`${this.username} attempting match (Attempt ${this.attempt})`);
 
-    // Prepare match request data
     const requestData = {
       username: this.username,
       email: this.email,
@@ -93,31 +89,24 @@ class Client {
       console.log(`${this.username} REST API response:`, response.data);
 
       if (response.data.matchingStatus === 'SUCCESS') {
-        // Match found
         console.log(`${this.username} has been successfully matched.`);
         this.isMatched = true;
         this.socket.disconnect();
       } else if (response.data.matchingStatus === 'SEARCHING') {
-        // No match found, wait and retry
         console.log(`${this.username} is still searching for a match. Retrying in ${this.retryInterval / 1000} seconds...`);
         setTimeout(() => this.requestMatch(), this.retryInterval);
       } else {
-        // Handle unexpected statuses
         console.error(`${this.username} received an unexpected status:`, response.data);
         this.socket.disconnect();
       }
     } catch (error) {
       if (error.response) {
-        // Server responded with a status code outside the 2xx range
         console.error(`${this.username} REST API error:`, error.response.status, error.response.data);
       } else if (error.request) {
-        // No response was received
         console.error(`${this.username} No response received:`, error.request);
       } else {
-        // Error setting up the request
         console.error(`${this.username} Error in request setup:`, error.message);
       }
-      // Decide whether to retry or not based on the error
       console.log(`${this.username} encountered an error. Retrying in ${this.retryInterval / 1000} seconds...`);
       setTimeout(() => this.requestMatch(), this.retryInterval);
     }
@@ -155,10 +144,11 @@ function runTests() {
     const user8 = new Client('User8', 'user8@example.com', 'Graphs', undefined);
   }, 5000); // Users7 and Users8 connect at 5 seconds
 
-  //Results:
-  //1-2, 3-4, 6-8 match
-  //5-7 retry until they stop.
+  /*
+  Results:
+  1-2, 3-4, 6-8 match
+  5-7 retry until they stop.
+  */
 }
 
-// Execute the tests
 runTests();
