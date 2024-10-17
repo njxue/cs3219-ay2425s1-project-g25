@@ -6,8 +6,9 @@ This project follows a microservices architecture with the following services:
 1. **Frontend** - Port `3000`
 2. **User Service** - Port `3001`
 3. **Question Service** - Port `3002`
-4. **MongoDB** - Port `27017` (Database)
-5. **Nginx API Gateway** - Port `80`
+4. **Matching Service** - Port `3003`
+5. **MongoDB** - Port `27017` (Database)
+6. **Nginx API Gateway** - Port `80`
 
 ### Running the Project
 
@@ -19,6 +20,7 @@ Once the containers are up:
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - User Service: [http://localhost:3001](http://localhost:3001)
 - Question Service: [http://localhost:3002](http://localhost:3002)
+- Matching Service: [http://localhost:3003](http://localhost:3003)
 - MongoDB: [http://localhost:27017](http://localhost:27017)
 - Nginx API Gateway: [http://localhost:80](http://localhost:80)
 
