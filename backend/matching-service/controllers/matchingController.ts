@@ -374,7 +374,7 @@ function generateAttemptKey(userData: any): string {
     return `attempts:${socketId}:${category || 'Any'}:${difficulty || 'Any'}`;
 }
 async function incrementUserAttempt(userData: any): Promise<number> {
-    if (!ENABLE_RELAXATION) return 1; // Default to 1 if relaxation is disabled
+    if (!ENABLE_RELAXATION) return 1;
 
     const attemptKey = generateAttemptKey(userData);
     const previousCriteriaKey = `previous_criteria:${userData.socketId}`;
@@ -391,13 +391,13 @@ async function incrementUserAttempt(userData: any): Promise<number> {
     const attempts = await redisClient.incr(attemptKey);
 
     // Set an expiration time for the attempt key to prevent stale data
-    await redisClient.expire(attemptKey, 3600); // 1 hour
+    await redisClient.expire(attemptKey, 3600);
 
     return attempts;
 }
 
 async function resetUserAttempt(userData: any) {
-    if (!ENABLE_RELAXATION) return; // No-op if relaxation is disabled
+    if (!ENABLE_RELAXATION) return;
 
     const attemptKey = generateAttemptKey(userData);
     await redisClient.del(attemptKey);

@@ -3,8 +3,8 @@ const io = require('socket.io-client');
 // Global counters for active clients and completed test cases
 let activeClients = 0;
 let completedTestCases = 0;
-const totalTestCases = 16; // Updated total number of test cases
-let testCaseQueue = []; // Queue to hold test case functions
+const totalTestCases = 16;
+let testCaseQueue = [];
 
 /**
  * Client class to simulate a user.
@@ -17,15 +17,15 @@ let testCaseQueue = []; // Queue to hold test case functions
  */
 class Client {
   constructor(username, email, category, difficulty, maxRetries, testCase, autoCancel = false, autoDisconnect = false) {
-    activeClients++; // Increment active client count
+    activeClients++;
 
     this.username = username;
     this.email = email;
     this.category = category;
     this.difficulty = difficulty;
-    this.socket = io('http://localhost:3003'); // Replace with your server URL
+    this.socket = io('http://localhost:3003');
     this.isMatched = false;
-    this.retryInterval = 2000; // 2 seconds
+    this.retryInterval = 2000;
     this.maxRetries = maxRetries;
     this.attempt = 0;
     this.testCase = testCase;
@@ -98,10 +98,10 @@ class Client {
   }
 
   requestMatch() {
-    if (this.isMatched) return; // Do not proceed if already matched
+    if (this.isMatched) return;
     if (this.attempt >= this.maxRetries) {
       console.log(`[Test Case ${this.testCase}] ${this.username} reached maximum match attempts. Stopping.`);
-      this.cancelMatch(); // This will handle disconnecting after delay
+      this.cancelMatch();
       return;
     }
 
@@ -144,7 +144,7 @@ function checkTestCompletion(testCase) {
 
     if (testCaseQueue.length > 0) {
       const nextTestCase = testCaseQueue.shift();
-      nextTestCase(); // Run the next test case in the queue
+      nextTestCase();
     } else if (completedTestCases === totalTestCases) {
       console.log('All test cases have been completed. Exiting program.');
       process.exit(0);
@@ -281,7 +281,7 @@ function runTestsSequentially() {
   addTestCasesToQueue();
   if (testCaseQueue.length > 0) {
     const firstTestCase = testCaseQueue.shift();
-    firstTestCase(); // Start the first test case
+    firstTestCase();
   }
 }
 
