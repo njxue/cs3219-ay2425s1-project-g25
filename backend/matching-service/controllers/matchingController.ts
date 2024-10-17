@@ -152,16 +152,19 @@ async function findMatchForUser(userData: any): Promise<string | null> {
 }
 
 async function handleMatch(userData: any, matchSocketId: string) {
-    const io = getSocket();
     const { socketId, username, email } = userData;
-  
+
     const matchUserData = await redisClient.hGetAll(`user:${matchSocketId}`);
-  
+
     if (!matchUserData.username || !matchUserData.email) {
         console.error(`matchUserData is missing required fields for socketId: ${matchSocketId}`);
         return;
     }
-    
+
+    // Remove user data before publishing to prevent race conditions
+    await redisClient.del(`user:${socketId}`);
+    await redisClient.del(`user:${matchSocketId}`);
+
     // Notify both users
     // io.to(socketId).emit(SOCKET_EVENTS.MATCH_FOUND, {
     //     message: `You have been matched with ${matchUserData.username}`,
@@ -174,7 +177,20 @@ async function handleMatch(userData: any, matchSocketId: string) {
     //     category: matchUserData.category || userData.category || 'Any',
     //     difficulty: matchUserData.difficulty || userData.difficulty || 'Any',
     // });
-  
+    // Append the match event to the Redis Stream
+
+    const streamKey = 'match_events';
+
+    await redisClient.xAdd(
+        streamKey,
+        '*', // Use '*' to let Redis assign an ID
+        {
+            user1: JSON.stringify(userData),
+            user2: JSON.stringify(matchUserData),
+        }
+    );
+
+    // Conditionally log the matching event
     if (process.env.ENABLE_LOGGING) {
         const matchingEvent = new MatchingEventModel({
             user1: { username, email },
@@ -184,22 +200,8 @@ async function handleMatch(userData: any, matchSocketId: string) {
         });
         await matchingEvent.save();
     }
-    
-    await redisClient.publish(SOCKET_EVENTS.MATCH_FOUND, JSON.stringify({
-        user1: userData,
-        user2: matchUserData,
-    }));
-  
-    // Remove matched users from all queues and data
-    // await removeUserFromQueues(socketId, userData);
-    // await removeUserFromQueues(matchSocketId, matchUserData);
-
-    await redisClient.set(`matched:${userData.socketId}`, '1', { EX: 60 });
-    await redisClient.set(`matched:${matchSocketId}`, '1', { EX: 60 });
-  
-    await redisClient.del(`user:${socketId}`);
-    await redisClient.del(`user:${matchSocketId}`);
 }
+
 
 async function removeUserFromQueues(socketId: string, userData: any) {
     const { difficulty, category } = userData;
@@ -329,44 +331,97 @@ export function setupSocketListeners() {
     });
 }
 
+// -----------------------------REDIS STREAMS----------------------------------------------
 export async function setupSubscriber() {
-    const subscriber = createRedisClient();
-    await subscriber.connect();
-  
-    await subscriber.subscribe(SOCKET_EVENTS.MATCH_FOUND, (message) => {
-        const { user1, user2 } = JSON.parse(message);
-        console.log("Message received for user 1:")
-        console.log(user1)
-        console.log("Message received for user 2:")
-        console.log(user2)
+    const redisClient = createRedisClient();
+    await redisClient.connect();
 
-        const io = getSocket();
-  
-        const socket1 = io.sockets.sockets.get(user1.socketId);
-        const socket2 = io.sockets.sockets.get(user2.socketId);
-  
-        // Add match processing code here in the future
+    const streamKey = 'match_events';
+    const consumerGroup = 'match_consumers';
+    const consumerName = `consumer_${process.pid}`; // Unique consumer name
 
-        // Tell the users about the match here
-        if (socket1) {
-            socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
-                message: `You have been matched with ${user2.username}`,
-                category: user1.category || user2.category || 'Any',
-                difficulty: user1.difficulty || user2.difficulty || 'Any',
-            });
+    // Create the consumer group if it doesn't exist
+    try {
+        await redisClient.xGroupCreate(streamKey, consumerGroup, '0', { MKSTREAM: true });
+        console.log(`Consumer group '${consumerGroup}' created.`);
+    } catch (err: any) {
+        if (err.code === 'BUSYGROUP') {
+            console.log(`Consumer group '${consumerGroup}' already exists.`);
         }
-  
-        if (socket2) {
-            socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
-                message: `You have been matched with ${user1.username}`,
-                category: user2.category || user1.category || 'Any',
-                difficulty: user2.difficulty || user1.difficulty || 'Any',
-            });
-        }
-    });
-  
-    subscriber.on('error', (err: any) => {
-        console.error('Redis Subscriber Error', err);
-    });
+    }
+
+    // Start processing messages
+    processMatchEvents(redisClient, streamKey, consumerGroup, consumerName);
 }
-  
+
+async function processMatchEvents(
+    redisClient: any,
+    streamKey: string,
+    consumerGroup: string,
+    consumerName: string
+) {
+    while (true) {
+        try {
+            // Read messages from the stream
+            const streams = await redisClient.xReadGroup(
+                consumerGroup,
+                consumerName,
+                [
+                    {
+                        key: streamKey,
+                        id: '>',
+                    }
+                ],
+                {
+                    COUNT: 10, // Adjust based on your needs
+                    BLOCK: 5000, // Wait for 5 seconds if no messages
+                }
+            );
+
+            if (streams) {
+                for (const stream of streams) {
+                    // stream is an object with 'name' and 'messages' properties
+                    const streamName = stream.name;
+                    const messages = stream.messages;
+
+                    for (const message of messages) {
+                        const id = message.id;
+                        const fields = message.message;
+                        const user1 = JSON.parse(fields.user1);
+                        const user2 = JSON.parse(fields.user2);
+
+                        await handleMatchEvent(user1, user2);
+                        await redisClient.xAck(streamKey, consumerGroup, id);
+                        await redisClient.xDel(streamKey, id);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Error processing match events:', err);
+        }
+    }
+}
+
+
+async function handleMatchEvent(user1: any, user2: any) {
+    const io = getSocket();
+
+    const socket1 = io.sockets.sockets.get(user1.socketId);
+    const socket2 = io.sockets.sockets.get(user2.socketId);
+
+    if (socket1) {
+        socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
+            message: `You have been matched with ${user2.username}`,
+            category: user1.category || user2.category || 'Any',
+            difficulty: user1.difficulty || user2.difficulty || 'Any',
+        });
+    }
+
+    if (socket2) {
+        socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
+            message: `You have been matched with ${user1.username}`,
+            category: user2.category || user1.category || 'Any',
+            difficulty: user2.difficulty || user1.difficulty || 'Any',
+        });
+    }
+}
