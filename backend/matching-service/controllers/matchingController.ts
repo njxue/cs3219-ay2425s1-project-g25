@@ -83,12 +83,6 @@ async function addUserToQueues(userData: any) {
     if (hasDifficulty && hasCategory) {
         const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
         queues.push(queueKey1);
-
-        const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
-        queues.push(queueKey2);
-
-        const queueKey3 = generateQueueKey(QueueType.Category, category, undefined);
-        queues.push(queueKey3);
     } else if (hasDifficulty) {
 
         const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
