@@ -35,6 +35,9 @@ export function createRedisClient(): RedisClientType {
 export async function logAllQueues() {
     try {
         const queueKeys = await redisClient.keys('queue:*');
+        if (queueKeys.length === 0) {
+            console.log('Match queue is empty')
+        }
         for (const queueKey of queueKeys) {
             const queueContents = await redisClient.lRange(queueKey, 0, -1);
             console.log(`Contents of ${queueKey}:`, queueContents);
