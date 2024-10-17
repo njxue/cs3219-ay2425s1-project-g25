@@ -1,31 +1,28 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { findUserByEmail as _findUserByEmail, findUserById as _findUserById } from "../model/repository.js";
 import { formatUserResponse } from "./user-controller.js";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
+import TokenService from "../services/tokenService.js";
+import { BadRequestError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
+import { decode } from "jsonwebtoken";
 
-export async function handleLogin(req, res) {
+export async function handleLogin(req, res, next) {
   const { email, password } = req.body;
   if (email && password) {
     try {
       const user = await _findUserByEmail(email);
       if (!user) {
-        return res.status(401).json({ message: "Wrong email and/or password" });
+        throw new UnauthorisedError("Wrong email");
       }
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) {
-        return res.status(401).json({ message: "Wrong email and/or password" });
+        throw new UnauthorisedError("Wrong password");
       }
 
       // Generate access and refresh token
-      const accessToken = jwt.sign(
-        { id: user.id, isAdmin: user.isAdmin },
-        jwtConfig.accessTokenSecret,
-        jwtConfig.accessTokenOptions
-      );
-      const refreshToken = jwt.sign({ id: user.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
-
+      const accessToken = TokenService.generateAccessToken(user);
+      const refreshToken = TokenService.generateRefreshToken(user);
       res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
 
       return res.status(200).json({
@@ -33,54 +30,66 @@ export async function handleLogin(req, res) {
         data: { accessToken, user: { ...formatUserResponse(user) } },
       });
     } catch (err) {
-      return res.status(500).json({ message: err.message });
+      next(err);
     }
   } else {
-    return res.status(400).json({ message: "Missing email and/or password" });
+    next(new BadRequestError("Missing email and/or password"));
   }
 }
 
-export async function handleLogout(req, res) {
+export async function handleLogout(req, res, next) {
   try {
     if (req.cookies[REFRESH_TOKEN_COOKIE_KEY]) {
       res.clearCookie(REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions);
     }
+    const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
+    const decodedToken = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
+    await TokenService.blacklistToken(decodedToken);
     return res.sendStatus(204);
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    next(err);
   }
 }
 
-export async function handleVerifyToken(req, res) {
+export async function handleVerifyToken(req, res, next) {
   try {
     const verifiedUser = req.user;
     return res.status(200).json({ message: "Token verified", data: formatUserResponse(verifiedUser) });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    next(err);
   }
 }
 
-export async function refresh(req, res) {
-  if (!req.cookies[[REFRESH_TOKEN_COOKIE_KEY]]) {
-    return res.status(401).json({ message: `Unauthorized: no token` });
-  }
-  const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
-  jwt.verify(refreshToken, jwtConfig.refreshTokenSecret, async (err, user) => {
-    if (err) {
-      return res.status(401).json({ message: `Unauthorized: ${err.message}` });
+export async function refresh(req, res, next) {
+  try {
+    const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
+    if (!refreshToken) {
+      throw new UnauthorisedError();
     }
-    const dbUser = await _findUserById(user.id);
+    const decodedRefreshToken = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
+
+    // Check if refresh token has been blacklisted
+    if (await TokenService.isRefreshTokenBlacklisted(decodedRefreshToken)) {
+      throw new UnauthorisedError(`${decodedRefreshToken.jti} found in token blacklist`);
+    }
+
+    // Check if user exists
+    const dbUser = await _findUserById(decodedRefreshToken.id);
     if (!dbUser) {
-      return res.status(401).json({ message: "Unauthorized: User not found" });
+      throw new NotFoundError("User not found");
     }
-    const accessToken = jwt.sign(
-      { id: user.id, isAdmin: user.isAdmin },
-      jwtConfig.accessTokenSecret,
-      jwtConfig.accessTokenOptions
-    );
+
+    // Blacklist old refresh token and generate new access and refresh tokens
+    const accessToken = TokenService.generateAccessToken(dbUser);
+    const newRefreshToken = TokenService.generateRefreshToken(dbUser);
+    res.cookie(REFRESH_TOKEN_COOKIE_KEY, newRefreshToken, refreshTokenCookieOptions);
+    await TokenService.blacklistToken(decodedRefreshToken);
+
     return res.status(200).json({
       message: "Access token refreshed",
       data: accessToken,
     });
-  });
+  } catch (err) {
+    next(err);
+  }
 }

@@ -1,37 +1,37 @@
-import jwt from "jsonwebtoken";
 import { findUserById as _findUserById } from "../model/repository.js";
 import { jwtConfig } from "../config/authConfig.js";
+import TokenService from "../services/tokenService.js";
+import { ForbiddenError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
 
-export function verifyAccessToken(req, res, next) {
-  const authHeader = req.headers.authorization || req.header.Authorization;
-  if (!authHeader) {
-    return res.status(401).json({ message: "Authentication failed" });
-  }
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized: no token" });
-  }
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, jwtConfig.accessTokenSecret, async (err, user) => {
-    if (err) {
-      return res.status(401).json({ message: `Unauthorized: ${err.message}` });
+export async function verifyAccessToken(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || req.header.Authorization;
+    if (!authHeader) {
+      throw new UnauthorisedError();
     }
 
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new UnauthorisedError();
+    }
+    const token = authHeader.split(" ")[1];
+
+    const user = await TokenService.verifyToken(token, jwtConfig.accessTokenSecret);
     const dbUser = await _findUserById(user.id);
     if (!dbUser) {
-      return res.status(401).json({ message: "Unauthorized: User not found" });
+      throw new NotFoundError("User not found");
     }
-
     req.user = { id: dbUser.id, username: dbUser.username, email: dbUser.email, isAdmin: dbUser.isAdmin };
     next();
-  });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function verifyIsAdmin(req, res, next) {
   if (req.user.isAdmin) {
     next();
   } else {
-    return res.status(403).json({ message: "Not authorized to access this resource" });
+    next(new ForbiddenError("Not authorised to access this resource"));
   }
 }
 
@@ -46,5 +46,5 @@ export function verifyIsOwnerOrAdmin(req, res, next) {
     return next();
   }
 
-  return res.status(403).json({ message: "Not authorized to access this resource" });
+  next(new ForbiddenError("Not authorised to access this resource"));
 }

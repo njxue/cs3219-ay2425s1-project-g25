@@ -1,6 +1,6 @@
 import { User } from "domain/entities/User";
 import { userUseCases } from "domain/usecases/UserUseCases";
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
 import AuthClientStore from "data/auth/AuthClientStore";
 import { IUserUpdateInput } from "domain/users/IUser";
 
@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | undefined>(undefined);
-
+    const isMounted = useRef<boolean>(false);
     useEffect(() => {
         const verifyAccessToken = async () => {
             try {
@@ -39,7 +39,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(null);
             return;
         }
-        verifyAccessToken();
+
+        if (!isMounted.current) {
+            verifyAccessToken();
+        }
+        isMounted.current = true;
     }, []);
 
     const login = async (email: string, password: string) => {

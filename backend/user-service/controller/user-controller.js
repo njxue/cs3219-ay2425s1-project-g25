@@ -13,17 +13,18 @@ import {
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
 } from "../model/repository.js";
+import { BadRequestError, ConflictError, NotFoundError } from "../utils/httpErrors.js";
 
-export async function createUser(req, res) {
+export async function createUser(req, res, next) {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res.status(400).json({ message: "username and/or email and/or password are missing" });
+      throw new BadRequestError("Username and/or email and/or password are missing");
     }
 
     const existingUser = await _findUserByUsernameOrEmail(username, email);
     if (existingUser) {
-      return res.status(409).json({ message: "username or email already exists" });
+      throw new ConflictError("Username or email already exists");
     }
 
     const salt = bcrypt.genSaltSync(10);
@@ -31,12 +32,8 @@ export async function createUser(req, res) {
     const createdUser = await _createUser(username, email, hashedPassword);
 
     // Generate access and refresh token
-    const accessToken = jwt.sign(
-      { id: createdUser.id, isAdmin: createdUser.isAdmin },
-      jwtConfig.accessTokenSecret,
-      jwtConfig.accessTokenOptions
-    );
-    const refreshToken = jwt.sign({ id: createdUser.id }, jwtConfig.refreshTokenSecret, jwtConfig.refreshTokenOptions);
+    const accessToken = TokenService.generateAccessToken(createdUser);
+    const refreshToken = TokenService.generateRefreshToken(createdUser);
 
     res.cookie(REFRESH_TOKEN_COOKIE_KEY, refreshToken, refreshTokenCookieOptions);
 
@@ -45,61 +42,58 @@ export async function createUser(req, res) {
       data: { accessToken, user: { ...formatUserResponse(createdUser) } },
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Unknown error when creating new user!" });
+    next(err);
   }
 }
 
-export async function getUser(req, res) {
+export async function getUser(req, res, next) {
   try {
     const userId = req.params.id;
     if (!isValidObjectId(userId)) {
-      return res.status(404).json({ message: `User ${userId} not found` });
+      throw new NotFoundError(`User ${userId} not found`);
     }
 
     const user = await _findUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: `User ${userId} not found` });
+      throw new NotFoundError(`User ${userId} not found`);
     } else {
       return res.status(200).json({ message: `Found user`, data: formatUserResponse(user) });
     }
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Unknown error when getting user!" });
+    next(err);
   }
 }
 
-export async function getAllUsers(req, res) {
+export async function getAllUsers(req, res, next) {
   try {
     const users = await _findAllUsers();
 
     return res.status(200).json({ message: `Found users`, data: users.map(formatUserResponse) });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Unknown error when getting all users!" });
+    next(err);
   }
 }
 
-export async function updateUser(req, res) {
+export async function updateUser(req, res, next) {
   try {
     const { username, email, password } = req.body;
     if (username || email || password) {
       const userId = req.params.id;
       if (!isValidObjectId(userId)) {
-        return res.status(404).json({ message: `User ${userId} not found` });
+        throw new NotFoundError(`User ${userId} not found`);
       }
       const user = await _findUserById(userId);
       if (!user) {
-        return res.status(404).json({ message: `User ${userId} not found` });
+        throw new NotFoundError(`User ${userId} not found`);
       }
       if (username || email) {
         let existingUser = await _findUserByUsername(username);
         if (existingUser && existingUser.id !== userId) {
-          return res.status(409).json({ message: "Username already exists" });
+          throw new ConflictError("Username already exists");
         }
         existingUser = await _findUserByEmail(email);
         if (existingUser && existingUser.id !== userId) {
-          return res.status(409).json({ message: "Email already exists" });
+          throw new ConflictError("Email already exists");
         }
       }
 
@@ -114,26 +108,25 @@ export async function updateUser(req, res) {
         data: formatUserResponse(updatedUser),
       });
     } else {
-      return res.status(400).json({ message: "No field to update: username and email and password are all missing!" });
+      throw new BadRequestError("No field to update: username and email and password are all missing!");
     }
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Unknown error when updating user!" });
+    next(err);
   }
 }
 
-export async function updateUserPrivilege(req, res) {
+export async function updateUserPrivilege(req, res, next) {
   try {
     const { isAdmin } = req.body;
 
     if (isAdmin !== undefined) {
       const userId = req.params.id;
       if (!isValidObjectId(userId)) {
-        return res.status(404).json({ message: `User ${userId} not found` });
+        throw new NotFoundError(`User ${userId} not found`);
       }
       const user = await _findUserById(userId);
       if (!user) {
-        return res.status(404).json({ message: `User ${userId} not found` });
+        throw new NotFoundError(`User ${userId} not found`);
       }
 
       const updatedUser = await _updateUserPrivilegeById(userId, isAdmin === true);
@@ -142,30 +135,28 @@ export async function updateUserPrivilege(req, res) {
         data: formatUserResponse(updatedUser),
       });
     } else {
-      return res.status(400).json({ message: "isAdmin is missing!" });
+      throw new BadRequestError("isAdmin is missing");
     }
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Unknown error when updating user privilege!" });
+    next(err);
   }
 }
 
-export async function deleteUser(req, res) {
+export async function deleteUser(req, res, next) {
   try {
     const userId = req.params.id;
     if (!isValidObjectId(userId)) {
-      return res.status(404).json({ message: `User ${userId} not found` });
+      throw new NotFoundError(`User ${userId} not found`);
     }
     const user = await _findUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: `User ${userId} not found` });
+      throw new NotFoundError(`User ${userId} not found`);
     }
 
     await _deleteUserById(userId);
     return res.status(200).json({ message: `Deleted user ${userId} successfully` });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Unknown error when deleting user!" });
+    next(err);
   }
 }
 

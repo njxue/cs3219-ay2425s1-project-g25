@@ -1,6 +1,4 @@
 import UserModel from "./user-model.js";
-import dotenv from "dotenv";
-import path from "path";
 import { connect } from "mongoose";
 
 export async function connectToDB() {
