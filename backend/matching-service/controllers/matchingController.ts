@@ -81,24 +81,15 @@ async function addUserToQueues(userData: any) {
     const queues = [];
 
     if (hasDifficulty && hasCategory) {
-        const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
-        queues.push(queueKey1);
+        const queueKey = generateQueueKey(QueueType.All, category, difficulty);
+        queues.push(queueKey);
     } else if (hasDifficulty) {
-
-        const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
-        queues.push(queueKey1);
-
-        const queueKey2 = generateQueueKey(QueueType.All, '*', difficulty);
-        queues.push(queueKey2);
+        const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
+        queues.push(queueKey);
     } else if (hasCategory) {
-
-        const queueKey1 = generateQueueKey(QueueType.Category, category, undefined);
-        queues.push(queueKey1);
-
-        const queueKey2 = generateQueueKey(QueueType.All, category, '*');
-        queues.push(queueKey2);
+        const queueKey = generateQueueKey(QueueType.All, category, '*');
+        queues.push(queueKey);
     } else {
-
         const queueKey = generateQueueKey(QueueType.General);
         queues.push(queueKey);
     }
@@ -129,17 +120,11 @@ async function findMatchForUser(userData: any): Promise<string | null> {
     if (hasDifficulty) {
         const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
         queueKeys.push(queueKey);
-
-        const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
-        queueKeys.push(queueKey2);
     }
 
     if (hasCategory) {
         const queueKey = generateQueueKey(QueueType.All, category, '*');
         queueKeys.push(queueKey);
-
-        const queueKey2 = generateQueueKey(QueueType.Category, category, undefined);
-        queueKeys.push(queueKey2);
     }
 
     const generalQueueKey = generateQueueKey(QueueType.General);
@@ -225,26 +210,14 @@ async function removeUserFromQueues(socketId: string, userData: any) {
     const queues = [];
 
     if (hasDifficulty && hasCategory) {
-        const queueKey1 = generateQueueKey(QueueType.All, category, difficulty);
-        queues.push(queueKey1);
-
-        const queueKey2 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
-        queues.push(queueKey2);
-
-        const queueKey3 = generateQueueKey(QueueType.Category, category, undefined);
-        queues.push(queueKey3);
+        const queueKey = generateQueueKey(QueueType.All, category, difficulty);
+        queues.push(queueKey);
     } else if (hasDifficulty) {
-        const queueKey1 = generateQueueKey(QueueType.Difficulty, undefined, difficulty);
-        queues.push(queueKey1);
-
-        const queueKey2 = generateQueueKey(QueueType.All, '*', difficulty);
-        queues.push(queueKey2);
+        const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
+        queues.push(queueKey);
     } else if (hasCategory) {
-        const queueKey1 = generateQueueKey(QueueType.Category, category, undefined);
-        queues.push(queueKey1);
-
-        const queueKey2 = generateQueueKey(QueueType.All, category, '*');
-        queues.push(queueKey2);
+        const queueKey = generateQueueKey(QueueType.All, category, '*');
+        queues.push(queueKey);
     } else {
         const queueKey = generateQueueKey(QueueType.General);
         queues.push(queueKey);
