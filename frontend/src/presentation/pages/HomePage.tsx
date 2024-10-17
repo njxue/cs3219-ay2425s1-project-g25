@@ -1,39 +1,16 @@
+import React, { useState, useEffect } from "react";
 import styles from "./HomePage.module.css";
-import React from "react";
 import { FindPeerButton } from "presentation/components/buttons/FindPeerButton";
-import { CategoriesDropdown } from "presentation/components/CategoriesDropdown";
-import { DifficultiesDropdown } from "presentation/components/DifficultiesDropdown";
-import { ProfileContainer } from "presentation/components/ProfileContainer";
-import { RecentAttemptsTable } from "presentation/components/RecentAttemptsTable";
-import { CustomTooltip } from "presentation/components/common/CustomTooltip";
-import React, { useState } from "react";
-import React, { useState, useEffect } from "react";
-import React, { useState, useEffect } from "react";
-import { useUser } from "domain/contexts/userContext";
-import { FindPeerButton } from "presentation/components/buttons/FindPeerButton";
-import { Tooltip } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
 import { ProfileContainer } from "presentation/components/ProfileContainer";
 import { RecentAttemptsTable } from "presentation/components/RecentAttemptsTable";
 import { QuestionFilters } from "presentation/components/QuestionFilters";
-import { Category } from "domain/entities/Category";
-import styles from "./HomePage.module.css";
 import { SelectedCategories } from "presentation/components/SelectedCategories";
 import { MatchingModal } from "presentation/components/modals/MatchingModal";
-import { FindPeerButton } from "presentation/components/buttons/FindPeerButton";
 import { Tooltip } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
-import { ProfileContainer } from "presentation/components/ProfileContainer";
-import { RecentAttemptsTable } from "presentation/components/RecentAttemptsTable";
-import { QuestionFilters } from "presentation/components/QuestionFilters";
 import { Category } from "domain/entities/Category";
-import styles from "./HomePage.module.css";
-import { SelectedCategories } from "presentation/components/SelectedCategories";
-import { MatchingModal } from "presentation/components/modals/MatchingModal";
 
 const HomePage: React.FC = () => {
-    const { user } = useUser();
-
     const [filters, setFilters] = useState({
         selectedDifficulty: "All",
         selectedCategories: [] as Category[],
@@ -66,53 +43,6 @@ const HomePage: React.FC = () => {
             }, 1000);
         }
         if (counter === 0) {
-            // Simulate finding a match after countdown reaches 0
-            setIsMatching(false);
-        }
-
-        return () => {
-            if (timer) clearInterval(timer);
-        };
-    }, [isModalVisible, counter]);
-
-    const handleModalClose = () => {
-        setIsModalVisible(false);
-        setIsMatching(false);
-    };
-
-    const [filters, setFilters] = useState({
-        selectedDifficulty: "All",
-        selectedCategories: [] as Category[],
-        searchTerm: ""
-    });
-
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isMatching, setIsMatching] = useState(false);
-    const [counter, setCounter] = useState(30);
-
-    const handleFiltersChange = (newFilters: {
-        selectedDifficulty: string;
-        selectedCategories: Category[];
-        searchTerm: string;
-    }) => {
-        setFilters(newFilters);
-    };
-
-    const handleFindPeerClick = () => {
-        setIsModalVisible(true);
-        setIsMatching(true);
-        setCounter(3);
-    };
-
-    useEffect(() => {
-        let timer: NodeJS.Timeout | undefined;
-        if (isModalVisible && counter > 0) {
-            timer = setInterval(() => {
-                setCounter((prevCounter) => prevCounter - 1);
-            }, 1000);
-        }
-        if (counter === 0) {
-            // Simulate finding a match after countdown reaches 0
             setIsMatching(false);
         }
 
@@ -134,12 +64,7 @@ const HomePage: React.FC = () => {
                 <div className={styles.selectRow}>
                     <QuestionFilters onFiltersChange={handleFiltersChange} showSearchBar={false} />
                 </div>
-                <FindPeerButton onClick={handleFindPeerClick} />
                 <div className={styles.selectRow}>
-                    <QuestionFilters onFiltersChange={handleFiltersChange} showSearchBar={false} />
-                </div>
-                <div className={styles.selectRow}>
-                    <SelectedCategories categories={filters.selectedCategories} />
                     <SelectedCategories categories={filters.selectedCategories} />
                 </div>
                 <Tooltip
@@ -153,13 +78,9 @@ const HomePage: React.FC = () => {
                 <ProfileContainer />
                 <RecentAttemptsTable />
             </div>
-            <MatchingModal visible={isModalVisible} onClose={handleModalClose} simulateFoundOrFail={"found" } />
-            <MatchingModal visible={isModalVisible} onClose={handleModalClose} simulateFoundOrFail={"found" } />
+            <MatchingModal visible={isModalVisible} onClose={handleModalClose} simulateFoundOrFail={"found"} />
         </div>
-    );
-};
     );
 };
 
 export default HomePage;
-
