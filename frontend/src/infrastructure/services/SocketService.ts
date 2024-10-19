@@ -1,12 +1,13 @@
-// src/services/socketService.ts
 import { io, Socket } from "socket.io-client";
 
 class SocketService {
     private socket: Socket | null = null;
+    private onConnectCallbacks: (() => void)[] = [];
+    private onDisconnectCallbacks: (() => void)[] = [];
 
     connect() {
         if (!this.socket) {
-            this.socket = io("http://localhost:7000");
+            this.socket = io("http://localhost:3003");
             this.setupEventListeners();
         }
     }
@@ -15,6 +16,7 @@ class SocketService {
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
+            console.log("Socket disconnected and cleaned up.");
         }
     }
 
@@ -29,30 +31,8 @@ class SocketService {
                 console.log("Disconnected from server");
                 this.onDisconnectCallbacks.forEach(callback => callback());
             });
-
-            this.socket.on("matchFound", () => {
-                console.log("Match found");
-                this.onMatchFoundCallbacks.forEach(callback => callback());
-            });
-
-            this.socket.on("startMatching", () => {
-                console.log("Matching started");
-                this.onMatchingStartCallbacks.forEach(callback => callback());
-            });
-
-            this.socket.on("cancelMatching", () => {
-                console.log("Matching cancelled");
-                this.onCancelMatchingCallbacks.forEach(callback => callback());
-            });
         }
     }
-
-
-    private onConnectCallbacks: (() => void)[] = [];
-    private onDisconnectCallbacks: (() => void)[] = [];
-    private onMatchFoundCallbacks: (() => void)[] = [];
-    private onMatchingStartCallbacks: (() => void)[] = [];
-    private onCancelMatchingCallbacks: (() => void)[] = [];
 
     onConnect(callback: () => void) {
         this.onConnectCallbacks.push(callback);
@@ -62,27 +42,31 @@ class SocketService {
         this.onDisconnectCallbacks.push(callback);
     }
 
-    onMatchFound(callback: () => void) {
-        this.onMatchFoundCallbacks.push(callback);
+    emit(event: string, data?: any) {
+        if (this.socket) {
+            this.socket.emit(event, data);
+        } else {
+            console.error("Socket not connected, cannot emit event.");
+        }
     }
 
-    onMatchingStart(callback: () => void) {
-        this.onMatchingStartCallbacks.push(callback);
+    on(event: string, callback: (data: any) => void) {
+        if (this.socket) {
+            this.socket.on(event, callback);
+        } else {
+            console.error("Socket not connected, cannot listen to event.");
+        }
     }
 
-    onCancelMatching(callback: () => void) {
-        this.onCancelMatchingCallbacks.push(callback);
+    off(event: string, callback?: (data: any) => void) {
+        if (this.socket) {
+            this.socket.off(event, callback);
+        } else {
+            console.error("Socket not connected, cannot remove listener.");
+        }
     }
 
-    startMatching() {
-        this.socket?.emit("startMatching");
-    }
-
-    cancelMatching() {
-        this.socket?.emit("cancelMatching");
-    }
-
-    isConnected() {
+    isConnected(): boolean {
         return this.socket?.connected || false;
     }
 }

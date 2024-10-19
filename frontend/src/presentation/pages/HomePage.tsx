@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import styles from "./HomePage.module.css";
 import { FindPeerButton } from "presentation/components/buttons/FindPeerButton";
 import { ProfileContainer } from "presentation/components/ProfileContainer";
@@ -6,9 +6,13 @@ import { RecentAttemptsTable } from "presentation/components/RecentAttemptsTable
 import { QuestionFilters } from "presentation/components/QuestionFilters";
 import { SelectedCategories } from "presentation/components/SelectedCategories";
 import { MatchingModal } from "presentation/components/modals/MatchingModal";
-import { Tooltip } from "antd";
+import { Tooltip, message } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Category } from "domain/entities/Category";
+import { useAuth } from "domain/context/AuthContext";
+import { ValidationError } from "presentation/utils/errors";
+import { useMatchmaking } from "domain/context/MatchmakingContext";
+import { MatchmakingValidator } from "domain/validation/MatchmakingValidator";
 
 const HomePage: React.FC = () => {
     const [filters, setFilters] = useState({
@@ -17,9 +21,8 @@ const HomePage: React.FC = () => {
         searchTerm: ""
     });
 
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isMatching, setIsMatching] = useState(false);
-    const [counter, setCounter] = useState(30);
+    const { startMatching, state } = useMatchmaking();
+    const { user } = useAuth();
 
     const handleFiltersChange = (newFilters: {
         selectedDifficulty: string | null;
@@ -29,32 +32,38 @@ const HomePage: React.FC = () => {
         setFilters(newFilters);
     };
 
+    const startMatchingProcess = useCallback(() => {
+        try {
+            const correctedInput = MatchmakingValidator.validateAndCorrectMatchmakingInput({
+                username: user?.username,
+                email: user?.email,
+                selectedCategories: filters.selectedCategories,
+                selectedDifficulty: filters.selectedDifficulty
+            });
+            startMatching(
+                correctedInput.username,
+                correctedInput.email,
+                correctedInput.selectedCategories[0].name,
+                correctedInput.selectedDifficulty
+            );
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                message.error(error.message);
+            }
+        }
+    }, [user, filters, startMatching]);
+
     const handleFindPeerClick = () => {
-        setIsModalVisible(true);
-        setIsMatching(true);
-        setCounter(3);
+        startMatchingProcess();
     };
 
-    useEffect(() => {
-        let timer: NodeJS.Timeout | undefined;
-        if (isModalVisible && counter > 0) {
-            timer = setInterval(() => {
-                setCounter((prevCounter) => prevCounter - 1);
-            }, 1000);
-        }
-        if (counter === 0) {
-            setIsMatching(false);
-        }
-
-        return () => {
-            if (timer) clearInterval(timer);
-        };
-    }, [isModalVisible, counter]);
-
-    const handleModalClose = () => {
-        setIsModalVisible(false);
-        setIsMatching(false);
+    const handleRetry = () => {
+        startMatchingProcess();
     };
+
+    if (!user) {
+        return <p>Loading user data...</p>;
+    }
 
     return (
         <div className={styles.container}>
@@ -69,7 +78,7 @@ const HomePage: React.FC = () => {
                     />
                 </div>
                 <div className={styles.selectRow}>
-                    <SelectedCategories categories={filters.selectedCategories } />
+                    <SelectedCategories categories={filters.selectedCategories} />
                 </div>
                 <Tooltip
                     className={styles.tooltip}
@@ -82,7 +91,7 @@ const HomePage: React.FC = () => {
                 <ProfileContainer />
                 <RecentAttemptsTable />
             </div>
-            <MatchingModal visible={isModalVisible} onClose={handleModalClose} simulateFoundOrFail={"found"} />
+            <MatchingModal onRetry={handleRetry} />
         </div>
     );
 };

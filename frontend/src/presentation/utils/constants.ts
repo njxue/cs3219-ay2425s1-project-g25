@@ -32,6 +32,13 @@ export const ERRORS = {
     GENERAL_ERROR: "An unexpected error occurred. Please try again later."
 };
 
+export const MATCHING_ERRORS = {
+    USER_USERNAME_EMPTY: "Username cannot be empty.",
+    USER_EMAIL_EMPTY: "Email cannot be empty.",
+    NO_CATEGORY_SELECTED: "Please select at least one category.",
+    NO_DIFFICULTY_SELECTED: "Please select a difficulty level."
+};
+
 export const QUESTIONS_PAGE_TEXT = {
     LAST_SELECTED_QUESTION_KEY: "lastSelectedQuestionId",
     ADD_QUESTION: "Add a new question"

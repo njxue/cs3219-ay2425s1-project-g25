@@ -1,42 +1,47 @@
-// src/components/MatchingFloatingButton.tsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button, Tooltip } from "antd";
-import { WifiOutlined, DisconnectOutlined } from "@ant-design/icons";
-import { useMatchmakingUseCase } from "domain/usecases/MatchmakingUseCase";
+import { useMatchmaking } from "domain/context/MatchmakingContext";
+import { LoadingOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
 const MatchingFloatingButton: React.FC = () => {
-    const { state, connectSocket, disconnectSocket } = useMatchmakingUseCase();
-    const [isConnected, setIsConnected] = useState(state.connected);
-
-    useEffect(() => {
-        setIsConnected(state.connected);
-    }, [state.connected]);
-
-    const handleClick = () => {
-        if (!isConnected) {
-            connectSocket();
-        } else {
-            disconnectSocket();
-        }
-    };
+    const { state, showModal } = useMatchmaking();
+    const { isMatching, matchFound, matchFailed } = state;
 
     const getButtonProps = () => {
-        if (!isConnected) {
+        if (isMatching) {
             return {
-                icon: <DisconnectOutlined />,
+                icon: <LoadingOutlined />,
+                style: { backgroundColor: "#1890ff" },
+                tooltipTitle: "Matching in progress..."
+            };
+        } else if (matchFound) {
+            return {
+                icon: <CheckCircleOutlined />,
+                style: { backgroundColor: "#52c41a" },
+                tooltipTitle: "Match found!"
+            };
+        } else if (matchFailed) {
+            return {
+                icon: <CloseCircleOutlined />,
                 style: { backgroundColor: "#ff4d4f" },
-                tooltipTitle: "Disconnected. Click to connect"
+                tooltipTitle: "Matching failed. Click to retry."
             };
         } else {
-            return {
-                icon: <WifiOutlined />,
-                style: { backgroundColor: "#52c41a" },
-                tooltipTitle: "Connected. Click to disconnect"
-            };
+            return null;
         }
     };
 
-    const { icon, style, tooltipTitle } = getButtonProps();
+    const handleButtonClick = () => {
+        showModal();
+    };
+
+    const buttonProps = getButtonProps();
+
+    if (!buttonProps) {
+        return null;
+    }
+
+    const { icon, style, tooltipTitle } = buttonProps;
 
     return (
         <Tooltip title={tooltipTitle}>
@@ -44,7 +49,6 @@ const MatchingFloatingButton: React.FC = () => {
                 type="primary"
                 shape="circle"
                 icon={icon}
-                onClick={handleClick}
                 style={{
                     ...style,
                     position: "fixed",
@@ -53,6 +57,7 @@ const MatchingFloatingButton: React.FC = () => {
                     zIndex: 1000,
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)"
                 }}
+                onClick={handleButtonClick}
             />
         </Tooltip>
     );
