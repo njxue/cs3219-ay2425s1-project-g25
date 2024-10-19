@@ -9,7 +9,7 @@ interface MatchingModalProps {
 
 export const MatchingModal: React.FC<MatchingModalProps> = ({ onRetry }) => {
     const { state, cancelMatching, closeModal } = useMatchmaking();
-    const { elapsedTime, isMatching, matchFound, isModalVisible, countdown, matchFailed } = state;
+    const { elapsedTime, status, isModalVisible, countdown } = state;
 
     const handleCancelFinding = () => {
         cancelMatching();
@@ -17,6 +17,44 @@ export const MatchingModal: React.FC<MatchingModalProps> = ({ onRetry }) => {
 
     const handleRetry = () => {
         onRetry();
+    };
+
+    const renderModalContent = () => {
+        switch (status) {
+            case "matching":
+                return (
+                    <div className={styles.matchingSection}>
+                        <Spin size="large" />
+                        <p className={styles.matchingText}>Matching you with a peer...</p>
+                        <p className={styles.elapsedTimeText}>
+                            Time waiting: {elapsedTime >= 60 ? `${Math.floor(elapsedTime / 60)}m ` : ""}
+                            {elapsedTime % 60}s
+                        </p>
+                        <Button type="primary" danger onClick={handleCancelFinding} className={styles.cancelButton}>
+                            Cancel Finding
+                        </Button>
+                    </div>
+                );
+            case "found":
+                return (
+                    <div className={styles.matchFoundSection}>
+                        <h2>Match Found!</h2>
+                        <p>Redirecting you in {countdown} seconds...</p>
+                    </div>
+                );
+            case "failed":
+                return (
+                    <div className={styles.matchFailedSection}>
+                        <h2>No Match Found</h2>
+                        <p>Matching took too long, please try again.</p>
+                        <Button type="primary" onClick={handleRetry}>
+                            Retry
+                        </Button>
+                    </div>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -30,36 +68,7 @@ export const MatchingModal: React.FC<MatchingModalProps> = ({ onRetry }) => {
             maskClosable={false}
             onCancel={closeModal}
         >
-            <div className={styles.modalContent}>
-                {isMatching && !matchFound && !matchFailed && (
-                    <div className={styles.matchingSection}>
-                        <Spin size="large" />
-                        <p className={styles.matchingText}>Matching you with a peer...</p>
-                        <p className={styles.elapsedTimeText}>
-                            Time waiting: {elapsedTime >= 60 ? `${Math.floor(elapsedTime / 60)}m ` : ""}
-                            {elapsedTime % 60}s
-                        </p>
-                        <Button type="primary" danger onClick={handleCancelFinding} className={styles.cancelButton}>
-                            Cancel Finding
-                        </Button>
-                    </div>
-                )}
-                {matchFound && (
-                    <div className={styles.matchFoundSection}>
-                        <h2>Match Found!</h2>
-                        <p>Redirecting you in {countdown} seconds...</p>
-                    </div>
-                )}
-                {matchFailed && (
-                    <div className={styles.matchFailedSection}>
-                        <h2>No Match Found</h2>
-                        <p>Matching took too long, please try again.</p>
-                        <Button type="primary" onClick={handleRetry}>
-                            Retry
-                        </Button>
-                    </div>
-                )}
-            </div>
+            <div className={styles.modalContent}>{renderModalContent()}</div>
         </Modal>
     );
 };

@@ -2,25 +2,20 @@ import React, { createContext, useReducer, useContext, ReactNode, useEffect, use
 import { useNavigate } from "react-router-dom";
 import { matchService } from "infrastructure/services/MatchService";
 
-interface MatchmakingState {
-    isMatching: boolean;
-    matchFound: boolean;
-    elapsedTime: number;
-    connected: boolean;
+type MatchStatus = "idle" | "matching" | "found" | "failed";
 
+interface MatchmakingState {
+    status: MatchStatus;
+    connected: boolean;
     isModalVisible: boolean;
     countdown: number;
-    matchFailed: boolean;
 }
 
 const initialState: MatchmakingState = {
-    isMatching: false,
-    matchFound: false,
-    elapsedTime: 0,
+    status: "idle",
     connected: false,
     isModalVisible: false,
-    countdown: 3,
-    matchFailed: false
+    countdown: 3
 };
 
 type MatchmakingAction =
@@ -29,10 +24,8 @@ type MatchmakingAction =
     | { type: "MATCH_FAILED" }
     | { type: "CANCEL_MATCHING" }
     | { type: "RESET" }
-    | { type: "INCREMENT_TIME" }
     | { type: "SOCKET_CONNECTED" }
     | { type: "SOCKET_DISCONNECTED" }
-    | { type: "INCREMENT_ATTEMPT" }
     | { type: "SHOW_MODAL" }
     | { type: "HIDE_MODAL" }
     | { type: "SET_COUNTDOWN"; payload: number };
@@ -40,21 +33,19 @@ type MatchmakingAction =
 const matchmakingReducer = (state: MatchmakingState, action: MatchmakingAction): MatchmakingState => {
     switch (action.type) {
         case "START_MATCHING":
-            return { ...state, isMatching: true, matchFound: false, elapsedTime: 0, isModalVisible: true };
+            return { ...state, status: "matching", isModalVisible: true };
         case "MATCH_FOUND":
-            return { ...state, isMatching: false, matchFound: true };
+            return { ...state, status: "found" };
         case "MATCH_FAILED":
-            return { ...state, isMatching: false, matchFailed: true, isModalVisible: true };
+            return { ...state, status: "failed", isModalVisible: true };
         case "CANCEL_MATCHING":
-            return { ...state, isMatching: false, matchFound: false, isModalVisible: false };
-        case "INCREMENT_TIME":
-            return { ...state, elapsedTime: state.elapsedTime + 1 };
+            return { ...state, status: "idle", isModalVisible: false };
         case "SOCKET_CONNECTED":
             return { ...state, connected: true };
         case "SOCKET_DISCONNECTED":
-            return { ...state, connected: false, isMatching: false };
+            return { ...state, connected: false, status: "idle" };
         case "RESET":
-            return { ...initialState, countdown: 3 };
+            return { ...initialState };
         case "SHOW_MODAL":
             return { ...state, isModalVisible: true };
         case "HIDE_MODAL":
@@ -66,8 +57,28 @@ const matchmakingReducer = (state: MatchmakingState, action: MatchmakingAction):
     }
 };
 
+type TimerAction =
+    | { type: "START_TIMER" }
+    | { type: "STOP_TIMER" }
+    | { type: "INCREMENT_TIME" }
+    | { type: "RESET_TIMER" };
+
+const timerReducer = (state: number, action: TimerAction): number => {
+    switch (action.type) {
+        case "INCREMENT_TIME":
+            return state + 1;
+        case "RESET_TIMER":
+            return 0;
+        case "START_TIMER":
+        case "STOP_TIMER":
+            return state;
+        default:
+            return state;
+    }
+};
+
 const MatchmakingContext = createContext<{
-    state: MatchmakingState;
+    state: MatchmakingState & { elapsedTime: number };
     dispatch: React.Dispatch<MatchmakingAction>;
     startMatching: (username: string, email: string, category: string, difficulty: string) => void;
     cancelMatching: () => void;
@@ -75,7 +86,7 @@ const MatchmakingContext = createContext<{
     closeModal: () => void;
     showModal: () => void;
 }>({
-    state: initialState,
+    state: { ...initialState, elapsedTime: 0 },
     dispatch: () => null,
     startMatching: () => {},
     cancelMatching: () => {},
@@ -86,14 +97,19 @@ const MatchmakingContext = createContext<{
 
 export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [state, dispatch] = useReducer(matchmakingReducer, initialState);
+    const [elapsedTime, timerDispatch] = useReducer(timerReducer, 0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const navigationTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const matchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isResetting = useRef(false);
+    const isMatchingRef = useRef(false);
     const navigate = useNavigate();
 
     const startTimer = () => {
-        if (!timerRef.current) {
+        if (!timerRef.current && !isResetting.current) {
             timerRef.current = setInterval(() => {
-                dispatch({ type: "INCREMENT_TIME" });
+                if (!isResetting.current) {
+                    timerDispatch({ type: "INCREMENT_TIME" });
+                }
             }, 1000);
         }
     };
@@ -105,25 +121,46 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         }
     };
 
+    const reset = () => {
+        isResetting.current = true;
+        isMatchingRef.current = false;
+        dispatch({ type: "RESET" });
+        timerDispatch({ type: "RESET_TIMER" });
+        stopTimer();
+        if (matchTimeoutRef.current) {
+            clearTimeout(matchTimeoutRef.current);
+            matchTimeoutRef.current = null;
+        }
+        setTimeout(() => {
+            isResetting.current = false;
+        }, 0);
+    };
+
     const startMatching = (username: string, email: string, category: string, difficulty: string) => {
         reset();
+        isMatchingRef.current = true;
+
         matchService
             .ensureConnected()
             .then(() => {
+                if (!isMatchingRef.current) return;
+
                 dispatch({ type: "SOCKET_CONNECTED" });
                 matchService.startMatch(username, email, category, difficulty);
                 dispatch({ type: "START_MATCHING" });
                 startTimer();
 
-                setTimeout(() => {
-                    if (!state.matchFound) {
+                matchTimeoutRef.current = setTimeout(() => {
+                    if (isMatchingRef.current) {
                         dispatch({ type: "MATCH_FAILED" });
                         stopTimer();
+                        isMatchingRef.current = false;
                     }
                 }, 30000);
             })
             .catch(() => {
                 dispatch({ type: "SOCKET_DISCONNECTED" });
+                isMatchingRef.current = false;
             });
     };
 
@@ -133,16 +170,11 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         dispatch({ type: "CANCEL_MATCHING" });
         dispatch({ type: "SOCKET_DISCONNECTED" });
         stopTimer();
-        reset();
-    };
-
-    const reset = () => {
-        dispatch({ type: "RESET" });
-        stopTimer();
-        if (navigationTimerRef.current) {
-            clearTimeout(navigationTimerRef.current);
-            navigationTimerRef.current = null;
+        isMatchingRef.current = false;
+        if (matchTimeoutRef.current) {
+            clearTimeout(matchTimeoutRef.current);
         }
+        reset();
     };
 
     const closeModal = () => {
@@ -154,32 +186,48 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-        if (state.matchFound) {
+        if (state.status === "found") {
             stopTimer();
             let countdown = state.countdown;
             const intervalId = setInterval(() => {
-                if (countdown > 0) {
+                if (countdown > 0 && !isResetting.current) {
                     dispatch({ type: "SET_COUNTDOWN", payload: countdown - 1 });
                     countdown--;
                 } else {
                     clearInterval(intervalId);
-                    reset();
-                    navigate("/questions");
+                    if (!isResetting.current) {
+                        reset();
+                        navigate("/questions");
+                    }
                 }
             }, 1000);
             return () => clearInterval(intervalId);
         }
-    }, [state.matchFound, state.countdown, navigate, reset]);
+    }, [state.status, state.countdown, navigate]);
 
     useEffect(() => {
         matchService.onMatchFound((data) => {
-            dispatch({ type: "MATCH_FOUND" });
+            if (isMatchingRef.current) {
+                dispatch({ type: "MATCH_FOUND" });
+                isMatchingRef.current = false;
+                if (matchTimeoutRef.current) {
+                    clearTimeout(matchTimeoutRef.current);
+                }
+            }
         });
-    }, [dispatch]);
+    }, []);
 
     return (
         <MatchmakingContext.Provider
-            value={{ state, dispatch, startMatching, cancelMatching, reset, closeModal, showModal }}
+            value={{
+                state: { ...state, elapsedTime },
+                dispatch,
+                startMatching,
+                cancelMatching,
+                reset,
+                closeModal,
+                showModal
+            }}
         >
             {children}
         </MatchmakingContext.Provider>

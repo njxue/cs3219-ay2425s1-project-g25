@@ -5,29 +5,30 @@ import { LoadingOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-
 
 const MatchingFloatingButton: React.FC = () => {
     const { state, showModal } = useMatchmaking();
-    const { isMatching, matchFound, matchFailed } = state;
+    const { status } = state;
 
     const getButtonProps = () => {
-        if (isMatching) {
-            return {
-                icon: <LoadingOutlined />,
-                style: { backgroundColor: "#1890ff" },
-                tooltipTitle: "Matching in progress..."
-            };
-        } else if (matchFound) {
-            return {
-                icon: <CheckCircleOutlined />,
-                style: { backgroundColor: "#52c41a" },
-                tooltipTitle: "Match found!"
-            };
-        } else if (matchFailed) {
-            return {
-                icon: <CloseCircleOutlined />,
-                style: { backgroundColor: "#ff4d4f" },
-                tooltipTitle: "Matching failed. Click to retry."
-            };
-        } else {
-            return null;
+        switch (status) {
+            case "matching":
+                return {
+                    icon: <LoadingOutlined />,
+                    style: { backgroundColor: "#1890ff" },
+                    tooltipTitle: "Matching in progress..."
+                };
+            case "found":
+                return {
+                    icon: <CheckCircleOutlined />,
+                    style: { backgroundColor: "#52c41a" },
+                    tooltipTitle: "Match found!"
+                };
+            case "failed":
+                return {
+                    icon: <CloseCircleOutlined />,
+                    style: { backgroundColor: "#ff4d4f" },
+                    tooltipTitle: "Matching failed. Click to retry."
+                };
+            default:
+                return null;
         }
     };
 
