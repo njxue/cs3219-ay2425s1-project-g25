@@ -11,7 +11,7 @@ class MatchService {
         socketService.on("matchFound", (data) => {
             console.log("MatchService: Match found:", data);
             this.onMatchFoundCallbacks.forEach(callback => callback(data));
-            this.disconnect(); 
+            this.disconnect();
         });
 
         socketService.on("cancelMatching", (data) => {
@@ -25,6 +25,7 @@ class MatchService {
     public ensureConnected(): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.isConnected()) {
+                this.setupEventListeners();
                 resolve();
             } else {
                 socketService.connect();
@@ -37,32 +38,34 @@ class MatchService {
 
                 socketService.onDisconnect(() => {
                     console.log("MatchService: Socket disconnected.");
-                    reject("Socket disconnected before it could connect.");
+                    this.eventsRegistered = false;
+                    reject(new Error("Socket disconnected before it could connect."));
                 });
             }
         });
     }
 
-    startMatch(username: string, email: string, category: string, difficulty: string) {
-        return this.ensureConnected()
-            .then(() => {
-                const requestData = { username, email, category, difficulty };
-                console.log("MatchService: Starting match with data:", requestData);
-                socketService.emit('startMatching', requestData);
-            })
-            .catch((error) => {
-                console.error("MatchService: Failed to start match:", error);
-            });
+    async startMatch(username: string, email: string, category: string, difficulty: string): Promise<void> {
+        try {
+            await this.ensureConnected();
+            const requestData = { username, email, category, difficulty };
+            console.log("MatchService: Starting match with data:", requestData);
+            socketService.emit('startMatching', requestData);
+        } catch (error) {
+            console.error("MatchService: Failed to start match:", error);
+            throw error;
+        }
     }
 
-    cancelMatch() {
-        return this.ensureConnected()
-            .then(() => {
-                console.log("MatchService: Canceling match.");
-            })
-            .catch((error) => {
-                console.error("MatchService: Failed to cancel match:", error);
-            });
+    async cancelMatch(): Promise<void> {
+        try {
+            await this.ensureConnected();
+            console.log("MatchService: Canceling match.");
+            socketService.emit('cancelMatching');
+        } catch (error) {
+            console.error("MatchService: Failed to cancel match:", error);
+            throw error;
+        }
     }
 
     disconnect() {
