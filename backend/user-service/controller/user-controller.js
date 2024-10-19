@@ -14,6 +14,7 @@ import {
   updateUserPrivilegeById as _updateUserPrivilegeById,
 } from "../model/repository.js";
 import { BadRequestError, ConflictError, NotFoundError } from "../utils/httpErrors.js";
+import TokenService from "../services/tokenService.js";
 
 export async function createUser(req, res, next) {
   try {
@@ -31,7 +32,6 @@ export async function createUser(req, res, next) {
     const hashedPassword = bcrypt.hashSync(password, salt);
     const createdUser = await _createUser(username, email, hashedPassword);
 
-    // Generate access and refresh token
     const accessToken = TokenService.generateAccessToken(createdUser);
     const refreshToken = TokenService.generateRefreshToken(createdUser);
 
@@ -42,9 +42,11 @@ export async function createUser(req, res, next) {
       data: { accessToken, user: { ...formatUserResponse(createdUser) } },
     });
   } catch (err) {
+    console.error('Error creating user:', err);
     next(err);
   }
 }
+
 
 export async function getUser(req, res, next) {
   try {
