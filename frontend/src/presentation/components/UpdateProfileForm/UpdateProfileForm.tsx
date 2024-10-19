@@ -4,7 +4,7 @@ import { User } from "domain/entities/User";
 import { UPDATE_PROFILE_FORM_FIELDS } from "presentation/utils/constants";
 import { useEffect, useState } from "react";
 import styles from "./UpdateProfileForm.module.css";
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
 import { toast } from "react-toastify";
 import { handleError } from "presentation/utils/errorHandler";
 import { useForm, useWatch } from "antd/es/form/Form";

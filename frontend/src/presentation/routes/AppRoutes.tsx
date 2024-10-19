@@ -1,30 +1,37 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Layout from "presentation/components/Layout";
-import QuestionsPage from "presentation/pages/QuestionsPage";
+import Layout from "presentation/pages/layout/Layout";
+import QuestionManagement from "presentation/pages/QuestionManagement";
+import QuestionPage from "presentation/pages/QuestionPage";
 import NotFound from "presentation/pages/NotFound";
 import RegisterPage from "presentation/pages/RegisterPage";
 import LoginPage from "presentation/pages/LoginPage";
 import HomePage from "presentation/pages/HomePage";
 import { ProtectedRoute } from "presentation/pages/ProtectedRoute";
 import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
+import { MatchmakingProvider } from "domain/context/MatchmakingContext";
 
 const AppRoutes: React.FC = () => {
     return (
-        <Layout>
-            <Routes>
-                <Route path="/" element={<Navigate to="/login" />} />
-                <Route path="" element={<ProtectedRoute />}>
-                    <Route path="" element={<AdminProtectedRoute />}>
-                        <Route path="/questions" element={<QuestionsPage />} />
+        <MatchmakingProvider>
+            <Layout>
+                <Routes>
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/questions" element={<QuestionPage />} />
+
+                        <Route element={<AdminProtectedRoute />}>
+                            <Route path="/question-management" element={<QuestionManagement />} />
+                        </Route>
                     </Route>
-                    <Route path="/home" element={<HomePage />} />
-                </Route>
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </Layout>
+
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </Layout>
+        </MatchmakingProvider>
     );
 };
 

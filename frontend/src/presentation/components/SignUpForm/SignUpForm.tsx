@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styles from "./SignUpForm.module.css";
 import { useNavigate } from "react-router-dom";
 import { handleError } from "presentation/utils/errorHandler";
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
 import { Form, Input } from "antd";
 import { SIGN_UP_FORM_FIELDS } from "presentation/utils/constants";
 import { useForm } from "antd/es/form/Form";
@@ -24,7 +24,7 @@ export const SignUpForm: React.FC = () => {
         const { email, username, password } = input;
         try {
             await register(email, password, username);
-            navigate("/home");
+            navigate("/");
         } catch (err) {
             console.error(err);
             toast.error(handleError(err));

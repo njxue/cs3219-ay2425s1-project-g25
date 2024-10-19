@@ -2,7 +2,7 @@ import styles from "./ProfileContainer.module.css";
 import React, { useState } from "react";
 import SampleProfilePicture from "../../assets/images/sample-profile-picture.jpg";
 import { EditOutlined } from "@ant-design/icons";
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
 import { Modal } from "antd";
 import { UpdateProfileForm } from "./UpdateProfileForm/UpdateProfileForm";
 import { Link } from "react-router-dom";

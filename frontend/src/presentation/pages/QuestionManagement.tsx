@@ -7,7 +7,7 @@ import { NewQuestionForm } from "../components/NewQuestionForm/NewQuestionForm";
 import { Question } from "../../domain/entities/Question";
 import { QUESTIONS_PAGE_TEXT } from "presentation/utils/constants";
 import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
-import styles from "./QuestionsPage.module.css";
+import styles from "./QuestionManagement.module.css";
 import { ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
 import { AddQuestionButton } from "presentation/components/buttons/AddQuestionButton";

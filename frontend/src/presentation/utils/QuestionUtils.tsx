@@ -29,21 +29,39 @@ export const getStatusColor = (status: string): string => {
 };
 
 export const difficultyOptions: {
-	value: QuestionDifficulty;
-	label: JSX.Element | string;
+    value: QuestionDifficulty;
+    label: JSX.Element | string;
 }[] = [
-	{
-		value: FILTER_DIFFICULTY_TEXT.EASY as QuestionDifficulty,
-		label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>{FILTER_DIFFICULTY_TEXT.EASY}</span>,
-	},
-	{
-		value: FILTER_DIFFICULTY_TEXT.MEDIUM as QuestionDifficulty,
-		label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>{FILTER_DIFFICULTY_TEXT.MEDIUM}</span>,
-	},
-	{
-		value: FILTER_DIFFICULTY_TEXT.HARD as QuestionDifficulty,
-		label: <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>{FILTER_DIFFICULTY_TEXT.HARD}</span>,
-	},
+    {
+        value: FILTER_DIFFICULTY_TEXT.ALL as QuestionDifficulty,
+        label: (
+            <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.ALL) }}>{FILTER_DIFFICULTY_TEXT.ALL}</span>
+        )
+    },
+    {
+        value: FILTER_DIFFICULTY_TEXT.EASY as QuestionDifficulty,
+        label: (
+            <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.EASY) }}>
+                {FILTER_DIFFICULTY_TEXT.EASY}
+            </span>
+        )
+    },
+    {
+        value: FILTER_DIFFICULTY_TEXT.MEDIUM as QuestionDifficulty,
+        label: (
+            <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.MEDIUM) }}>
+                {FILTER_DIFFICULTY_TEXT.MEDIUM}
+            </span>
+        )
+    },
+    {
+        value: FILTER_DIFFICULTY_TEXT.HARD as QuestionDifficulty,
+        label: (
+            <span style={{ color: getDifficultyColor(FILTER_DIFFICULTY_TEXT.HARD) }}>
+                {FILTER_DIFFICULTY_TEXT.HARD}
+            </span>
+        )
+    }
 ];
 
 const templateQuestionDescription: string = `

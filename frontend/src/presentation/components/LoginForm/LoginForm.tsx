@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./LoginForm.module.css";
 import { useNavigate } from "react-router-dom";
 import { handleError } from "presentation/utils/errorHandler";
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
 
 export const LoginForm: React.FC = () => {
     const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ export const LoginForm: React.FC = () => {
         event.preventDefault();
         try {
             await login(email, password);
-            navigate("/home");
+            navigate("/");
         } catch (error) {
             console.error("Failed to log in user", error);
             alert(handleError(error, "Failed to log in user"));

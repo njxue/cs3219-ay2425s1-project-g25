@@ -1,6 +1,6 @@
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
+import Unauthorized from "presentation/components/feedback/Unauthorized";
 import { Navigate, Outlet } from "react-router-dom";
-import NotFound from "./NotFound";
 
 export const AdminProtectedRoute: React.FC<{}> = () => {
     const { isLoggedIn, isUserAdmin } = useAuth();
@@ -13,7 +13,9 @@ export const AdminProtectedRoute: React.FC<{}> = () => {
     }
 
     if (!isUserAdmin) {
-        return <NotFound />;
+        console.warn("Unauthorized access attempt by non-admin user");
+        return <Unauthorized />;
     }
+
     return <Outlet />;
 };

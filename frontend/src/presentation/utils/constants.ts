@@ -32,6 +32,13 @@ export const ERRORS = {
     GENERAL_ERROR: "An unexpected error occurred. Please try again later."
 };
 
+export const MATCHING_ERRORS = {
+    USER_USERNAME_EMPTY: "Username cannot be empty.",
+    USER_EMAIL_EMPTY: "Email cannot be empty.",
+    NO_CATEGORY_SELECTED: "Please select at least one category.",
+    NO_DIFFICULTY_SELECTED: "Please select a difficulty level."
+};
+
 export const QUESTIONS_PAGE_TEXT = {
     LAST_SELECTED_QUESTION_KEY: "lastSelectedQuestionId",
     ADD_QUESTION: "Add a new question"
@@ -48,12 +55,14 @@ export const QUESTIONS_FILTER_TEXT = {
     SELECT_TITLE: "Search by title"
 };
 
+
 export const FILTER_DIFFICULTY_TEXT = {
-    ALL: "All",
+    ALL: "All" as QuestionDifficulty | "All",
     EASY: "Easy" as QuestionDifficulty,
     MEDIUM: "Medium" as QuestionDifficulty,
     HARD: "Hard" as QuestionDifficulty
 };
+
 
 export const LANDING_CARD_TEXT = {
     WELCOME: "Welcome to the Question Workspace",
