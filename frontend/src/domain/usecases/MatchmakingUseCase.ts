@@ -1,7 +1,7 @@
 // src/domain/useCases/matchmakingUseCase.ts
 import { useEffect, useCallback } from "react";
 import { socketService } from "infrastructure/services/SocketService";
-import { useMatchmaking } from "../../application/context/MatchmakingContext";
+import { useMatchmaking } from "../context/MatchmakingContext";
 
 export const useMatchmakingUseCase = () => {
     const { state, dispatch } = useMatchmaking();

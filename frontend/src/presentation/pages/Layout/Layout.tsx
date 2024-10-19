@@ -2,10 +2,10 @@ import React from "react";
 import { Layout as AntLayout } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./Layout.module.css";
-import PeerPrepLogo from "../../assets/images/PeerPrepLogo.png";
-import MatchingFloatingButton from "./buttons/MatchingFloatingButton";
+import PeerPrepLogo from "../../../assets/images/PeerPrepLogo.png";
+import MatchingFloatingButton from "../../components/buttons/MatchingFloatingButton";
 import { ArrowLeftOutlined, LogoutOutlined } from "@ant-design/icons";
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
 
 const { Content, Header } = AntLayout;
 
@@ -27,17 +27,24 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         }
     };
 
+    const handleBack = () => {
+        navigate(-1);
+    };
+
+    const showBackButton = location.pathname !== "/" && window.history.length > 1;
+
     return (
         <AntLayout className={styles.layout}>
             <Header className={styles.header}>
                 <div onClick={navigateHome} style={{ cursor: "pointer" }}>
                     <img src={PeerPrepLogo} alt="PeerPrep Logo" width="15%" />
                 </div>
-                {location.pathname !== "/" && (
-                    <ArrowLeftOutlined onClick={navigateHome} className={styles.backButton} />
-                )}
-                {isLoggedIn && <LogoutOutlined onClick={handleLogout} className={styles.logoutButton} />}
+                <div className={styles.iconGroup}>
+                    {showBackButton && <ArrowLeftOutlined className={styles.backButton} onClick={handleBack} />}
+                    {isLoggedIn && <LogoutOutlined className={styles.logoutButton} onClick={handleLogout} />}
+                </div>
             </Header>
+
             <Content className={styles.content}>
                 {children}
                 <MatchingFloatingButton />

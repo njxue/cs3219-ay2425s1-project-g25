@@ -1,4 +1,4 @@
-import { useAuth } from "domain/contexts/AuthContext";
+import { useAuth } from "domain/context/AuthContext";
 import { Navigate, Outlet } from "react-router-dom";
 
 export const ProtectedRoute: React.FC<{}> = () => {
