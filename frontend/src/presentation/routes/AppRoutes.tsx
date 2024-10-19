@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Layout from "presentation/pages/Layout/Layout";
+import Layout from "presentation/pages/layout/Layout";
 import QuestionsPage from "presentation/pages/QuestionManagement";
 import NotFound from "presentation/pages/NotFound";
 import RegisterPage from "presentation/pages/RegisterPage";
