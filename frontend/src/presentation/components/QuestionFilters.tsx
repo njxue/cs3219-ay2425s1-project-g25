@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Dropdown, Button, Select, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
-import { difficultyOptions, getDifficultyColor } from "presentation/utils/QuestionUtils";
+import { difficultyOptions } from "presentation/utils/QuestionUtils";
 import { CategoryFilter } from "./Category/CategoryFilter";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
@@ -37,25 +37,27 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     const [allCategories, setAllCategories] = useState<Category[]>([]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const categories: Category[] = await categoryUseCases.getAllCategories();
-                const validCategories = categories.filter(
-                    (category) =>
-                        typeof category.name === "string" &&
-                        category.name.trim() !== "" &&
-                        typeof category._id === "string" &&
-                        category._id.trim() !== ""
-                );
-                setAllCategories(validCategories);
-            } catch (error) {
-                console.error("Failed to fetch categories", error);
-                message.error("Failed to fetch categories.");
-            }
-        };
+        if (!defaultCategory) {
+            const fetchCategories = async () => {
+                try {
+                    const categories: Category[] = await categoryUseCases.getAllCategories();
+                    const validCategories = categories.filter(
+                        (category) =>
+                            typeof category.name === "string" &&
+                            category.name.trim() !== "" &&
+                            typeof category._id === "string" &&
+                            category._id.trim() !== ""
+                    );
+                    setAllCategories(validCategories);
+                } catch (error) {
+                    console.error("Failed to fetch categories", error);
+                    message.error("Failed to fetch categories.");
+                }
+            };
 
-        fetchCategories();
-    }, []);
+            fetchCategories();
+        }
+    }, [defaultCategory]);
 
     const memoizedOnFiltersChange = useCallback(() => {
         onFiltersChange({
@@ -111,7 +113,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
                     : [category]
                 : selectedCategories?.filter((c) => c._id !== category._id) || null;
 
-        setSelectedCategories(updatedSelectedCategories?.length ? updatedSelectedCategories : null); // Set null if no category is selected
+        setSelectedCategories(updatedSelectedCategories?.length ? updatedSelectedCategories : null);
         onFiltersChange({
             selectedDifficulty,
             selectedCategories: updatedSelectedCategories,
@@ -170,7 +172,7 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
     const dropdownContent = (
         <CategoryFilter
             allCategories={allCategories}
-            selectedCategories={selectedCategories || []} // Pass empty array if no category is selected
+            selectedCategories={selectedCategories || []}
             onCategoryChange={handleCategoryChange}
             onAddCategory={handleAddCategory}
             onDeleteCategory={handleDeleteCategory}

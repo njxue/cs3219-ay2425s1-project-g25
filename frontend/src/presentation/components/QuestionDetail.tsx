@@ -15,9 +15,16 @@ interface QuestionDetailProps {
     onEdit?: (updatedQuestion: Question) => void;
     onDelete?: (deletedQuestion: Question) => void;
     onStartWorking?: () => void;
+    isAdmin?: boolean;
 }
 
-export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit, onDelete, onStartWorking }) => {
+export const QuestionDetail: React.FC<QuestionDetailProps> = ({
+    question,
+    onEdit,
+    onDelete,
+    onStartWorking,
+    isAdmin = false
+}) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 
@@ -65,20 +72,22 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
                                 </a>
                             )}
                         </div>
-                        <div>
-                            <Button
-                                type="text"
-                                icon={<DeleteOutlined />}
-                                onClick={() => setIsDeleteModalOpen(true)}
-                                aria-label="Delete Question"
-                            />
-                            <Button
-                                type="text"
-                                icon={<EditOutlined />}
-                                onClick={() => setIsEditModalOpen(true)}
-                                aria-label="Edit Question"
-                            />
-                        </div>
+                        {isAdmin && (
+                            <div>
+                                <Button
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => setIsDeleteModalOpen(true)}
+                                    aria-label="Delete Question"
+                                />
+                                <Button
+                                    type="text"
+                                    icon={<EditOutlined />}
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    aria-label="Edit Question"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <Divider className={styles.divider} />
@@ -105,14 +114,16 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({ question, onEdit
                                 </div>
                             </div>
                         </div>
-                        <Card className={styles.userInfoCard}>
-                            <div className={styles.userInfo}>
-                                <Avatar size={64} icon={<UserOutlined />} className={styles.userAvatar} />
-                                <h3>{"Anonymous"}</h3>
-                                <p>{"No email provided"}</p>
-                                <p>Questions</p>
-                            </div>
-                        </Card>
+                        {!isAdmin && (
+                            <Card className={styles.userInfoCard}>
+                                <div className={styles.userInfo}>
+                                    <Avatar size={64} icon={<UserOutlined />} className={styles.userAvatar} />
+                                    <h3>{"Anonymous"}</h3>
+                                    <p>{"No email provided"}</p>
+                                    <p>Questions</p>
+                                </div>
+                            </Card>
+                        )}
                     </div>
                 </Card>
             </div>

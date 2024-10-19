@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "presentation/pages/layout/Layout";
 import QuestionManagement from "presentation/pages/QuestionManagement";
-import QuestionPage from "presentation/pages/QuestionPage";
+import QuestionPage from "presentation/pages/QuestionSelection";
 import NotFound from "presentation/pages/NotFound";
 import RegisterPage from "presentation/pages/RegisterPage";
 import LoginPage from "presentation/pages/LoginPage";

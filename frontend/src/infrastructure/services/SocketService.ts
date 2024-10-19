@@ -1,5 +1,5 @@
+import { SOCKET_URL } from "config";
 import { io, Socket } from "socket.io-client";
-
 class SocketService {
     private socket: Socket | null = null;
     private onConnectCallbacks: (() => void)[] = [];
@@ -7,7 +7,7 @@ class SocketService {
 
     connect() {
         if (!this.socket) {
-            this.socket = io("http://localhost:3003");
+            this.socket = io(SOCKET_URL);
             this.setupEventListeners();
         }
     }
