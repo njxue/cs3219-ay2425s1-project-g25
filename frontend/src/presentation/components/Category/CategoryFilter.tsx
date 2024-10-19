@@ -9,11 +9,13 @@ const { CheckableTag } = Tag;
 interface CategoryFilterProps {
     allCategories: Category[];
     selectedCategories: Category[];
-    onCategoryChange: (category: Category, checked: boolean) => void;
+    onCategoryChange: (category: Category | null, checked: boolean) => void;
     onAddCategory: (categoryName: string) => void;
     onDeleteCategory: (categoriesToDeleteIds: string[]) => void;
     onClearAllCategories: () => void;
     isEditMode?: boolean;
+    isSingleCategory?: boolean;
+    defaultCategory?: Category | null;
 }
 
 export const CategoryFilter: React.FC<CategoryFilterProps> = ({
@@ -23,7 +25,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     onAddCategory,
     onDeleteCategory,
     onClearAllCategories,
-    isEditMode = true
+    isEditMode = true,
+    isSingleCategory = false,
+    defaultCategory = null
 }) => {
     const [categorySearchTerm, setCategorySearchTerm] = useState("");
     const [newCategory, setNewCategory] = useState("");
@@ -78,8 +82,16 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         });
     };
 
-    const handleCategoryChange = (category: Category, checked: boolean) => {
-        onCategoryChange(category, checked);
+    const handleCategoryChange = (category: Category | null, checked: boolean) => {
+        if (category === null) {
+            onCategoryChange(null, true);
+            return;
+        }
+        if (isSingleCategory && checked) {
+            onCategoryChange(category, true);
+        } else {
+            onCategoryChange(category, checked);
+        }
     };
 
     const handleClearAll = () => {
@@ -103,6 +115,15 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
             {deletingMode && <div className={styles.instructionText}>Select categories to delete</div>}
 
             <div className={styles.categoriesGrid}>
+                <CheckableTag
+                    key="all"
+                    checked={!selectedCategories.length} // Checked if no categories are selected
+                    onChange={(checked) => handleCategoryChange(null, checked)}
+                    className={`${styles.checkableTag} ${!selectedCategories.length ? styles.selectedTag : ""}`}
+                >
+                    All Categories
+                </CheckableTag>
+
                 {filteredCategories.map((category) => {
                     const isSelectedForDeletion = deletingMode && categoriesToDelete.includes(category._id);
                     const isSelectedForFiltering = selectedCategories.some((c) => c._id === category._id);

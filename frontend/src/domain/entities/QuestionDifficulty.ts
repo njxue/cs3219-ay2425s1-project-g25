@@ -1,1 +1,1 @@
-export type QuestionDifficulty = "Easy" | "Medium" | "Hard";
+export type QuestionDifficulty = "All" | "Easy" | "Medium" | "Hard";

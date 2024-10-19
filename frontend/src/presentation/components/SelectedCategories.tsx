@@ -1,25 +1,27 @@
 import React from "react";
 import { Card, Tag } from "antd";
 import { Category } from "domain/entities/Category";
-import styles from "./SelectedCategories.module.css"; // Create a new module for styling
+import styles from "./SelectedCategories.module.css";
 
 interface SelectedCategoriesProps {
-    categories: Category[];
+    categories: Category[] | null; 
 }
 
 export const SelectedCategories: React.FC<SelectedCategoriesProps> = ({ categories }) => {
+    const isAllCategorySelected = categories === null || categories.length === 0;
+
     return (
         <Card className={styles.categoriesCard}>
-            {categories.length > 0 ? (
+            {isAllCategorySelected ? (
+                <Tag className={styles.allCategoryTag}>All categories selected</Tag>
+            ) : (
                 <div className={styles.categoriesContainer}>
                     {categories.map((category) => (
-                        <Tag key={category._id} className={styles.categoryTag}>
+                        <Tag key={category._id || category.name} className={styles.categoryTag}>
                             {category.name}
                         </Tag>
                     ))}
                 </div>
-            ) : (
-                <p className={styles.noCategories}>No categories selected</p>
             )}
         </Card>
     );

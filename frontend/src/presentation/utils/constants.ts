@@ -48,12 +48,14 @@ export const QUESTIONS_FILTER_TEXT = {
     SELECT_TITLE: "Search by title"
 };
 
+
 export const FILTER_DIFFICULTY_TEXT = {
-    ALL: "All",
+    ALL: "All" as QuestionDifficulty | "All",
     EASY: "Easy" as QuestionDifficulty,
     MEDIUM: "Medium" as QuestionDifficulty,
     HARD: "Hard" as QuestionDifficulty
 };
+
 
 export const LANDING_CARD_TEXT = {
     WELCOME: "Welcome to the Question Workspace",

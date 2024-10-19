@@ -12,8 +12,8 @@ import { Category } from "domain/entities/Category";
 
 const HomePage: React.FC = () => {
     const [filters, setFilters] = useState({
-        selectedDifficulty: "All",
-        selectedCategories: [] as Category[],
+        selectedDifficulty: null as string | null,
+        selectedCategories: [] as Category[] | null,
         searchTerm: ""
     });
 
@@ -22,8 +22,8 @@ const HomePage: React.FC = () => {
     const [counter, setCounter] = useState(30);
 
     const handleFiltersChange = (newFilters: {
-        selectedDifficulty: string;
-        selectedCategories: Category[];
+        selectedDifficulty: string | null;
+        selectedCategories: Category[] | null;
         searchTerm: string;
     }) => {
         setFilters(newFilters);
@@ -62,10 +62,14 @@ const HomePage: React.FC = () => {
                 <h1 className={styles.headline}>Find a peer and practice together!</h1>
                 <FindPeerButton onClick={handleFindPeerClick} />
                 <div className={styles.selectRow}>
-                    <QuestionFilters onFiltersChange={handleFiltersChange} showSearchBar={false} />
+                    <QuestionFilters
+                        isSingleCategory={true}
+                        onFiltersChange={handleFiltersChange}
+                        showSearchBar={false}
+                    />
                 </div>
                 <div className={styles.selectRow}>
-                    <SelectedCategories categories={filters.selectedCategories} />
+                    <SelectedCategories categories={filters.selectedCategories } />
                 </div>
                 <Tooltip
                     className={styles.tooltip}

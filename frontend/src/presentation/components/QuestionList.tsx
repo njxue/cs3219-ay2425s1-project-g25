@@ -3,7 +3,7 @@ import { List, Spin, Alert } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionFilters } from "./QuestionFilters";
-import { Category } from "domain/entities/Category"; // Import Category entity
+import { Category } from "domain/entities/Category";
 import styles from "./QuestionList.module.css";
 import { QUESTIONS_LIST_TEXT } from "presentation/utils/constants";
 
@@ -26,9 +26,13 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     error,
     onQuestionsUpdated
 }) => {
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<{
+        selectedDifficulty: string | null;
+        selectedCategories: Category[] | null;
+        searchTerm: string;
+    }>({
         selectedDifficulty: "All",
-        selectedCategories: [] as Category[],
+        selectedCategories: [],
         searchTerm: ""
     });
 
@@ -39,47 +43,48 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     }, [questions]);
 
     const handleFiltersChange = (newFilters: {
-        selectedDifficulty: string;
-        selectedCategories: Category[];
+        selectedDifficulty: string | null;
+        selectedCategories: Category[] | null;
         searchTerm: string;
     }) => {
         setFilters(newFilters);
     };
 
-    const filteredQuestions = localQuestions.filter((question) => {
-        if (filters.selectedDifficulty !== "All" && question.difficulty !== filters.selectedDifficulty) {
+const filteredQuestions = localQuestions.filter((question) => {
+    // 1. Filter by difficulty if it's not "All"
+    if (filters.selectedDifficulty && filters.selectedDifficulty !== "All") {
+        if (question.difficulty !== filters.selectedDifficulty) {
             return false;
         }
+    }
 
-        if (filters.searchTerm && !question.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
+    // 2. Filter by search term if present
+    if (filters.searchTerm) {
+        const searchTermLower = filters.searchTerm.toLowerCase();
+        if (!question.title.toLowerCase().includes(searchTermLower)) {
             return false;
         }
+    }
 
-        if (filters.selectedCategories.length > 0) {
-            const hasAllSelectedCategories = filters.selectedCategories.every((selectedCategory) =>
-                question.categories.some((questionCategory) => questionCategory._id === selectedCategory._id)
-            );
-            if (!hasAllSelectedCategories) {
-                return false;
-            }
+    // 3. Filter by categories if any categories are selected
+    if (filters.selectedCategories && filters.selectedCategories.length > 0) {
+        // Ensure question contains all selected categories
+        const hasAllSelectedCategories = filters.selectedCategories.every((selectedCategory) =>
+            question.categories.some((questionCategory) => questionCategory._id === selectedCategory._id)
+        );
+        if (!hasAllSelectedCategories) {
+            return false;
         }
+    }
 
-        return true;
-    });
+    // If all conditions pass, include the question in the filtered result
+    return true;
+});
 
-    const renderItem = (question: Question) => (
-        <QuestionCard
-            key={question._id}
-            question={question}
-            isSelected={selectedQuestion?.code === question.code}
-            onClick={() => onSelectQuestion(question)}
-            isNarrow={isNarrow}
-        />
-    );
 
     return (
         <div className={styles.questionListContainer}>
-            <QuestionFilters onFiltersChange={handleFiltersChange} isEditMode={true} />
+            <QuestionFilters onFiltersChange={handleFiltersChange} isEditMode={true} defaultDifficulty={filters.selectedDifficulty} />
             <div className={styles.listContainer}>
                 {isLoading ? (
                     <div className={styles.centerContent}>
@@ -99,7 +104,15 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                         className={styles.list}
                         itemLayout="vertical"
                         dataSource={filteredQuestions}
-                        renderItem={renderItem}
+                        renderItem={(question) => (
+                            <QuestionCard
+                                key={question._id}
+                                question={question}
+                                isSelected={selectedQuestion?.code === question.code}
+                                onClick={() => onSelectQuestion(question)}
+                                isNarrow={isNarrow}
+                            />
+                        )}
                     />
                 )}
             </div>
