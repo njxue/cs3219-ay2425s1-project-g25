@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "presentation/pages/layout/Layout";
 import QuestionManagement from "presentation/pages/QuestionManagement";
-import QuestionPage from "presentation/pages/QuestionPage"; // Import your new QuestionPage
+import QuestionPage from "presentation/pages/QuestionPage";
 import NotFound from "presentation/pages/NotFound";
 import RegisterPage from "presentation/pages/RegisterPage";
 import LoginPage from "presentation/pages/LoginPage";
@@ -16,15 +16,15 @@ const AppRoutes: React.FC = () => {
         <MatchmakingProvider>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<HomePage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
-                    <Route path="/questions" element={<QuestionPage />} />
-
                     <Route element={<ProtectedRoute />}>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/questions" element={<QuestionPage />} />
+
                         <Route element={<AdminProtectedRoute />}>
-                            <Route path="/Question-management" element={<QuestionManagement />} />
+                            <Route path="/question-management" element={<QuestionManagement />} />
                         </Route>
                     </Route>
 
