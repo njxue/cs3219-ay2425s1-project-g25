@@ -50,41 +50,44 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         setFilters(newFilters);
     };
 
-const filteredQuestions = localQuestions.filter((question) => {
-    // 1. Filter by difficulty if it's not "All"
-    if (filters.selectedDifficulty && filters.selectedDifficulty !== "All") {
-        if (question.difficulty !== filters.selectedDifficulty) {
-            return false;
+    const filteredQuestions = localQuestions.filter((question) => {
+        // 1. Filter by difficulty if it's not "All"
+        if (filters.selectedDifficulty && filters.selectedDifficulty !== "All") {
+            if (question.difficulty !== filters.selectedDifficulty) {
+                return false;
+            }
         }
-    }
 
-    // 2. Filter by search term if present
-    if (filters.searchTerm) {
-        const searchTermLower = filters.searchTerm.toLowerCase();
-        if (!question.title.toLowerCase().includes(searchTermLower)) {
-            return false;
+        // 2. Filter by search term if present
+        if (filters.searchTerm) {
+            const searchTermLower = filters.searchTerm.toLowerCase();
+            if (!question.title.toLowerCase().includes(searchTermLower)) {
+                return false;
+            }
         }
-    }
 
-    // 3. Filter by categories if any categories are selected
-    if (filters.selectedCategories && filters.selectedCategories.length > 0) {
-        // Ensure question contains all selected categories
-        const hasAllSelectedCategories = filters.selectedCategories.every((selectedCategory) =>
-            question.categories.some((questionCategory) => questionCategory._id === selectedCategory._id)
-        );
-        if (!hasAllSelectedCategories) {
-            return false;
+        // 3. Filter by categories if any categories are selected
+        if (filters.selectedCategories && filters.selectedCategories.length > 0) {
+            // Ensure question contains all selected categories
+            const hasAllSelectedCategories = filters.selectedCategories.every((selectedCategory) =>
+                question.categories.some((questionCategory) => questionCategory._id === selectedCategory._id)
+            );
+            if (!hasAllSelectedCategories) {
+                return false;
+            }
         }
-    }
 
-    // If all conditions pass, include the question in the filtered result
-    return true;
-});
-
+        // If all conditions pass, include the question in the filtered result
+        return true;
+    });
 
     return (
         <div className={styles.questionListContainer}>
-            <QuestionFilters onFiltersChange={handleFiltersChange} isEditMode={true} defaultDifficulty={filters.selectedDifficulty} />
+            <QuestionFilters
+                onFiltersChange={handleFiltersChange}
+                isEditMode={true}
+                defaultDifficulty={filters.selectedDifficulty}
+            />
             <div className={styles.listContainer}>
                 {isLoading ? (
                     <div className={styles.centerContent}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Dropdown, Button, Select, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
@@ -57,13 +57,17 @@ export const QuestionFilters: React.FC<QuestionFiltersProps> = ({
         fetchCategories();
     }, []);
 
-    useEffect(() => {
+    const memoizedOnFiltersChange = useCallback(() => {
         onFiltersChange({
             selectedDifficulty,
             selectedCategories,
             searchTerm
         });
-    }, [selectedDifficulty, selectedCategories, searchTerm, onFiltersChange]);
+    }, [selectedDifficulty, selectedCategories, searchTerm]);
+
+    useEffect(() => {
+        memoizedOnFiltersChange();
+    }, [selectedDifficulty, selectedCategories, searchTerm, memoizedOnFiltersChange]);
 
     const handleSearch = (term: string) => {
         setSearchTerm(term);

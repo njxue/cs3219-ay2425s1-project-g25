@@ -21,7 +21,7 @@ class SocketService {
     private setupEventListeners() {
         if (this.socket) {
             this.socket.on("connect", () => {
-                console.log("Connected to server");
+                console.log("Connected to server with socket ID:", this.socket?.id);
                 this.onConnectCallbacks.forEach(callback => callback());
             });
 
@@ -46,6 +46,7 @@ class SocketService {
             });
         }
     }
+
 
     private onConnectCallbacks: (() => void)[] = [];
     private onDisconnectCallbacks: (() => void)[] = [];

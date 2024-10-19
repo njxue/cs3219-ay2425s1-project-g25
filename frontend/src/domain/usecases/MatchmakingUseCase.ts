@@ -11,17 +11,14 @@ export const useMatchmakingUseCase = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        // Set up socket event listeners
         socketService.onConnect(() => updateConnectionStatus(true));
         socketService.onDisconnect(() => updateConnectionStatus(false));
         socketService.onMatchingStart(() => dispatch({ type: "START_MATCHING" }));
         socketService.onMatchFound(() => dispatch({ type: "MATCH_FOUND" }));
         socketService.onCancelMatching(() => dispatch({ type: "CANCEL_MATCHING" }));
 
-        // Check initial connection status
         updateConnectionStatus(socketService.isConnected());
 
-        // Clean up listeners on unmount
         return () => {
             socketService.disconnect();
         };
@@ -38,9 +35,15 @@ export const useMatchmakingUseCase = () => {
     }, [updateConnectionStatus]);
 
     const startMatching = useCallback(() => {
-        socketService.startMatching();
-        dispatch({ type: "START_MATCHING" });
-    }, [dispatch]);
+        if (state.attempts < state.maxRetries) {
+            socketService.startMatching();
+            dispatch({ type: "START_MATCHING" });
+            dispatch({ type: "INCREMENT_ATTEMPT" });
+        } else {
+            console.log("Max retries reached.");
+            cancelMatching(); // cancel if retries are exhausted
+        }
+    }, [dispatch, state.attempts, state.maxRetries]);
 
     const cancelMatching = useCallback(() => {
         socketService.cancelMatching();
@@ -62,6 +65,6 @@ export const useMatchmakingUseCase = () => {
         startMatching,
         cancelMatching,
         reset,
-        incrementTime
+        incrementTime,
     };
 };
