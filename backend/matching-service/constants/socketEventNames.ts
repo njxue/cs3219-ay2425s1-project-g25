@@ -4,4 +4,6 @@ export const SOCKET_EVENTS = {
     START_MATCHING: 'startMatching',
     MATCH_FOUND: 'matchFound',
     CANCEL_MATCHING: 'cancelMatching',
+    MATCH_FAILED: 'matchFailed',
+    ERROR: 'matchError'
 };
