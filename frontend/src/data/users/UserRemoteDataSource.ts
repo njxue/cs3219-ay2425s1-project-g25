@@ -1,4 +1,4 @@
-import { BaseApi } from "data/BaseApi";
+import { BaseApi } from "infrastructure/Api/BaseApi";
 import { IUserLoginInput, IUserRegisterInput, IUserUpdateInput } from "domain/users/IUser";
 
 const API_URL = "";

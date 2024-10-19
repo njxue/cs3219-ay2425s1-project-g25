@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { userUseCases } from "domain/usecases/UserUseCases";
-import AuthClientStore from "./auth/AuthClientStore";
+import AuthClientStore from "../../data/auth/AuthClientStore";
 import { API_URL } from "config";
 
 export class BaseApi {
