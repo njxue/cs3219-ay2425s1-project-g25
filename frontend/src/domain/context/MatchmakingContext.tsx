@@ -186,36 +186,49 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-        if (state.status === "found") {
-            stopTimer();
+        let intervalId: NodeJS.Timeout | null = null;
+
+        // Function to handle countdown and navigation
+        const startCountdown = (roomId: string | null = null, matchUserId: string | null = null) => {
             let countdown = state.countdown;
-            const intervalId = setInterval(() => {
+            intervalId = setInterval(() => {
                 if (countdown > 0 && !isResetting.current) {
                     dispatch({ type: "SET_COUNTDOWN", payload: countdown - 1 });
                     countdown--;
                 } else {
-                    clearInterval(intervalId);
+                    if (intervalId) clearInterval(intervalId);
                     if (!isResetting.current) {
                         reset();
-                        navigate("/questions");
+                        navigate(`/room/${roomId}/${matchUserId}`);
                     }
                 }
             }, 1000);
-            return () => clearInterval(intervalId);
-        }
-    }, [state.status, state.countdown, navigate]);
+        };
 
-    useEffect(() => {
-        matchService.onMatchFound((data) => {
+        // Listen for match found event and start countdown
+        matchService.onMatchFound(({ matchUserId, roomId }) => {
             if (isMatchingRef.current) {
                 dispatch({ type: "MATCH_FOUND" });
                 isMatchingRef.current = false;
+
                 if (matchTimeoutRef.current) {
                     clearTimeout(matchTimeoutRef.current);
                 }
+
+                startCountdown(roomId, matchUserId); // Start countdown with roomId for navigation
             }
         });
-    }, []);
+
+        // When the match status is "found", start countdown (if triggered elsewhere)
+        if (state.status === "found" && !intervalId) {
+            startCountdown();
+        }
+
+        // Cleanup function to clear the interval
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [state.status, state.countdown, navigate, reset]);
 
     return (
         <MatchmakingContext.Provider

@@ -47,6 +47,10 @@ export class UserRemoteDataSource extends BaseApi {
     async verifyToken() {
         return await this.protectedGet<any>("/auth/verify-token");
     }
+    async getUser(userId: string) {
+        return await this.protectedGet<any>(`/users/${userId}`);
+    }
+
 }
 
 export const userRemoteDataSource = new UserRemoteDataSource();

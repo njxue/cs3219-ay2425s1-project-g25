@@ -69,7 +69,7 @@ export const LANDING_CARD_TEXT = {
     ADMIN_INSTRUCTIONS: "You can add or select a question to get started.",
     ADD_QUESTION: "Add Question",
     PEER_WELCOME: "Welcome",
-    PEER_INSTRUCTIONS: "Please select a question from the list to begin."
+    PEER_INSTRUCTIONS: "Please select a question from the list to begin with your peer."
 };
 
 

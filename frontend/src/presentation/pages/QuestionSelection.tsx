@@ -8,7 +8,7 @@ import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
 import styles from "./QuestionManagement.module.css";
 import { ROUTES, ERRORS } from "presentation/utils/constants";
 import { handleError } from "presentation/utils/errorHandler";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 const QuestionSelection: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -19,6 +19,12 @@ const QuestionSelection: React.FC = () => {
     const selectedQuestionCode = searchParams.get("code");
 
     const selectedQuestion: Question | undefined = questions.find((q) => q.code.toString() === selectedQuestionCode);
+    const { roomId, matchUserId } = useParams<{ roomId: string; matchUserId: string }>(); // Correct params destructuring
+
+    useEffect(() => {
+        console.log("Room ID:", roomId);
+        console.log("matchUserId ID:", matchUserId); // Logs matchUserId correctly
+    }, [roomId, matchUserId]); // Added matchUserId as a dependency
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -92,9 +98,9 @@ const QuestionSelection: React.FC = () => {
                         {isLoading ? (
                             <Spin size="large" />
                         ) : selectedQuestion ? (
-                                <QuestionDetail question={selectedQuestion} isAdmin={false} />
+                            <QuestionDetail question={selectedQuestion} isAdmin={false} matchUserId={matchUserId} />
                         ) : (
-                            <LandingComponent isAdmin={ false } />
+                            <LandingComponent isAdmin={false} matchUserId={matchUserId} />
                         )}
                     </Col>
                 </Row>

@@ -140,6 +140,21 @@ export class MockUser {
             }
         });
     }
+
+    async getUser(userId: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            try {
+                const foundUser = this.users.find((u) => u._id === userId);
+                if (!foundUser) {
+                    resolve({ message: "User not found" });
+                } else {
+                    resolve({ message: "User found", data: foundUser });
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
 
 export const mockUser = new MockUser();

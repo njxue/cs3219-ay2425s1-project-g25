@@ -1,21 +1,25 @@
+// QuestionDetail.tsx
 import React, { useState } from "react";
-import { Tag, Divider, Modal, Button, Card, Avatar } from "antd";
+import { Tag, Divider, Modal, Button, Card } from "antd";
 import { Question } from "../../domain/entities/Question";
 import { getDifficultyColor } from "../utils/QuestionUtils";
 import styles from "./QuestionDetail.module.css";
 import { EditQuestionForm } from "./EditQuestionForm/EditQuestionForm";
 import { ReactMarkdown } from "./common/ReactMarkdown";
-import { DeleteOutlined, EditOutlined, UserOutlined, PlayCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { UserCard } from "./cards/UserCard";
 
 interface QuestionDetailProps {
     question: Question;
     onEdit?: (updatedQuestion: Question) => void;
     onDelete?: (deletedQuestion: Question) => void;
-    onStartWorking?: () => void;
+    onStartWorking?: (roomId?: string, matchUserId?: string) => void;
     isAdmin?: boolean;
+    roomId?: string;
+    matchUserId?: string;
 }
 
 export const QuestionDetail: React.FC<QuestionDetailProps> = ({
@@ -23,7 +27,9 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({
     onEdit,
     onDelete,
     onStartWorking,
-    isAdmin = false
+    isAdmin = false,
+    roomId,
+    matchUserId
 }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -32,6 +38,8 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({
         setIsEditModalOpen(false);
         onEdit?.(updatedQuestion);
     };
+
+    
 
     const handleDeleteQuestion = async () => {
         try {
@@ -50,7 +58,7 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({
     };
 
     const handleStartWorking = () => {
-        onStartWorking?.();
+        onStartWorking?.(roomId, matchUserId);
         toast.success("Starting to work on the question!");
     };
 
@@ -114,16 +122,7 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({
                                 </div>
                             </div>
                         </div>
-                        {!isAdmin && (
-                            <Card className={styles.userInfoCard}>
-                                <div className={styles.userInfo}>
-                                    <Avatar size={64} icon={<UserOutlined />} className={styles.userAvatar} />
-                                    <h3>{"Anonymous"}</h3>
-                                    <p>{"No email provided"}</p>
-                                    <p>Questions</p>
-                                </div>
-                            </Card>
-                        )}
+                        {matchUserId && <UserCard userId={matchUserId} />}
                     </div>
                 </Card>
             </div>

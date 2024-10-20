@@ -1,5 +1,7 @@
 import { SOCKET_URL } from "config";
+import AuthClientStore from "data/auth/AuthClientStore";
 import { io, Socket } from "socket.io-client";
+
 class SocketService {
     private socket: Socket | null = null;
     private onConnectCallbacks: (() => void)[] = [];
@@ -7,7 +9,12 @@ class SocketService {
 
     connect() {
         if (!this.socket) {
-            this.socket = io(SOCKET_URL);
+            const token = AuthClientStore.getAccessToken();
+            this.socket = io(SOCKET_URL, {
+                auth: {
+                    token: token,
+                },
+            });
             this.setupEventListeners();
         }
     }

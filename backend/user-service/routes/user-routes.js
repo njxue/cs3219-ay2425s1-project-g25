@@ -81,7 +81,7 @@ router.get("/", verifyAccessToken, verifyIsAdmin, getAllUsers);
  *       500:
  *         description: Internal server error
  */
-router.get("/:id", verifyAccessToken, verifyIsOwnerOrAdmin, getUser);
+router.get("/:id", getUser);
 
 /**
  * @swagger

@@ -24,4 +24,5 @@ export interface IUser {
     loginUser(user: IUserLoginInput): Promise<any>;
     logoutUser(userId: string): Promise<any>;
     updateUser(userId: string, userUpdateInput: IUserUpdateInput): Promise<any>;
+    getUser(userId: string): Promise<any>;
 }

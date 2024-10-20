@@ -8,7 +8,7 @@ class MatchService {
     private setupEventListeners() {
         if (this.eventsRegistered) return;
 
-        socketService.on("matchFound", (data) => {
+        socketService.on("matchFound", (data: { matchUserId: string; roomId: string }) => {
             console.log("MatchService: Match found:", data);
             this.onMatchFoundCallbacks.forEach(callback => callback(data));
             this.disconnect();
@@ -77,10 +77,9 @@ class MatchService {
         return socketService.isConnected();
     }
 
-    onMatchFound(callback: (data: any) => void) {
+    onMatchFound(callback: (data: { matchUserId: string; roomId: string }) => void) {
         this.onMatchFoundCallbacks.push(callback);
     }
-
     onMatchCancel(callback: (data: any) => void) {
         this.onMatchCancelCallbacks.push(callback);
     }
