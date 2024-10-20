@@ -43,6 +43,10 @@ Once the containers are up:
 - Nginx API Gateway: [http://localhost:80](http://localhost:80)
 - Redis: [http://localhost:6379](http://localhost:6379)
 
+Note that even after docker says that everything is up and running, there is a risk that they aren't when you load the frontend. 
+In this event, wait for about a minute before trying again. If that still doesn't work and there are network errors, try
+rebuilding the services by running `docker-compose up --build` again.
+
 ### MongoDB Configuration
 
 - MongoDB runs on port `27017` inside a container named `peerprep-mongo-container`.
