@@ -11,22 +11,16 @@ export async function connectToDB() {
     DB_HOST = "localhost",
     DB_PORT = "27017",
     DATABASE_NAME,
-    ENV,
-    DB_CLOUD_URI,
   } = process.env;
 
   let mongoDBUri = "";
 
-  if (ENV === "production") {
-    mongoDBUri = DB_CLOUD_URI;
+  if (DB_REQUIRE_AUTH === "true") {
+    mongoDBUri = `mongodb://${APP_MONGO_USERNAME || MONGO_INITDB_ROOT_USERNAME}:${
+      APP_MONGO_PASSWORD || MONGO_INITDB_ROOT_PASSWORD
+    }@${DB_HOST}:${DB_PORT}/${DATABASE_NAME}?authSource=admin`;
   } else {
-    if (DB_REQUIRE_AUTH === "true") {
-      mongoDBUri = `mongodb://${APP_MONGO_USERNAME || MONGO_INITDB_ROOT_USERNAME}:${
-        APP_MONGO_PASSWORD || MONGO_INITDB_ROOT_PASSWORD
-      }@${DB_HOST}:${DB_PORT}/${DATABASE_NAME}?authSource=admin`;
-    } else {
-      mongoDBUri = `mongodb://${DB_HOST}:${DB_PORT}/${DATABASE_NAME}`;
-    }
+    mongoDBUri = `mongodb://${DB_HOST}:${DB_PORT}/${DATABASE_NAME}`;
   }
 
   try {
