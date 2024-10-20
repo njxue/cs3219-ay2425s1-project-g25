@@ -97,8 +97,10 @@ export async function matchingWorker() {
  */
 function getRelaxationLevel(userData: any): number {
     const now = Date.now();
-    const requestedAt = parseInt(userData.requestedAt, 10);
+    const requestedAt = parseInt(userData.requestedAt);
+    console.log("HEY DICKHEAD", now, userData.requestedAt, requestedAt); 
     const elapsedTime = now - requestedAt;
+    console.log(elapsedTime)
 
     if (elapsedTime <= RELAXATION_INTERVAL) {
         return 0; // No relaxation
@@ -120,17 +122,23 @@ function getRelaxationLevel(userData: any): number {
 function canUsersMatch(user1: any, user2: any, relaxationLevel1: number, relaxationLevel2: number): boolean {
     // Get relaxed criteria for both users
     console.log("HEY HERE IS THE MATCHING:", user1, user2, relaxationLevel1, relaxationLevel2);
-    const relaxedCriteria1 = getRelaxedCriteria(relaxationLevel1, user1);
-    const relaxedCriteria2 = getRelaxedCriteria(relaxationLevel2, user2);
+    let satisfied = false; // One exit point pattern
 
     // Check if user1's original criteria are satisfied by user2's relaxed criteria
-    const user1SatisfiedByUser2 = isCriteriaSatisfied(user1, relaxedCriteria2);
+    if (relaxationLevel1 < 0 || relaxationLevel1 > 2) return false;
+    for (let i = 0; i <= relaxationLevel1; i++) {
+        const relaxedCriteria1 = getRelaxedCriteria(i, user1);
+        satisfied = satisfied || isCriteriaSatisfied(user2, relaxedCriteria1);
+    }
 
     // Check if user2's original criteria are satisfied by user1's relaxed criteria
-    const user2SatisfiedByUser1 = isCriteriaSatisfied(user2, relaxedCriteria1);
+    if (relaxationLevel2 < 0 || relaxationLevel2 > 2) return false;
+    for (let i = 0; i <= relaxationLevel2; i++) {
+        const relaxedCriteria2 = getRelaxedCriteria(relaxationLevel2, user2);
+        satisfied = satisfied || isCriteriaSatisfied(user1, relaxedCriteria2);
+    }
 
-    // Users can be matched if either condition is true
-    return user1SatisfiedByUser2 || user2SatisfiedByUser1;
+    return satisfied;
 }
 
 /**
@@ -159,6 +167,7 @@ function getRelaxedCriteria(relaxationLevel: number, userData: any): { category:
  * @returns True if satisfied, else false.
  */
 function isCriteriaSatisfied(user: any, relaxedCriteria: { category: string; difficulty: string }): boolean {
+    console.log(user, relaxedCriteria);
     const categoryMatch = relaxedCriteria.category === 'Any' || user.category === relaxedCriteria.category;
     const difficultyMatch = relaxedCriteria.difficulty === 'Any' || user.difficulty === relaxedCriteria.difficulty;
     return categoryMatch && difficultyMatch;

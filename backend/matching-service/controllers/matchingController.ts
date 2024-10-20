@@ -111,7 +111,7 @@ export function setupSocketListeners() {
             const userData = {
                 userId,
                 socketId: socket.id,
-                connectedAt: Date.now(),
+                requestedAt: Date.now(),
                 category: category,
                 difficulty: difficulty,
             };
