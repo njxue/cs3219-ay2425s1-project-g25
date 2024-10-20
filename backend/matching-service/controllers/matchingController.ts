@@ -211,8 +211,15 @@ async function processMatchEvents(
                         console.log("Match Message Details:", { user1, user2, roomId, matchId });
 
                         await handleMatchEvent(user1, user2, roomId, matchId);
+
+                        console.log("Before processing messages, message queue state:");
+                        const messagesBefore = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
+                        console.log(messagesBefore);
                         await redisClient.xAck(streamKey, consumerGroup, id);
                         await redisClient.xDel(streamKey, id);
+                        console.log("After processing match event, message queue state:");
+                        const messagesAfter = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
+                        console.log(messagesAfter);
                     }
                 }
             }
@@ -226,10 +233,6 @@ async function processMatchEvents(
 async function handleMatchEvent(user1: any, user2: any, roomId: string, matchId: string) {
     try {
         const io = getSocket();
-
-        console.log("Before processing messages, message queue state:");
-        const messagesBefore = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
-        console.log(messagesBefore);
 
         const socket1 = io.sockets.sockets.get(user1.socketId);
         const socket2 = io.sockets.sockets.get(user2.socketId);
@@ -261,9 +264,6 @@ async function handleMatchEvent(user1: any, user2: any, roomId: string, matchId:
             console.error("One or both users are not connected.");
         }
 
-        console.log("After processing match event, message queue state:");
-        const messagesAfter = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
-        console.log(messagesAfter);
     } catch (error) {
         console.error('Error in handleMatchEvent:', error);
     }
