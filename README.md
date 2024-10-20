@@ -19,8 +19,15 @@ Files to do this in:
 3. /backend/user-service
 4. /backend/question-service
 5. /backend/matching-service
-Consult the readme files in the service if there are further configurations needed.
+Then, run `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` twice to generate
+your 2 JWT token secrets. For the first one, paste it into the JWT_ACCESS_TOKEN_SECRET variable of
+the .env files in question-service and user-service. Then, copy the second into the
+JWT_REFRESH_TOKEN_SECRET of the .env file in user-service. 
 
+Further note: The DB_CLOUD_URI .env variable in user-service doesn't need to be filled in. A local
+database will be created in the mongoDB service. 
+
+Consult the readme files in the service if there are further configurations needed.
 ### Running the Project
 
 To run all services, execute the following command in the root directory:
