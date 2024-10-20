@@ -2,28 +2,17 @@ import { Request, Response, NextFunction } from "express";
 import { getSocket } from "../utils/socket";
 import { SOCKET_EVENTS } from "../constants/socketEventNames";
 import { MATCHING_STATUS } from "../constants/matchingStatus";
-import redisClient, { createRedisClient, logAllQueues, luaScript } from "../utils/redisClient";
-// import MatchingEventModel from "../models/MatchingEvent";
-import { Server } from "socket.io";
-import { QueueType } from "../constants/queueTypes";
-import { generateQueueKey } from "../utils/queueUtils";
+import redisClient, { createRedisClient, logAllQueues } from "../utils/redisClient";
 import { decodeToken } from "../utils/tokenUtils";
 import Room from "../models/RoomSchema";
-import MatchingEventModel from "../models/MatchingEvent";
 
-// Configurable settings for relaxing the matching criteria
-const ENABLE_RELAXATION = true;  // Boolean to toggle relaxation on/off
-const ATTEMPTS_BEFORE_RELAX_DIFFICULTY = 3;  // Number of attempts before relaxing difficulty
-const ATTEMPTS_BEFORE_RELAX_CATEGORY = 5;  // Number of attempts before relaxing category
-
-import redisClient, { createRedisClient, logAllQueues } from "../utils/redisClient";
 import { startStaleUserCleanup } from '../workers/staleUserCleaner';
 import { isValidSocketId } from "../utils/helpers";
 // -------------------------------------REST FUNCTIONS-------------------------------------------
 export async function startMatching(request: Request, response: Response, next: NextFunction) {
     try {
         const io = getSocket();
-        const { username, email, category, difficulty, socketId } = request.body;
+        const { category, difficulty, socketId } = request.body;
 
         if (!isValidSocketId(io, socketId)) {
             return response.status(400).json({
@@ -35,8 +24,6 @@ export async function startMatching(request: Request, response: Response, next: 
         const requestedAt = Date.now();
 
         const userData: Record<string, string> = {
-            username,
-            email,
             category: category || '',
             difficulty: difficulty || '',
             socketId,
@@ -79,29 +66,9 @@ export function setupSocketListeners() {
     const io = getSocket();
 
     io.on(SOCKET_EVENTS.CONNECT, (socket) => {
-        const token = socket.handshake.auth?.token;
-
-        // Use the decodeToken utility to decode the token
-        const decodedToken = decodeToken(token);
-        if (!decodedToken) {
-            socket.emit('error', { message: 'Invalid or missing token' });
-            return;
-        }
-
-        const userId = decodedToken.id;
-        console.log(`User connected: ${socket.id}, User ID: ${userId}`);
-
-        // Save user ID with socket ID in Redis only on connect
-        const userKey = `user:${socket.id}`;
-        const userData = {
-            userId,
-            socketId: socket.id,
-            connectedAt: Date.now(),
-        };
-        redisClient.hSet(userKey, userData);
-
-        socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; username: string; email: string; }) => {
-            const { category, difficulty, username, email } = requestData;
+     
+        socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; }) => {
+            const { category, difficulty} = requestData;
             if ((!category && category !== '') || (!difficulty && difficulty !== '')) {
                 console.error("Missing field - All fields must be strings. Empty category/difficulty are to be empty strings. username and email cannot be empty.");
                 return;
@@ -117,15 +84,28 @@ export function setupSocketListeners() {
             const userKey = `user:${socketId}`;
             const requestedAt = Date.now();
 
+            const token = socket.handshake.auth?.token;
+
+            // Use the decodeToken utility to decode the token
+            const decodedToken = decodeToken(token);
+            if (!decodedToken) {
+                socket.emit('error', { message: 'Invalid or missing token' });
+                return;
+            }
+
+            const userId = decodedToken.id;
+            console.log(`User connected: ${socket.id}, User ID: ${userId}`);
+
+            // Save user ID with socket ID in Redis only on connect
             const userData = {
-                username,
-                email,
-                category: category || '',
-                difficulty: difficulty || '',
-                socketId,
-                requestedAt: requestedAt.toString(),
+                userId,
+                socketId: socket.id,
+                connectedAt: Date.now(),
             };
-            await redisClient.hSet(userKey, userData);
+            redisClient.hSet(userKey, userData);
+            // Log the saved user data
+            console.log('User data saved:', { userKey, userData });
+
             await redisClient.zAdd('matching_queue', {
                 score: requestedAt,
                 value: userKey,
@@ -161,8 +141,9 @@ export async function setupSubscriber() {
 
     const streamKey = 'match_events';
     const consumerGroup = 'match_consumers';
-    const consumerName = `consumer_${process.pid}`;
+    const consumerName = `consumer_${process.pid}`; // Unique consumer name
 
+    // Create the consumer group if it doesn't exist
     try {
         await redisClientInstance.xGroupCreate(streamKey, consumerGroup, '0', { MKSTREAM: true });
         console.log(`Consumer group '${consumerGroup}' created.`);
@@ -180,6 +161,7 @@ export async function setupSubscriber() {
     // Start the periodic cleanup for stale users
     startStaleUserCleanup();
 }
+
 
 async function processMatchEvents(
     redisClient: any,
@@ -206,7 +188,6 @@ async function processMatchEvents(
 
             if (streams) {
                 for (const stream of streams) {
-                    const streamName = stream.name;
                     const messages = stream.messages;
 
                     for (const message of messages) {
@@ -215,7 +196,7 @@ async function processMatchEvents(
                         const user1 = JSON.parse(fields.user1);
                         const user2 = JSON.parse(fields.user2);
 
-                        // await handleMatchEvent(user1, user2);
+                        await handleMatchEvent(user1, user2);
                         await logAllQueues();
                         await redisClient.xAck(streamKey, consumerGroup, id);
                         await redisClient.xDel(streamKey, id);
@@ -228,7 +209,6 @@ async function processMatchEvents(
         await new Promise(resolve => setImmediate(resolve));
     }
 }
-
 
 // Room creation function
 async function createRoom(user1: any, user2: any) {

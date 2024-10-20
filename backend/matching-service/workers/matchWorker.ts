@@ -1,7 +1,8 @@
 import redisClient from '../utils/redisClient';
 import { getSocket } from '../utils/socket';
-import MatchingEventModel from '../models/MatchingEvent';
 import { SOCKET_EVENTS } from '../constants/socketEventNames';
+import MatchingEventModel from '../models/MatchingEvent';
+import Room from '../models/RoomSchema';
 
 // Configurable settings for time-based relaxing the matching criteria
 const MATCHING_INTERVAL = parseInt(process.env.MATCHING_INTERVAL || "3000");
@@ -30,7 +31,9 @@ export async function matchingWorker() {
 
             // Filter out null entries
             const validUsers = users.filter((u) => u !== null) as Array<{ userKey: string; userData: any }>;
-
+            console.log(
+                'Unmatched users after this round:',
+            );
             // Sort users by requestedAt to prioritize earlier requests
             validUsers.sort((a, b) => parseInt(a.userData.requestedAt, 10) - parseInt(b.userData.requestedAt, 10));
 
@@ -69,6 +72,7 @@ export async function matchingWorker() {
                         // Remove both users from the queue
                         await redisClient.zRem('matching_queue', userKey1);
                         await redisClient.zRem('matching_queue', userKey2);
+                        console.log('Match created between:', { userKey1, userData1, userKey2, userData2 });
 
                         // Handle the match
                         await handleMatch(userData1, userData2);
@@ -159,13 +163,34 @@ function isCriteriaSatisfied(user: any, relaxedCriteria: { category: string; dif
     return categoryMatch && difficultyMatch;
 }
 
+// Room creation function
+async function createRoom(user1: any, user2: any) {
+    // Create a new room in MongoDB and save it
+    const newRoom = new Room({
+        participants: [
+            { userId: user1.userId },
+            { userId: user2.userId }
+        ],
+        category: user1.category || user2.category || 'Any',
+        difficulty: user1.difficulty || user2.difficulty || 'Any',
+    });
+
+    // Save the room to the database
+    const savedRoom = await newRoom.save();
+    return savedRoom._id.toString(); // Return the roomId as a string
+}
+
+
 /**
  * Handles the match between two users.
  * Emits MATCH_FOUND event to both users and logs the match in MongoDB.
  * @param user1 - Data of the first user.
  * @param user2 - Data of the second user.
  */
+// Handle match event function
 async function handleMatch(user1: any, user2: any) {
+    console.log(`Match created between ${user1.userId} and ${user2.userId}`);
+
     const io = getSocket();
 
     const socket1 = io.sockets.sockets.get(user1.socketId);
@@ -174,33 +199,43 @@ async function handleMatch(user1: any, user2: any) {
     if (socket1 && socket2) {
         // Create MatchEvent in MongoDB
         const matchingEvent = new MatchingEventModel({
-            user1: { username: user1.username, email: user1.email },
-            user2: { username: user2.username, email: user2.email },
             category: user1.category || user2.category || 'Any',
             difficulty: user1.difficulty || user2.difficulty || 'Any',
         });
         const savedEvent = await matchingEvent.save();
 
-        // Emit match found event to both users, including the MatchEvent _id
+        // Call the createRoom function to create a room for the match
+        const roomId = await createRoom(user1, user2);
+
+        // Both users join the newly created room
+        socket1.join(roomId);
+        socket2.join(roomId);
+
+        // Emit match found event to both users with match details, including roomId and userId
         socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched with ${user2.username}`,
+            message: `You have been matched with ${user2.userId}`,
             category: user1.category || user2.category || 'Any',
             difficulty: user1.difficulty || user2.difficulty || 'Any',
             matchId: savedEvent._id,
+            roomId: roomId,
+            matchUserId: user2.userId // The matched user for user1
         });
 
         socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched with ${user1.username}`,
+            message: `You have been matched with ${user1.userId}`,
             category: user2.category || user1.category || 'Any',
             difficulty: user2.difficulty || user1.difficulty || 'Any',
             matchId: savedEvent._id,
+            roomId: roomId,
+            matchUserId: user1.userId // The matched user for user2
         });
-    }
 
-    // Remove user data from Redis
-    await redisClient.del(`user:${user1.socketId}`);
-    await redisClient.del(`user:${user2.socketId}`);
+        console.log(`Room created with MongoDB ObjectId: ${roomId}, users: ${user1.userId}, ${user2.userId}`);
+    } else {
+        console.error("One or both users are not connected.");
+    }
 }
+
 
 /**
  * Handles timeout scenarios by emitting MATCH_FAILED events to users

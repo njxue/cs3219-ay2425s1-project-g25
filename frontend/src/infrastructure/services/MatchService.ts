@@ -53,10 +53,10 @@ class MatchService {
         });
     }
 
-    async startMatch(username: string, email: string, category: string, difficulty: string): Promise<void> {
+    async startMatch(category: string, difficulty: string): Promise<void> {
         try {
             await this.ensureConnected();
-            const requestData = { username, email, category, difficulty };
+            const requestData = { category, difficulty };
             console.log("MatchService: Starting match with data:", requestData);
             socketService.emit('startMatching', requestData);
         } catch (error) {

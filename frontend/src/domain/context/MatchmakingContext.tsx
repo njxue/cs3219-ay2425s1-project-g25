@@ -80,7 +80,7 @@ const timerReducer = (state: number, action: TimerAction): number => {
 const MatchmakingContext = createContext<{
     state: MatchmakingState & { elapsedTime: number };
     dispatch: React.Dispatch<MatchmakingAction>;
-    startMatching: (username: string, email: string, category: string, difficulty: string) => void;
+    startMatching: (category: string, difficulty: string) => void;
     cancelMatching: () => void;
     reset: () => void;
     closeModal: () => void;
@@ -136,8 +136,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         }, 0);
     };
 
-    const startMatching = (username: string, email: string, category: string, difficulty: string) => {
-        reset();
+    const startMatching = (category: string, difficulty: string) => {
         isMatchingRef.current = true;
 
         matchService
@@ -146,7 +145,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                 if (!isMatchingRef.current) return;
 
                 dispatch({ type: "SOCKET_CONNECTED" });
-                matchService.startMatch(username, email, category, difficulty);
+                matchService.startMatch(category, difficulty);
                 dispatch({ type: "START_MATCHING" });
                 startTimer();
 

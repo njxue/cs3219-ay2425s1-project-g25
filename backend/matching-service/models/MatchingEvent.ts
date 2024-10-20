@@ -14,12 +14,6 @@ export interface MatchingEvent extends Document {
 }
 
 const matchingEventSchema: Schema = new Schema({
-    user1: {
-        userId: { type: String, required: true },
-    },
-    user2: {
-        userId: { type: String, required: true },
-    },
     category: { type: String, required: true },
     difficulty: { type: String, required: true },
     matchedAt: { type: Date, default: Date.now },
