@@ -1,4 +1,4 @@
-import redisClient from '../utils/redisClient';
+import redisClient, { logAllQueues } from '../utils/redisClient';
 import { getSocket } from '../utils/socket';
 import { SOCKET_EVENTS } from '../constants/socketEventNames';
 import MatchingEventModel from '../models/MatchingEvent';
@@ -31,9 +31,6 @@ export async function matchingWorker() {
 
             // Filter out null entries
             const validUsers = users.filter((u) => u !== null) as Array<{ userKey: string; userData: any }>;
-            console.log(
-                'Unmatched users after this round:',
-            );
             // Sort users by requestedAt to prioritize earlier requests
             validUsers.sort((a, b) => parseInt(a.userData.requestedAt, 10) - parseInt(b.userData.requestedAt, 10));
 
@@ -75,7 +72,10 @@ export async function matchingWorker() {
                         console.log('Match created between:', { userKey1, userData1, userKey2, userData2 });
 
                         // Handle the match
-                        await handleMatch(userData1, userData2);
+                        await handleMatch(userData1, userData2).then(() => {
+                            console.log("After match, match queue state:");
+                            logAllQueues();
+                        });
 
                         break; // Move to the next user1
                     }
@@ -97,8 +97,10 @@ export async function matchingWorker() {
  */
 function getRelaxationLevel(userData: any): number {
     const now = Date.now();
-    const requestedAt = parseInt(userData.requestedAt, 10);
+    const requestedAt = parseInt(userData.requestedAt);
+    console.log("HEY DICKHEAD", now, userData.requestedAt, requestedAt); 
     const elapsedTime = now - requestedAt;
+    console.log(elapsedTime)
 
     if (elapsedTime <= RELAXATION_INTERVAL) {
         return 0; // No relaxation
@@ -119,17 +121,24 @@ function getRelaxationLevel(userData: any): number {
  */
 function canUsersMatch(user1: any, user2: any, relaxationLevel1: number, relaxationLevel2: number): boolean {
     // Get relaxed criteria for both users
-    const relaxedCriteria1 = getRelaxedCriteria(relaxationLevel1, user1);
-    const relaxedCriteria2 = getRelaxedCriteria(relaxationLevel2, user2);
+    console.log("HEY HERE IS THE MATCHING:", user1, user2, relaxationLevel1, relaxationLevel2);
+    let satisfied = false; // One exit point pattern
 
     // Check if user1's original criteria are satisfied by user2's relaxed criteria
-    const user1SatisfiedByUser2 = isCriteriaSatisfied(user1, relaxedCriteria2);
+    if (relaxationLevel1 < 0 || relaxationLevel1 > 2) return false;
+    for (let i = 0; i <= relaxationLevel1; i++) {
+        const relaxedCriteria1 = getRelaxedCriteria(i, user1);
+        satisfied = satisfied || isCriteriaSatisfied(user2, relaxedCriteria1);
+    }
 
     // Check if user2's original criteria are satisfied by user1's relaxed criteria
-    const user2SatisfiedByUser1 = isCriteriaSatisfied(user2, relaxedCriteria1);
+    if (relaxationLevel2 < 0 || relaxationLevel2 > 2) return false;
+    for (let i = 0; i <= relaxationLevel2; i++) {
+        const relaxedCriteria2 = getRelaxedCriteria(relaxationLevel2, user2);
+        satisfied = satisfied || isCriteriaSatisfied(user1, relaxedCriteria2);
+    }
 
-    // Users can be matched if either condition is true
-    return user1SatisfiedByUser2 || user2SatisfiedByUser1;
+    return satisfied;
 }
 
 /**
@@ -158,6 +167,7 @@ function getRelaxedCriteria(relaxationLevel: number, userData: any): { category:
  * @returns True if satisfied, else false.
  */
 function isCriteriaSatisfied(user: any, relaxedCriteria: { category: string; difficulty: string }): boolean {
+    console.log(user, relaxedCriteria);
     const categoryMatch = relaxedCriteria.category === 'Any' || user.category === relaxedCriteria.category;
     const difficultyMatch = relaxedCriteria.difficulty === 'Any' || user.difficulty === relaxedCriteria.difficulty;
     return categoryMatch && difficultyMatch;
@@ -187,16 +197,17 @@ async function createRoom(user1: any, user2: any) {
  * @param user1 - Data of the first user.
  * @param user2 - Data of the second user.
  */
-// Handle match event function
 async function handleMatch(user1: any, user2: any) {
-    console.log(`Match created between ${user1.userId} and ${user2.userId}`);
+    try {
+        // Log the state of the match queues before adding the match message
+        console.log("Match found, match queue state before handling:");
+        await logAllQueues();
 
-    const io = getSocket();
+        // Log the state of the message queue before adding the match message
+        console.log("Before adding match to message queue, message queue state:");
+        const messagesBefore = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
+        console.log(messagesBefore);
 
-    const socket1 = io.sockets.sockets.get(user1.socketId);
-    const socket2 = io.sockets.sockets.get(user2.socketId);
-
-    if (socket1 && socket2) {
         // Create MatchEvent in MongoDB
         const matchingEvent = new MatchingEventModel({
             category: user1.category || user2.category || 'Any',
@@ -207,32 +218,37 @@ async function handleMatch(user1: any, user2: any) {
         // Call the createRoom function to create a room for the match
         const roomId = await createRoom(user1, user2);
 
-        // Both users join the newly created room
-        socket1.join(roomId);
-        socket2.join(roomId);
-
-        // Emit match found event to both users with match details, including roomId and userId
-        socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched with ${user2.userId}`,
-            category: user1.category || user2.category || 'Any',
-            difficulty: user1.difficulty || user2.difficulty || 'Any',
-            matchId: savedEvent._id,
+        // Prepare the match information to enqueue
+        const matchMessage = {
+            user1: JSON.stringify({
+                userId: user1.userId,
+                socketId: user1.socketId,
+                category: user1.category,
+                difficulty: user1.difficulty,
+            }),
+            user2: JSON.stringify({
+                userId: user2.userId,
+                socketId: user2.socketId,
+                category: user2.category,
+                difficulty: user2.difficulty,
+            }),
             roomId: roomId,
-            matchUserId: user2.userId // The matched user for user1
-        });
+            matchId: savedEvent._id.toString(),
+        };
 
-        socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched with ${user1.userId}`,
-            category: user2.category || user1.category || 'Any',
-            difficulty: user2.difficulty || user1.difficulty || 'Any',
-            matchId: savedEvent._id,
-            roomId: roomId,
-            matchUserId: user1.userId // The matched user for user2
-        });
+        // Add the match message to the 'match_events' stream
+        await redisClient.xAdd('match_events', '*', matchMessage);
 
-        console.log(`Room created with MongoDB ObjectId: ${roomId}, users: ${user1.userId}, ${user2.userId}`);
-    } else {
-        console.error("One or both users are not connected.");
+        // Log the state of the match queues after adding the match message
+        console.log("Match found, match queue after handling:");
+        await logAllQueues();
+
+        // Log the state of the message queue after adding the match message
+        console.log("After adding match to message queue, message queue state:");
+        const messagesAfter = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
+        console.log(messagesAfter);
+    } catch (error) {
+        console.error('Error in handleMatch:', error);
     }
 }
 

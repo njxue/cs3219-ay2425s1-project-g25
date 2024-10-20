@@ -35,6 +35,9 @@ export async function startMatching(request: Request, response: Response, next: 
         await redisClient.zAdd('matching_queue', {
             score: requestedAt,
             value: userKey,
+        }).then(() => {
+            console.log("Add match request, match queue state:");
+            logAllQueues();
         });
 
         response.status(200).json({
@@ -68,10 +71,18 @@ export function setupSocketListeners() {
     io.on(SOCKET_EVENTS.CONNECT, (socket) => {
      
         socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; }) => {
-            const { category, difficulty} = requestData;
-            if ((!category && category !== '') || (!difficulty && difficulty !== '')) {
+            let { category, difficulty } = requestData;
+            if (!category || !difficulty) {
                 console.error("Missing field - All fields must be strings. Empty category/difficulty are to be empty strings. username and email cannot be empty.");
                 return;
+            }
+
+            if (category === '') {
+                category = 'Any';
+            }
+
+            if (difficulty === '') {
+                category = 'Any';
             }
 
             const socketId = socket.id;
@@ -100,7 +111,9 @@ export function setupSocketListeners() {
             const userData = {
                 userId,
                 socketId: socket.id,
-                connectedAt: Date.now(),
+                requestedAt: Date.now(),
+                category: category,
+                difficulty: difficulty,
             };
             redisClient.hSet(userKey, userData);
             // Log the saved user data
@@ -109,6 +122,9 @@ export function setupSocketListeners() {
             await redisClient.zAdd('matching_queue', {
                 score: requestedAt,
                 value: userKey,
+            }).then(() => {
+                console.log("Add match request, match queue state:");
+                logAllQueues();
             });
         });
 
@@ -193,11 +209,19 @@ async function processMatchEvents(
                     for (const message of messages) {
                         const id = message.id;
                         const fields = message.message;
+
+                        // Parse the match message
                         const user1 = JSON.parse(fields.user1);
                         const user2 = JSON.parse(fields.user2);
+                        const roomId = fields.roomId;
+                        const matchId = fields.matchId;
 
-                        await handleMatchEvent(user1, user2);
-                        await logAllQueues();
+                        // Log the message being processed
+                        console.log(`Processing MatchEvent ID: ${matchId} from Stream ID: ${id}`);
+                        console.log("Match Message Details:", { user1, user2, roomId, matchId });
+
+                        // Handle the match event
+                        await handleMatchEvent(user1, user2, roomId, matchId);
                         await redisClient.xAck(streamKey, consumerGroup, id);
                         await redisClient.xDel(streamKey, id);
                     }
@@ -210,52 +234,52 @@ async function processMatchEvents(
     }
 }
 
-// Room creation function
-async function createRoom(user1: any, user2: any) {
-    // Create a new room in MongoDB and save it
-    const newRoom = new Room({
-        participants: [
-            { userId: user1.userId },
-            { userId: user2.userId }
-        ],
-        category: user1.category || user2.category || 'Any',
-        difficulty: user1.difficulty || user2.difficulty || 'Any',
-    });
-
-    // Save the room to the database
-    const savedRoom = await newRoom.save();
-    return savedRoom._id.toString(); // Return the roomId as a string
-}
-
 // Handle match event function
-async function handleMatchEvent(user1: any, user2: any) {
-    const io = getSocket();
+async function handleMatchEvent(user1: any, user2: any, roomId: string, matchId: string) {
+    try {
+        const io = getSocket();
 
-    // Log the user objects to inspect their contents
-    console.log("User1 Object:", user1);
-    console.log("User2 Object:", user2);
+        // Log the state of the message queue before processing the match event
+        console.log("Before processing messages, message queue state:");
+        const messagesBefore = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
+        console.log(messagesBefore);
 
-    const socket1 = io.sockets.sockets.get(user1.socketId);
-    const socket2 = io.sockets.sockets.get(user2.socketId);
+        const socket1 = io.sockets.sockets.get(user1.socketId);
+        const socket2 = io.sockets.sockets.get(user2.socketId);
 
-    if (socket1 && socket2) {
-        // Call the createRoom function to create a room for the match
-        const roomId = await createRoom(user1, user2);
+        if (socket1 && socket2) {
+            // Both users join the newly created room
+            socket1.join(roomId);
+            socket2.join(roomId);
 
-        // Both users join the newly created room
-        socket1.join(roomId);
-        socket2.join(roomId);
+            // Emit match found event to both users with match details, including roomId and userId
+            socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
+                message: `You have been matched with User ID: ${user2.userId}`,
+                category: user1.category || user2.category || 'Any',
+                difficulty: user1.difficulty || user2.difficulty || 'Any',
+                matchId: matchId,
+                roomId: roomId,
+                matchUserId: user2.userId
+            });
 
-        // Emit the match found event to both users in the room
-        io.to(roomId).emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched!`,
-            category: user1.category || user2.category || 'Any',
-            difficulty: user1.difficulty || user2.difficulty || 'Any',
-            roomId: roomId,
-        });
+            socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
+                message: `You have been matched with User ID: ${user1.userId}`,
+                category: user2.category || user1.category || 'Any',
+                difficulty: user2.difficulty || user1.difficulty || 'Any',
+                matchId: matchId,
+                roomId: roomId,
+                matchUserId: user1.userId
+            });
 
-        console.log(`Room created with MongoDB ObjectId: ${roomId}, users: ${user1.userId}, ${user2.userId}`);
-    } else {
-        console.error("One or both users are not connected.");
+            console.log(`Match processed and events emitted for Room ID: ${roomId}, MatchEvent ID: ${matchId}`);
+        } else {
+            console.error("One or both users are not connected.");
+        }
+
+        console.log("After processing match event, message queue state:");
+        const messagesAfter = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
+        console.log(messagesAfter);
+    } catch (error) {
+        console.error('Error in handleMatchEvent:', error);
     }
 }

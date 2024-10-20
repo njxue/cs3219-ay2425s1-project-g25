@@ -34,16 +34,20 @@ export function createRedisClient(): RedisClientType {
 
 export async function logAllQueues() {
     try {
-        const queueKeys = await redisClient.keys('queue:*');
-        if (queueKeys.length === 0) {
-            console.log('Match queue is empty')
-        }
-        for (const queueKey of queueKeys) {
-            const queueContents = await redisClient.lRange(queueKey, 0, -1);
-            console.log(`Contents of ${queueKey}:`, queueContents);
+        const matchQueueKey = 'matching_queue'; // Update if your match queue key is different
+        const queueLength = await redisClient.zCard(matchQueueKey);
+        
+        if (queueLength === 0) {
+            console.log('Matching queue is empty.');
+        } else {
+            const queueContents = await redisClient.zRangeWithScores(matchQueueKey, 0, -1);
+            console.log(`Contents of '${matchQueueKey}':`);
+            queueContents.forEach(entry => {
+                console.log(`Value: ${entry.value}, Score: ${entry.score}`);
+            });
         }
     } catch (error) {
-        console.error('Error retrieving queue contents:', error);
+        console.error('Error retrieving match queue contents:', error);
     }
 }
 
