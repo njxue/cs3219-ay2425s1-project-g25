@@ -1,6 +1,7 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface MatchingEvent extends Document {
+    _id: Types.ObjectId;
     user1?: {
         username: string;
         email: string;
