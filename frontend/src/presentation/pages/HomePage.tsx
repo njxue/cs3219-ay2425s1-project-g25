@@ -41,8 +41,6 @@ const HomePage: React.FC = () => {
                 selectedDifficulty: filters.selectedDifficulty
             });
             startMatching(
-                correctedInput.username,
-                correctedInput.email,
                 correctedInput.selectedCategories[0].name,
                 correctedInput.selectedDifficulty
             );

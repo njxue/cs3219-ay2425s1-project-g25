@@ -3,12 +3,10 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export interface MatchingEvent extends Document {
     _id: Types.ObjectId;
     user1?: {
-        username: string;
-        email: string;
+        userId: string;
     };
     user2?: {
-        username: string;
-        email: string;
+        userId: string;
     };
     category?: string;
     difficulty?: string;
@@ -16,14 +14,6 @@ export interface MatchingEvent extends Document {
 }
 
 const matchingEventSchema: Schema = new Schema({
-    user1: {
-        username: { type: String, required: true },
-        email: { type: String, required: true },
-    },
-    user2: {
-        username: { type: String, required: true },
-        email: { type: String, required: true },
-    },
     category: { type: String, required: true },
     difficulty: { type: String, required: true },
     matchedAt: { type: Date, default: Date.now },

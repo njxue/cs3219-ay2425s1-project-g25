@@ -65,10 +65,13 @@ export const FILTER_DIFFICULTY_TEXT = {
 
 
 export const LANDING_CARD_TEXT = {
-    WELCOME: "Welcome to the Question Workspace",
-    INSTRUCTIONS: "Select a question from the list or add a new question to get started.",
-    ADD_QUESTION: "Add a new question"
+    ADMIN_WELCOME: "Welcome, Admin",
+    ADMIN_INSTRUCTIONS: "You can add or select a question to get started.",
+    ADD_QUESTION: "Add Question",
+    PEER_WELCOME: "Welcome",
+    PEER_INSTRUCTIONS: "Please select a question from the list to begin with your peer."
 };
+
 
 export const QUESTION_FORM_FIELDS = {
     FIELD_TITLE: { label: "Title", name: "title" },

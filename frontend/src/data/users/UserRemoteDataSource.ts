@@ -1,4 +1,4 @@
-import { BaseApi } from "data/BaseApi";
+import { BaseApi } from "infrastructure/Api/BaseApi";
 import { IUserLoginInput, IUserRegisterInput, IUserUpdateInput } from "domain/users/IUser";
 
 const API_URL = "";
@@ -47,6 +47,10 @@ export class UserRemoteDataSource extends BaseApi {
     async verifyToken() {
         return await this.protectedGet<any>("/auth/verify-token");
     }
+    async getUser(userId: string) {
+        return await this.protectedGet<any>(`/users/${userId}`);
+    }
+
 }
 
 export const userRemoteDataSource = new UserRemoteDataSource();

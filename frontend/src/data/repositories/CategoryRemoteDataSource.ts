@@ -1,5 +1,5 @@
 import { Category } from "domain/entities/Category";
-import { BaseApi } from "../BaseApi";
+import { BaseApi } from "../../infrastructure/Api/BaseApi";
 
 const API_URL = "/api/categories";
 

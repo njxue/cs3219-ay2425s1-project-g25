@@ -1,4 +1,4 @@
-import { BaseApi } from "../BaseApi";
+import { BaseApi } from "../../infrastructure/Api/BaseApi";
 import { Question } from "../../domain/entities/Question";
 import { IQuestionInput, IQuestionUpdateInput } from "domain/repositories/IQuestionRepository";
 

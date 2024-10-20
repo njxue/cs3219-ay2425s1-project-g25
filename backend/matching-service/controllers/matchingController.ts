@@ -3,13 +3,16 @@ import { getSocket } from "../utils/socket";
 import { SOCKET_EVENTS } from "../constants/socketEventNames";
 import { MATCHING_STATUS } from "../constants/matchingStatus";
 import redisClient, { createRedisClient, logAllQueues } from "../utils/redisClient";
+import { decodeToken } from "../utils/tokenUtils";
+import Room from "../models/RoomSchema";
+
 import { startStaleUserCleanup } from '../workers/staleUserCleaner';
 import { isValidSocketId } from "../utils/helpers";
 // -------------------------------------REST FUNCTIONS-------------------------------------------
 export async function startMatching(request: Request, response: Response, next: NextFunction) {
     try {
         const io = getSocket();
-        const { username, email, category, difficulty, socketId } = request.body;
+        const { category, difficulty, socketId } = request.body;
 
         if (!isValidSocketId(io, socketId)) {
             return response.status(400).json({
@@ -21,8 +24,6 @@ export async function startMatching(request: Request, response: Response, next: 
         const requestedAt = Date.now();
 
         const userData: Record<string, string> = {
-            username,
-            email,
             category: category || '',
             difficulty: difficulty || '',
             socketId,
@@ -64,22 +65,15 @@ export async function cancelMatch(request: Request, response: Response, next: Ne
 export function setupSocketListeners() {
     const io = getSocket();
 
-    io.on('connection', (socket) => {
-        console.log(`User connected: ${socket.id}`);
-
-        socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; username: string; email: string; }) => {
-            const { category, difficulty, username, email } = requestData;
-            if (
-                typeof category !== 'string' ||
-                typeof difficulty !== 'string' ||
-                !username ||
-                username.trim() === '' ||
-                !email ||
-                email.trim() === ''
-            ) {
-                console.error("Missing field - All fields must be strings. Empty category/difficulty are allowed. Username and email cannot be empty.");
+    io.on(SOCKET_EVENTS.CONNECT, (socket) => {
+     
+        socket.on(SOCKET_EVENTS.START_MATCHING, async (requestData: { category: string; difficulty: string; }) => {
+            const { category, difficulty} = requestData;
+            if ((!category && category !== '') || (!difficulty && difficulty !== '')) {
+                console.error("Missing field - All fields must be strings. Empty category/difficulty are to be empty strings. username and email cannot be empty.");
                 return;
             }
+
             const socketId = socket.id;
 
             if (!isValidSocketId(io, socketId)) {
@@ -90,15 +84,28 @@ export function setupSocketListeners() {
             const userKey = `user:${socketId}`;
             const requestedAt = Date.now();
 
+            const token = socket.handshake.auth?.token;
+
+            // Use the decodeToken utility to decode the token
+            const decodedToken = decodeToken(token);
+            if (!decodedToken) {
+                socket.emit('error', { message: 'Invalid or missing token' });
+                return;
+            }
+
+            const userId = decodedToken.id;
+            console.log(`User connected: ${socket.id}, User ID: ${userId}`);
+
+            // Save user ID with socket ID in Redis only on connect
             const userData = {
-                username,
-                email,
-                category: category || '',
-                difficulty: difficulty || '',
-                socketId,
-                requestedAt: requestedAt.toString(),
+                userId,
+                socketId: socket.id,
+                connectedAt: Date.now(),
             };
-            await redisClient.hSet(userKey, userData);
+            redisClient.hSet(userKey, userData);
+            // Log the saved user data
+            console.log('User data saved:', { userKey, userData });
+
             await redisClient.zAdd('matching_queue', {
                 score: requestedAt,
                 value: userKey,
@@ -110,7 +117,6 @@ export function setupSocketListeners() {
             const userKey = `user:${socketId}`;
 
             await redisClient.zRem('matching_queue', userKey);
-
             await redisClient.del(userKey);
 
             console.log(`User ${socketId} canceled their match request.`);
@@ -155,6 +161,7 @@ export async function setupSubscriber() {
     // Start the periodic cleanup for stale users
     startStaleUserCleanup();
 }
+
 
 async function processMatchEvents(
     redisClient: any,
@@ -203,25 +210,52 @@ async function processMatchEvents(
     }
 }
 
+// Room creation function
+async function createRoom(user1: any, user2: any) {
+    // Create a new room in MongoDB and save it
+    const newRoom = new Room({
+        participants: [
+            { userId: user1.userId },
+            { userId: user2.userId }
+        ],
+        category: user1.category || user2.category || 'Any',
+        difficulty: user1.difficulty || user2.difficulty || 'Any',
+    });
+
+    // Save the room to the database
+    const savedRoom = await newRoom.save();
+    return savedRoom._id.toString(); // Return the roomId as a string
+}
+
+// Handle match event function
 async function handleMatchEvent(user1: any, user2: any) {
     const io = getSocket();
+
+    // Log the user objects to inspect their contents
+    console.log("User1 Object:", user1);
+    console.log("User2 Object:", user2);
 
     const socket1 = io.sockets.sockets.get(user1.socketId);
     const socket2 = io.sockets.sockets.get(user2.socketId);
 
-    if (socket1) {
-        socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched with ${user2.username}`,
+    if (socket1 && socket2) {
+        // Call the createRoom function to create a room for the match
+        const roomId = await createRoom(user1, user2);
+
+        // Both users join the newly created room
+        socket1.join(roomId);
+        socket2.join(roomId);
+
+        // Emit the match found event to both users in the room
+        io.to(roomId).emit(SOCKET_EVENTS.MATCH_FOUND, {
+            message: `You have been matched!`,
             category: user1.category || user2.category || 'Any',
             difficulty: user1.difficulty || user2.difficulty || 'Any',
+            roomId: roomId,
         });
-    }
 
-    if (socket2) {
-        socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
-            message: `You have been matched with ${user1.username}`,
-            category: user2.category || user1.category || 'Any',
-            difficulty: user2.difficulty || user1.difficulty || 'Any',
-        });
+        console.log(`Room created with MongoDB ObjectId: ${roomId}, users: ${user1.userId}, ${user2.userId}`);
+    } else {
+        console.error("One or both users are not connected.");
     }
 }

@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "presentation/pages/layout/Layout";
 import QuestionManagement from "presentation/pages/QuestionManagement";
-import QuestionPage from "presentation/pages/QuestionPage";
+import QuestionPage from "presentation/pages/QuestionSelection";
 import NotFound from "presentation/pages/NotFound";
 import RegisterPage from "presentation/pages/RegisterPage";
 import LoginPage from "presentation/pages/LoginPage";
@@ -18,10 +18,10 @@ const AppRoutes: React.FC = () => {
                 <Routes>
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/room/:roomId/:matchUserId" element={<QuestionPage />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route path="/" element={<HomePage />} />
-                        <Route path="/questions" element={<QuestionPage />} />
 
                         <Route element={<AdminProtectedRoute />}>
                             <Route path="/question-management" element={<QuestionManagement />} />

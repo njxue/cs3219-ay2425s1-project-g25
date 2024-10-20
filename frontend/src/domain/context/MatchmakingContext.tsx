@@ -80,7 +80,7 @@ const timerReducer = (state: number, action: TimerAction): number => {
 const MatchmakingContext = createContext<{
     state: MatchmakingState & { elapsedTime: number };
     dispatch: React.Dispatch<MatchmakingAction>;
-    startMatching: (username: string, email: string, category: string, difficulty: string) => void;
+    startMatching: (category: string, difficulty: string) => void;
     cancelMatching: () => void;
     reset: () => void;
     closeModal: () => void;
@@ -136,8 +136,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         }, 0);
     };
 
-    const startMatching = (username: string, email: string, category: string, difficulty: string) => {
-        reset();
+    const startMatching = (category: string, difficulty: string) => {
         isMatchingRef.current = true;
 
         matchService
@@ -146,7 +145,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                 if (!isMatchingRef.current) return;
 
                 dispatch({ type: "SOCKET_CONNECTED" });
-                matchService.startMatch(username, email, category, difficulty);
+                matchService.startMatch(category, difficulty);
                 dispatch({ type: "START_MATCHING" });
                 startTimer();
 
@@ -186,36 +185,63 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-        if (state.status === "found") {
-            stopTimer();
+        let intervalId: NodeJS.Timeout | null = null;
+
+        // Function to handle countdown and navigation
+        const startCountdown = (roomId: string | null = null, matchUserId: string | null = null) => {
             let countdown = state.countdown;
-            const intervalId = setInterval(() => {
+            intervalId = setInterval(() => {
                 if (countdown > 0 && !isResetting.current) {
                     dispatch({ type: "SET_COUNTDOWN", payload: countdown - 1 });
                     countdown--;
                 } else {
-                    clearInterval(intervalId);
+                    if (intervalId) clearInterval(intervalId);
                     if (!isResetting.current) {
                         reset();
-                        navigate("/questions");
+                        navigate(`/room/${roomId}/${matchUserId}`);
                     }
                 }
             }, 1000);
-            return () => clearInterval(intervalId);
-        }
-    }, [state.status, state.countdown, navigate]);
+        };
 
-    useEffect(() => {
-        matchService.onMatchFound((data) => {
+        // Listen for match found event and start countdown
+        matchService.onMatchFound(({ matchUserId, roomId }) => {
             if (isMatchingRef.current) {
                 dispatch({ type: "MATCH_FOUND" });
                 isMatchingRef.current = false;
+
                 if (matchTimeoutRef.current) {
                     clearTimeout(matchTimeoutRef.current);
                 }
+
+                startCountdown(roomId, matchUserId); // Start countdown with roomId for navigation
             }
         });
-    }, []);
+
+        matchService.onMatchFail(() => {
+            if (isMatchingRef.current) {
+                dispatch({ type: "MATCH_FAILED" });
+                isMatchingRef.current = false;
+
+                if (matchTimeoutRef.current) {
+                    clearTimeout(matchTimeoutRef.current);
+                }
+
+                stopTimer();
+            }
+        });
+
+
+        // When the match status is "found", start countdown (if triggered elsewhere)
+        if (state.status === "found" && !intervalId) {
+            startCountdown();
+        }
+
+        // Cleanup function to clear the interval
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [state.status, state.countdown, navigate, reset]);
 
     return (
         <MatchmakingContext.Provider

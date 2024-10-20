@@ -15,6 +15,8 @@ interface QuestionListProps {
     isLoading: boolean;
     error: string | null;
     onQuestionsUpdated?: (updatedQuestions: Question[]) => void;
+    categories?: Category[] | null;
+    isEditMode?: boolean;
 }
 
 export const QuestionList: React.FC<QuestionListProps> = ({
@@ -24,7 +26,9 @@ export const QuestionList: React.FC<QuestionListProps> = ({
     isNarrow,
     isLoading,
     error,
-    onQuestionsUpdated
+    onQuestionsUpdated,
+    categories = null,
+    isEditMode = false
 }) => {
     const [filters, setFilters] = useState<{
         selectedDifficulty: string | null;
@@ -68,7 +72,6 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 
         // 3. Filter by categories if any categories are selected
         if (filters.selectedCategories && filters.selectedCategories.length > 0) {
-            // Ensure question contains all selected categories
             const hasAllSelectedCategories = filters.selectedCategories.every((selectedCategory) =>
                 question.categories.some((questionCategory) => questionCategory._id === selectedCategory._id)
             );
@@ -85,7 +88,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         <div className={styles.questionListContainer}>
             <QuestionFilters
                 onFiltersChange={handleFiltersChange}
-                isEditMode={true}
+                isEditMode={isEditMode}
                 defaultDifficulty={filters.selectedDifficulty}
             />
             <div className={styles.listContainer}>

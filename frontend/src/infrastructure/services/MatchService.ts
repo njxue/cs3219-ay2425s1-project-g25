@@ -3,12 +3,14 @@ import { socketService } from "./SocketService";
 class MatchService {
     private onMatchFoundCallbacks: ((data: any) => void)[] = [];
     private onMatchCancelCallbacks: ((data: any) => void)[] = [];
+    private onMatchFailCallbacks: ((data: any) => void)[] = [];
+
     private eventsRegistered: boolean = false;
 
     private setupEventListeners() {
         if (this.eventsRegistered) return;
 
-        socketService.on("matchFound", (data) => {
+        socketService.on("matchFound", (data: { matchUserId: string; roomId: string }) => {
             console.log("MatchService: Match found:", data);
             this.onMatchFoundCallbacks.forEach(callback => callback(data));
             this.disconnect();
@@ -18,6 +20,12 @@ class MatchService {
             console.log("MatchService: Match canceled:", data);
             this.onMatchCancelCallbacks.forEach(callback => callback(data));
         });
+
+        socketService.on("matchFailed", (data) => {
+            console.log("MatchService: Match failed:", data);
+            this.onMatchFailCallbacks.forEach(callback => callback(data));
+        });
+
 
         this.eventsRegistered = true;
     }
@@ -45,10 +53,10 @@ class MatchService {
         });
     }
 
-    async startMatch(username: string, email: string, category: string, difficulty: string): Promise<void> {
+    async startMatch(category: string, difficulty: string): Promise<void> {
         try {
             await this.ensureConnected();
-            const requestData = { username, email, category, difficulty };
+            const requestData = { category, difficulty };
             console.log("MatchService: Starting match with data:", requestData);
             socketService.emit('startMatching', requestData);
         } catch (error) {
@@ -77,13 +85,17 @@ class MatchService {
         return socketService.isConnected();
     }
 
-    onMatchFound(callback: (data: any) => void) {
+    onMatchFound(callback: (data: { matchUserId: string; roomId: string }) => void) {
         this.onMatchFoundCallbacks.push(callback);
     }
-
     onMatchCancel(callback: (data: any) => void) {
         this.onMatchCancelCallbacks.push(callback);
     }
+
+    onMatchFail(callback: (data: any) => void) {
+        this.onMatchFailCallbacks.push(callback);
+    }
+
 }
 
 export const matchService = new MatchService();

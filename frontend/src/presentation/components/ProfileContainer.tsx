@@ -25,7 +25,7 @@ export const ProfileContainer: React.FC = () => {
                     </div>
                     <p>{user?.email}</p>
                     <div className={styles.linksContainer}>
-                        {isUserAdmin && <Link to="/questions">Manage questions</Link>}
+                        {isUserAdmin && <Link to="/question-management">Manage questions</Link>}
                     </div>
                 </div>
             </div>
