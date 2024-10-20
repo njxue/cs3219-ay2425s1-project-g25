@@ -3,6 +3,8 @@ import { socketService } from "./SocketService";
 class MatchService {
     private onMatchFoundCallbacks: ((data: any) => void)[] = [];
     private onMatchCancelCallbacks: ((data: any) => void)[] = [];
+    private onMatchFailCallbacks: ((data: any) => void)[] = [];
+
     private eventsRegistered: boolean = false;
 
     private setupEventListeners() {
@@ -18,6 +20,12 @@ class MatchService {
             console.log("MatchService: Match canceled:", data);
             this.onMatchCancelCallbacks.forEach(callback => callback(data));
         });
+
+        socketService.on("matchFailed", (data) => {
+            console.log("MatchService: Match failed:", data);
+            this.onMatchFailCallbacks.forEach(callback => callback(data));
+        });
+
 
         this.eventsRegistered = true;
     }
@@ -83,6 +91,11 @@ class MatchService {
     onMatchCancel(callback: (data: any) => void) {
         this.onMatchCancelCallbacks.push(callback);
     }
+
+    onMatchFail(callback: (data: any) => void) {
+        this.onMatchFailCallbacks.push(callback);
+    }
+
 }
 
 export const matchService = new MatchService();

@@ -219,6 +219,20 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
             }
         });
 
+        matchService.onMatchFail(() => {
+            if (isMatchingRef.current) {
+                dispatch({ type: "MATCH_FAILED" });
+                isMatchingRef.current = false;
+
+                if (matchTimeoutRef.current) {
+                    clearTimeout(matchTimeoutRef.current);
+                }
+
+                stopTimer();
+            }
+        });
+
+
         // When the match status is "found", start countdown (if triggered elsewhere)
         if (state.status === "found" && !intervalId) {
             startCountdown();
