@@ -1,33 +1,31 @@
--- find_and_remove_match.lua
-local requesterSocketId = ARGV[1]
-local matchedSocketId = nil
+-- KEYS[1]: The queue key where users are stored (e.g., 'queue:category:difficulty')
+-- ARGV[1]: The socket ID of the user requesting a match
 
--- Iterate over the queues
-for i = 1, #KEYS do
-    local queueKey = KEYS[i]
-    -- Remove the requester from the queue (if present)
-    redis.call('LREM', queueKey, 0, requesterSocketId)
-    -- Attempt to find another user in the queue
-    local queueLength = redis.call('LLEN', queueKey)
-    if queueLength > 0 then
-        matchedSocketId = redis.call('LINDEX', queueKey, 0)
-        if matchedSocketId and matchedSocketId ~= requesterSocketId then
-            -- Remove the matched user from all queues
-            for j = 1, #KEYS do
-                redis.call('LREM', KEYS[j], 0, matchedSocketId)
-            end
-            -- Remove the requester from all queues (in case they are still there)
-            for j = 1, #KEYS do
-                redis.call('LREM', KEYS[j], 0, requesterSocketId)
-            end
-            break
-        end
+local queueKey = KEYS[1]
+local requestingSocketId = ARGV[1]
+
+-- Check if the requesting user is still in the queue
+local userIndex = redis.call('LPOS', queueKey, requestingSocketId)
+if not userIndex then
+    -- User is not in the queue anymore
+    return nil
+end
+
+-- Try to find another user in the queue to match with
+-- We'll look for any other user in the queue
+
+-- Get all users in the queue
+local allUsers = redis.call('LRANGE', queueKey, 0, -1)
+
+for i, socketId in ipairs(allUsers) do
+    if socketId ~= requestingSocketId then
+        -- Found a match, remove both users from the queue
+        redis.call('LREM', queueKey, 0, requestingSocketId)
+        redis.call('LREM', queueKey, 0, socketId)
+        -- Return the matched socket ID
+        return socketId
     end
 end
 
-if matchedSocketId then
-    return matchedSocketId
-else
-    -- No match found; do not add the requester to the queues here
-    return nil
-end
+-- No match found
+return nil

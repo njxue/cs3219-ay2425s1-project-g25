@@ -15,7 +15,7 @@ const matchingRequestSchema: Schema<MatchingRequest> = new Schema<MatchingReques
     email: { type: String, required: true },
     category: { type: String, required: true },
     difficulty: { type: String, required: true },
-    socketId: { type: String, required: true },  // Store socket ID for real-time notifications
+    socketId: { type: String, required: true },
     requestedAt: { type: Date, required: true, default: Date.now },
 });
 

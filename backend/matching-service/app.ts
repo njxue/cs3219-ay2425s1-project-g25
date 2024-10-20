@@ -8,6 +8,7 @@ import matchingRoutes from './routes/matchingRoutes';
 import http from 'http';
 import { initSocket } from './utils/socket';
 import { setupSocketListeners, setupSubscriber } from './controllers/matchingController';
+import { matchingWorker } from './workers/matchWorker'
 
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
@@ -37,4 +38,6 @@ server.listen(port, async () => {
   setupSocketListeners();
   
   await setupSubscriber();
+
+  matchingWorker()
 });

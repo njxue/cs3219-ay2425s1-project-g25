@@ -16,12 +16,11 @@ const ENABLE_RELAXATION = true;  // Boolean to toggle relaxation on/off
 const ATTEMPTS_BEFORE_RELAX_DIFFICULTY = 3;  // Number of attempts before relaxing difficulty
 const ATTEMPTS_BEFORE_RELAX_CATEGORY = 5;  // Number of attempts before relaxing category
 
-// REST-based matching function
-export async function getMatch(
-    request: Request,
-    response: Response,
-    next: NextFunction
-) {
+import redisClient, { createRedisClient, logAllQueues } from "../utils/redisClient";
+import { startStaleUserCleanup } from '../workers/staleUserCleaner';
+import { isValidSocketId } from "../utils/helpers";
+// -------------------------------------REST FUNCTIONS-------------------------------------------
+export async function startMatching(request: Request, response: Response, next: NextFunction) {
     try {
         const io = getSocket();
         const { username, email, category, difficulty, socketId } = request.body;
@@ -33,429 +32,49 @@ export async function getMatch(
         }
 
         const userKey = `user:${socketId}`;
+        const requestedAt = Date.now();
+
         const userData: Record<string, string> = {
             username,
             email,
+            category: category || '',
+            difficulty: difficulty || '',
             socketId,
-            requestedAt: Date.now().toString(),
+            requestedAt: requestedAt.toString(),
         };
 
-        if (typeof category === 'string' && category.trim() !== '') {
-            userData.category = category.trim();
-        }
-
-        if (typeof difficulty === 'string' && difficulty.trim() !== '') {
-            userData.difficulty = difficulty.trim();
-        }
         await redisClient.hSet(userKey, userData);
-        console.log("Before matching queue state:");
-        await logAllQueues();
 
-        const matchSocketId = await findMatchForUser(userData);
+        await redisClient.zAdd('matching_queue', {
+            score: requestedAt,
+            value: userKey,
+        });
 
-        if (matchSocketId) {
-            await handleMatch(userData, matchSocketId);
-            console.log("After matching queue state:");
-            await logAllQueues();
-
-            return response.status(200).json({
-                message: "Match found!",
-                matchingStatus: MATCHING_STATUS.SUCCESS,
-            });
-        } else {
-            // No need to call addUserToQueues here
-            console.log("No match found, user added to queues within findMatchForUser.");
-            console.log("After attempting to find match, queue state:");
-            await logAllQueues();
-
-            return response.status(200).json({
-                message: "Searching for a match...",
-                matchingStatus: MATCHING_STATUS.SEARCHING,
-            });
-        }
+        response.status(200).json({
+            message: "Searching for a match...",
+            matchingStatus: MATCHING_STATUS.SEARCHING,
+        });
     } catch (error) {
         next(error);
     }
 }
 
-function isValidSocketId(io: Server, socketId: string): boolean {
-    return io.sockets.sockets.has(socketId);
-}
-
-async function addUserToQueues(userData: any, matchCriteria: any) {
-    // const { socketId, difficulty, category } = userData;
-
-    // const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
-    // const hasCategory = typeof category === 'string' && category.trim() !== '';
-
-    // const queues = [];
-
-    // if (hasDifficulty && hasCategory) {
-    //     const queueKey = generateQueueKey(QueueType.All, category, difficulty);
-    //     queues.push(queueKey);
-    // } else if (hasDifficulty) {
-    //     const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
-    //     queues.push(queueKey);
-    // } else if (hasCategory) {
-    //     const queueKey = generateQueueKey(QueueType.All, category, '*');
-    //     queues.push(queueKey);
-    // } else {
-    //     const queueKey = generateQueueKey(QueueType.General);
-    //     queues.push(queueKey);
-    // }
-
-    // for (const queueKey of queues) {
-    //     const isMember = await redisClient.lPos(queueKey, socketId);
-    //     if (isMember === null) {
-    //         await redisClient.rPush(queueKey, socketId);
-    //         console.log(`Added ${socketId} to ${queueKey}`);
-    //     }
-    // }
-    const { socketId } = userData;
-    const { category, difficulty } = matchCriteria;
-
-    const queues = [];
-
-    if (category && difficulty) {
-        const queueKey = generateQueueKey(QueueType.All, category, difficulty);
-        queues.push(queueKey);
-    } else if (category) {
-        const queueKey = generateQueueKey(QueueType.All, category, '*');
-        queues.push(queueKey);
-    } else if (difficulty) {
-        const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
-        queues.push(queueKey);
-    } else {
-        const queueKey = generateQueueKey(QueueType.General);
-        queues.push(queueKey);
-    }
-
-    for (const queueKey of queues) {
-        const isMember = await redisClient.lPos(queueKey, socketId);
-        if (isMember === null) {
-            await redisClient.rPush(queueKey, socketId);
-            console.log(`Added ${socketId} to ${queueKey}`);
-        }
-    }
-}
-
-async function findMatchForUser(userData: any): Promise<string | null> {
-    // const { socketId, difficulty, category } = userData;
-
-    // const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
-    // const hasCategory = typeof category === 'string' && category.trim() !== '';
-
-    // const queueKeys: string[] = [];
-
-    // if (hasDifficulty && hasCategory) {
-    //     const queueKey = generateQueueKey(QueueType.All, category, difficulty);
-    //     queueKeys.push(queueKey);
-    // }
-
-    // if (hasDifficulty) {
-    //     const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
-    //     queueKeys.push(queueKey);
-    // }
-
-    // if (hasCategory) {
-    //     const queueKey = generateQueueKey(QueueType.All, category, '*');
-    //     queueKeys.push(queueKey);
-    // }
-
-    // const generalQueueKey = generateQueueKey(QueueType.General);
-    // queueKeys.push(generalQueueKey);
-
-    // try {
-    //     const result = await redisClient.eval(luaScript, {
-    //         keys: queueKeys,
-    //         arguments: [socketId],
-    //     });
-
-    //     const matchedSocketId = result as string | null;
-
-    //     if (matchedSocketId) {
-    //         console.log(`Found a match for ${socketId}: ${matchedSocketId}`);
-    //         return matchedSocketId;
-    //     } else {
-    //         console.log(`No match found for ${socketId}`);
-    //         return null;
-    //     }
-    // } catch (error) {
-    //     console.error(`Error finding match for ${socketId}:`, error);
-    //     return null;
-    // }
-    const { socketId, difficulty, category } = userData;
-
-    // Increment the user's attempt count only if relaxation is enabled
-    const attempts = ENABLE_RELAXATION ? await incrementUserAttempt(userData) : 1;
-
-    // Determine matching criteria based on attempts and the relaxation flag
-    const matchCriteria = getMatchCriteria(userData, attempts);
-
-    const queueKeys: string[] = [];
-
-    // Build queue keys based on match criteria
-    if (matchCriteria.category && matchCriteria.difficulty) {
-        const queueKey = generateQueueKey(QueueType.All, matchCriteria.category, matchCriteria.difficulty);
-        queueKeys.push(queueKey);
-    } else if (matchCriteria.category) {
-        const queueKey = generateQueueKey(QueueType.All, matchCriteria.category, '*');
-        queueKeys.push(queueKey);
-    } else if (matchCriteria.difficulty) {
-        const queueKey = generateQueueKey(QueueType.All, '*', matchCriteria.difficulty);
-        queueKeys.push(queueKey);
-    }
-
-    // Always include the general queue as the last resort
-    const generalQueueKey = generateQueueKey(QueueType.General);
-    queueKeys.push(generalQueueKey);
-
-    try {
-        const result = await redisClient.eval(luaScript, {
-            keys: queueKeys,
-            arguments: [socketId],
-        });
-
-        const matchedSocketId = result as string | null;
-
-        if (matchedSocketId) {
-            console.log(`Found a match for ${socketId}: ${matchedSocketId}`);
-            // Reset attempts upon successful match if relaxation is enabled
-            if (ENABLE_RELAXATION) await resetUserAttempt(userData);
-            return matchedSocketId;
-        } else {
-            // Add user to queues based on current match criteria
-            await addUserToQueues(userData, matchCriteria);
-            console.log(`No match found for ${socketId} on attempt ${attempts}`);
-            return null;
-        }
-    } catch (error) {
-        console.error(`Error finding match for ${socketId}:`, error);
-        return null;
-    }
-}
-
-async function handleMatch(userData: any, matchSocketId: string) {
-    const { socketId, userId } = userData;
-
-    // Fetch matched user data from Redis
-    const matchUserData = await redisClient.hGetAll(`user:${matchSocketId}`);
-    // Log both user IDs
-    console.log(`User1 ID: ${userId}`);
-    console.log(`User2 (Matched) ID: ${matchUserData.userId}`);
-
-    // Check if the matchUserData has the necessary fields
-    if (!matchUserData || !matchUserData.userId) {
-        console.error(`matchUserData is missing required fields or user disconnected: ${matchSocketId}`);
-        return; // Abort the matching process if data is missing
-    }
-
-    // Ensure both users are still connected
-    const io = getSocket();
-    const socket1 = io.sockets.sockets.get(socketId);
-    const socket2 = io.sockets.sockets.get(matchSocketId);
-
-    if (!socket1 || !socket2) {
-        console.error(`One of the users has disconnected during the match process. socket1: ${!!socket1}, socket2: ${!!socket2}`);
-        return; // Abort if one of the users has disconnected
-    }
-
-    // Ensure users are removed from their queues
-    await removeUserFromQueues(socketId, userData);
-    await removeUserFromQueues(matchSocketId, matchUserData);
-    // Remove both users' data from Redis to prevent race conditions
-    await redisClient.del(`user:${socketId}`);
-    await redisClient.del(`user:${matchSocketId}`);
-    // Create a room for the matched users
-    const roomId = await createRoom(userData, matchUserData);
-
-    // Both users join the newly created room
-    socket1.join(roomId);
-    socket2.join(roomId);
-
-    // Notify both users of the match and room
-    socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
-        message: `You have been matched with user ${matchUserData.userId}`,
-        category: userData.category || matchUserData.category || 'Any',
-        difficulty: userData.difficulty || matchUserData.difficulty || 'Any',
-        roomId: roomId,
-        userId: userData.userId,
-        matchUserId: matchUserData.userId
-    });
-
-    socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
-        message: `You have been matched with user ${userId}`,
-        category: matchUserData.category || userData.category || 'Any',
-        difficulty: matchUserData.difficulty || userData.difficulty || 'Any',
-        roomId: roomId, 
-        userId: matchUserData.userId,
-        matchUserId: userData.userId
-    });
-
-
-
-    // Append the match event to the Redis Stream
-    const streamKey = 'match_events';
-    await redisClient.xAdd(
-        streamKey,
-        '*', // Use '*' to let Redis assign an ID
-        {
-            user1: JSON.stringify({ userId: userData.userId }),
-            user2: JSON.stringify({ userId: matchUserData.userId }),
-        }
-    );
-
-    // // Conditionally log the matching event
-    if (process.env.ENABLE_LOGGING) {
-        const matchingEvent = new MatchingEventModel({
-            user1: { userId },
-            user2: { userId: matchUserData.userId },
-            category: userData.category || matchUserData.category || 'Any',
-            difficulty: userData.difficulty || matchUserData.difficulty || 'Any',
-        });
-        await matchingEvent.save();
-    }
-
-    // Reset the attempt counters for both users after a successful match
-    await resetUserAttempt(userData);
-    await resetUserAttempt(matchUserData);
-}
-
-
-
-async function removeUserFromQueues(socketId: string, userData: any) {
-    const { difficulty, category } = userData;
-
-    const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
-    const hasCategory = typeof category === 'string' && category.trim() !== '';
-
-    const queues = [];
-
-    if (hasDifficulty && hasCategory) {
-        const queueKey = generateQueueKey(QueueType.All, category, difficulty);
-        queues.push(queueKey);
-    }
-    
-    if (hasDifficulty) {
-        const queueKey = generateQueueKey(QueueType.All, '*', difficulty);
-        queues.push(queueKey);
-    }
-    
-    if (hasCategory) {
-        const queueKey = generateQueueKey(QueueType.All, category, '*');
-        queues.push(queueKey);
-    }
-
-    const queueKey = generateQueueKey(QueueType.General);
-    queues.push(queueKey);
-
-    for (const queueKey of queues) {
-        await redisClient.lRem(queueKey, 0, socketId);
-        console.log(`Removed ${socketId} from ${queueKey}`);
-    }
-}
-
-
-export async function cancelMatch(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+export async function cancelMatch(request: Request, response: Response, next: NextFunction) {
     try {
         const { socketId } = request.params;
-        const io = getSocket();
-    
-        if (!isValidSocketId(io, socketId)) {
-            return response.status(400).json({
-                message: "Invalid socket ID. Please ensure you are connected.",
-            });
-        }
-  
         const userKey = `user:${socketId}`;
-  
-        const userData = await redisClient.hGetAll(userKey);
-        if (Object.keys(userData).length > 0) {
-            await removeUserFromQueues(socketId, userData);
-            await redisClient.del(userKey);
-        }
-        await resetUserAttempt(userData);
-  
-        console.log(`User ${socketId} canceled their match request via REST API.`);
-        return response.status(200).json({ message: "Match request canceled." });
+
+        await redisClient.zRem('matching_queue', userKey);
+
+        await redisClient.del(userKey);
+
+        response.status(200).json({ message: "Match request canceled." });
     } catch (error) {
         next(error);
     }
 }
 
-// -----------------------------ATTEMPT TRACKING-------------------------------------------
-function generateAttemptKey(userData: any): string {
-    const { socketId, category, difficulty } = userData;
-    return `attempts:${socketId}:${category || 'Any'}:${difficulty || 'Any'}`;
-}
-async function incrementUserAttempt(userData: any): Promise<number> {
-    if (!ENABLE_RELAXATION) return 1;
-
-    const attemptKey = generateAttemptKey(userData);
-    const previousCriteriaKey = `previous_criteria:${userData.socketId}`;
-
-    const previousCriteria = await redisClient.get(previousCriteriaKey);
-    const currentCriteria = `${userData.category || 'Any'}:${userData.difficulty || 'Any'}`;
-
-    if (previousCriteria !== currentCriteria) {
-        // Criteria have changed; reset attempts
-        await redisClient.del(attemptKey);
-        await redisClient.set(previousCriteriaKey, currentCriteria);
-    }
-
-    const attempts = await redisClient.incr(attemptKey);
-
-    // Set an expiration time for the attempt key to prevent stale data
-    await redisClient.expire(attemptKey, 3600);
-
-    return attempts;
-}
-
-async function resetUserAttempt(userData: any) {
-    if (!ENABLE_RELAXATION) return;
-
-    const attemptKey = generateAttemptKey(userData);
-    await redisClient.del(attemptKey);
-}
-function getMatchCriteria(userData: any, attempts: number) {
-    const { category, difficulty } = userData;
-    const hasCategory = typeof category === 'string' && category.trim() !== '';
-    const hasDifficulty = typeof difficulty === 'string' && difficulty.trim() !== '';
-
-    // If relaxation is disabled, always match on both category and difficulty strictly
-    if (!ENABLE_RELAXATION) {
-        return {
-            category: hasCategory ? category.trim() : null,
-            difficulty: hasDifficulty ? difficulty.trim() : null,
-        };
-    }
-
-    // When relaxation is enabled, use the attempt count to gradually relax the criteria
-    if (attempts <= ATTEMPTS_BEFORE_RELAX_DIFFICULTY) {
-        // Match on both category and difficulty strictly
-        return {
-            category: hasCategory ? category.trim() : null,
-            difficulty: hasDifficulty ? difficulty.trim() : null,
-        };
-    } else if (attempts <= ATTEMPTS_BEFORE_RELAX_CATEGORY) {
-        // Relax matching on difficulty, match on category only
-        return {
-            category: hasCategory ? category.trim() : null,
-            difficulty: null,
-        };
-    } else {
-        // Fully relax the criteria, match only on difficulty
-        return {
-            category: null,
-            difficulty: hasDifficulty ? difficulty.trim() : null,
-        };
-    }
-}
-
+// -----------------------------SOCKET LISTENERS----------------------------------------------
 export function setupSocketListeners() {
     const io = getSocket();
 
@@ -489,34 +108,36 @@ export function setupSocketListeners() {
             }
 
             const socketId = socket.id;
+
             if (!isValidSocketId(io, socketId)) {
-                socket.emit('error', { message: 'Invalid socket ID. Please ensure you are connected.' });
+                socket.emit(SOCKET_EVENTS.ERROR, { message: 'Invalid socket ID. Please ensure you are connected.' });
                 return;
             }
 
-            // No need to save user data here again; it's already saved on connect
-            const matchSocketId = await findMatchForUser({
+            const userKey = `user:${socketId}`;
+            const requestedAt = Date.now();
+
+            const userData = {
                 username,
                 email,
-                category,
-                difficulty,
+                category: category || '',
+                difficulty: difficulty || '',
                 socketId,
+                requestedAt: requestedAt.toString(),
+            };
+            await redisClient.hSet(userKey, userData);
+            await redisClient.zAdd('matching_queue', {
+                score: requestedAt,
+                value: userKey,
             });
-            if (matchSocketId) {
-                await handleMatch({ userId, category, difficulty, socketId }, matchSocketId);
-            }
         });
 
         socket.on(SOCKET_EVENTS.CANCEL_MATCHING, async () => {
             const socketId = socket.id;
             const userKey = `user:${socketId}`;
 
-            const userData = await redisClient.hGetAll(userKey);
-            if (Object.keys(userData).length > 0) {
-                await removeUserFromQueues(socketId, userData);
-                await redisClient.del(userKey);
-                await resetUserAttempt(userData);
-            }
+            await redisClient.zRem('matching_queue', userKey);
+            await redisClient.del(userKey);
 
             console.log(`User ${socketId} canceled their match request.`);
         });
@@ -526,38 +147,38 @@ export function setupSocketListeners() {
             console.log(`User disconnected: ${socketId}`);
             const userKey = `user:${socketId}`;
 
-            const userData = await redisClient.hGetAll(userKey);
-            if (Object.keys(userData).length > 0) {
-                const isMatched = await redisClient.get(`matched:${socketId}`);
-                if (!isMatched) {
-                    await removeUserFromQueues(socketId, userData);
-                    await redisClient.del(userKey);
-                    await resetUserAttempt(userData);
-                }
-            }
+            // Remove user from queue and delete data
+            await redisClient.zRem('matching_queue', userKey);
+            await redisClient.del(userKey);
         });
     });
 }
 
 // -----------------------------REDIS STREAMS----------------------------------------------
 export async function setupSubscriber() {
-    const redisClient = createRedisClient();
-    await redisClient.connect();
+    const redisClientInstance = createRedisClient();
+    await redisClientInstance.connect();
 
     const streamKey = 'match_events';
     const consumerGroup = 'match_consumers';
     const consumerName = `consumer_${process.pid}`;
 
     try {
-        await redisClient.xGroupCreate(streamKey, consumerGroup, '0', { MKSTREAM: true });
+        await redisClientInstance.xGroupCreate(streamKey, consumerGroup, '0', { MKSTREAM: true });
         console.log(`Consumer group '${consumerGroup}' created.`);
     } catch (err: any) {
         if (err.code === 'BUSYGROUP') {
             console.log(`Consumer group '${consumerGroup}' already exists.`);
+        } else {
+            console.error(`Error creating consumer group '${consumerGroup}':`, err);
         }
     }
 
-    processMatchEvents(redisClient, streamKey, consumerGroup, consumerName);
+    // Start processing messages
+    processMatchEvents(redisClientInstance, streamKey, consumerGroup, consumerName);
+
+    // Start the periodic cleanup for stale users
+    startStaleUserCleanup();
 }
 
 async function processMatchEvents(
@@ -604,6 +225,7 @@ async function processMatchEvents(
         } catch (err) {
             console.error('Error processing match events:', err);
         }
+        await new Promise(resolve => setImmediate(resolve));
     }
 }
 
@@ -625,7 +247,7 @@ async function createRoom(user1: any, user2: any) {
     return savedRoom._id.toString(); // Return the roomId as a string
 }
 
-// // Handle match event function
+// Handle match event function
 async function handleMatchEvent(user1: any, user2: any) {
     const io = getSocket();
 
