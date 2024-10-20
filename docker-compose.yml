@@ -14,9 +14,10 @@ services:
         depends_on:
             - peerprep-redis
         env_file:
-            - ./backend/user-service/.env
+            - ./backend/user-service/.env 
         environment:
             REDIS_HOST: peerprep-redis # Override localhost
+            DB_HOST: peerprep-mongodb
         networks:
             - peerprep-network
 
