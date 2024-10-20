@@ -16,6 +16,8 @@ export const MatchingModal: React.FC<MatchingModalProps> = ({ onRetry }) => {
     };
 
     const handleRetry = () => {
+        cancelMatching();
+
         onRetry();
     };
 
