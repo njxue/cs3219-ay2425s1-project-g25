@@ -2,7 +2,6 @@ import { getSocket } from '../utils/socket';
 import redisClient from '../utils/redisClient'
 import { SOCKET_EVENTS } from '../constants/socketEventNames';
 
-// Configurable settings for time-based relaxing the matching criteria
 const RELAXATION_INTERVAL = parseInt(process.env.RELAXATION_INTERVAL || "10000");
 const MATCH_TIMEOUT = parseInt(process.env.MATCH_TIMEOUT || "30000");
 const CLEANUP_INTERVAL = parseInt(process.env.CLEANUP_INTERVAL || "90000");
@@ -10,7 +9,6 @@ const CLEANUP_INTERVAL = parseInt(process.env.CLEANUP_INTERVAL || "90000");
 function startStaleUserCleanup() {
     setInterval(async () => {
         try {
-            // Get all users in the matching queue
             const userKeys = await redisClient.zRange('matching_queue', 0, -1);
 
             const now = Date.now();

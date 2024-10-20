@@ -10,7 +10,6 @@ const REDIS_PORT = process.env.REDIS_PORT || '6379';
 
 const redisUrl = `redis://${REDIS_HOST}:${REDIS_PORT}`;
 
-// Regular Redis client for commands and publishing
 const redisClient: RedisClientType = createClient({
     url: redisUrl,
 });
@@ -21,7 +20,6 @@ redisClient.on('error', (err) => console.error('Redis Client Error', err));
     await redisClient.connect();
 })();
 
-// Function to create a new Redis client (used for subscribing)
 export function createRedisClient(): RedisClientType {
     const client: RedisClientType = createClient({
         url: redisUrl,
@@ -34,7 +32,7 @@ export function createRedisClient(): RedisClientType {
 
 export async function logAllQueues() {
     try {
-        const matchQueueKey = 'matching_queue'; // Update if your match queue key is different
+        const matchQueueKey = 'matching_queue';
         const queueLength = await redisClient.zCard(matchQueueKey);
         
         if (queueLength === 0) {

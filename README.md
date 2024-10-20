@@ -9,6 +9,17 @@ This project follows a microservices architecture with the following services:
 4. **Matching Service** - Port `3003`
 5. **MongoDB** - Port `27017` (Database)
 6. **Nginx API Gateway** - Port `80`
+7. **Redis** - Port `6379`
+
+### Setting up the Project
+Copy and paste the .env.example files in each service. Rename them as .env files.
+Files to do this in:
+1. ./
+2. /frontend
+3. /backend/user-service
+4. /backend/question-service
+5. /backend/matching-service
+Consult the readme files in the service if there are further configurations needed.
 
 ### Running the Project
 
@@ -23,6 +34,7 @@ Once the containers are up:
 - Matching Service: [http://localhost:3003](http://localhost:3003)
 - MongoDB: [http://localhost:27017](http://localhost:27017)
 - Nginx API Gateway: [http://localhost:80](http://localhost:80)
+- Redis: [http://localhost:6379](http://localhost:6379)
 
 ### MongoDB Configuration
 

@@ -4,7 +4,6 @@ import { SOCKET_EVENTS } from "../constants/socketEventNames";
 import { MATCHING_STATUS } from "../constants/matchingStatus";
 import redisClient, { createRedisClient, logAllQueues } from "../utils/redisClient";
 import { decodeToken } from "../utils/tokenUtils";
-import Room from "../models/RoomSchema";
 
 import { startStaleUserCleanup } from '../workers/staleUserCleaner';
 import { isValidSocketId } from "../utils/helpers";
@@ -97,7 +96,6 @@ export function setupSocketListeners() {
 
             const token = socket.handshake.auth?.token;
 
-            // Use the decodeToken utility to decode the token
             const decodedToken = decodeToken(token);
             if (!decodedToken) {
                 socket.emit('error', { message: 'Invalid or missing token' });
@@ -107,7 +105,6 @@ export function setupSocketListeners() {
             const userId = decodedToken.id;
             console.log(`User connected: ${socket.id}, User ID: ${userId}`);
 
-            // Save user ID with socket ID in Redis only on connect
             const userData = {
                 userId,
                 socketId: socket.id,
@@ -116,7 +113,6 @@ export function setupSocketListeners() {
                 difficulty: difficulty,
             };
             redisClient.hSet(userKey, userData);
-            // Log the saved user data
             console.log('User data saved:', { userKey, userData });
 
             await redisClient.zAdd('matching_queue', {
@@ -143,7 +139,6 @@ export function setupSocketListeners() {
             console.log(`User disconnected: ${socketId}`);
             const userKey = `user:${socketId}`;
 
-            // Remove user from queue and delete data
             await redisClient.zRem('matching_queue', userKey);
             await redisClient.del(userKey);
         });
@@ -157,9 +152,8 @@ export async function setupSubscriber() {
 
     const streamKey = 'match_events';
     const consumerGroup = 'match_consumers';
-    const consumerName = `consumer_${process.pid}`; // Unique consumer name
+    const consumerName = `consumer_${process.pid}`;
 
-    // Create the consumer group if it doesn't exist
     try {
         await redisClientInstance.xGroupCreate(streamKey, consumerGroup, '0', { MKSTREAM: true });
         console.log(`Consumer group '${consumerGroup}' created.`);
@@ -171,10 +165,8 @@ export async function setupSubscriber() {
         }
     }
 
-    // Start processing messages
     processMatchEvents(redisClientInstance, streamKey, consumerGroup, consumerName);
 
-    // Start the periodic cleanup for stale users
     startStaleUserCleanup();
 }
 
@@ -210,17 +202,14 @@ async function processMatchEvents(
                         const id = message.id;
                         const fields = message.message;
 
-                        // Parse the match message
                         const user1 = JSON.parse(fields.user1);
                         const user2 = JSON.parse(fields.user2);
                         const roomId = fields.roomId;
                         const matchId = fields.matchId;
 
-                        // Log the message being processed
                         console.log(`Processing MatchEvent ID: ${matchId} from Stream ID: ${id}`);
                         console.log("Match Message Details:", { user1, user2, roomId, matchId });
 
-                        // Handle the match event
                         await handleMatchEvent(user1, user2, roomId, matchId);
                         await redisClient.xAck(streamKey, consumerGroup, id);
                         await redisClient.xDel(streamKey, id);
@@ -234,12 +223,10 @@ async function processMatchEvents(
     }
 }
 
-// Handle match event function
 async function handleMatchEvent(user1: any, user2: any, roomId: string, matchId: string) {
     try {
         const io = getSocket();
 
-        // Log the state of the message queue before processing the match event
         console.log("Before processing messages, message queue state:");
         const messagesBefore = await redisClient.xRange('match_events', '-', '+', { COUNT: 10 });
         console.log(messagesBefore);
@@ -248,11 +235,9 @@ async function handleMatchEvent(user1: any, user2: any, roomId: string, matchId:
         const socket2 = io.sockets.sockets.get(user2.socketId);
 
         if (socket1 && socket2) {
-            // Both users join the newly created room
             socket1.join(roomId);
             socket2.join(roomId);
 
-            // Emit match found event to both users with match details, including roomId and userId
             socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with User ID: ${user2.userId}`,
                 category: user1.category || user2.category || 'Any',
