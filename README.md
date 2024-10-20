@@ -19,8 +19,15 @@ Files to do this in:
 3. /backend/user-service
 4. /backend/question-service
 5. /backend/matching-service
-Consult the readme files in the service if there are further configurations needed.
+Then, run `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` twice to generate
+your 2 JWT token secrets. For the first one, paste it into the JWT_ACCESS_TOKEN_SECRET variable of
+the .env files in question-service and user-service. Then, copy the second into the
+JWT_REFRESH_TOKEN_SECRET of the .env file in user-service. 
 
+Further note: The DB_CLOUD_URI .env variable in user-service doesn't need to be filled in. A local
+database will be created in the mongoDB service. 
+
+Consult the readme files in the service if there are further configurations needed.
 ### Running the Project
 
 To run all services, execute the following command in the root directory:
@@ -35,6 +42,10 @@ Once the containers are up:
 - MongoDB: [http://localhost:27017](http://localhost:27017)
 - Nginx API Gateway: [http://localhost:80](http://localhost:80)
 - Redis: [http://localhost:6379](http://localhost:6379)
+
+Note that even after docker says that everything is up and running, there is a risk that they aren't when you load the frontend. 
+In this event, wait for about a minute before trying again. If that still doesn't work and there are network errors, try
+rebuilding the services by running `docker-compose up --build` again.
 
 ### MongoDB Configuration
 
