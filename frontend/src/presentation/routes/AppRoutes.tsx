@@ -22,7 +22,7 @@ const AppRoutes: React.FC = () => {
                     <Route path="/room/:roomId/:matchUserId" element={<QuestionPage />} />
 
                     <Route element={<ProtectedRoute />}>
-                        <Route path="/room" element={<CollaborationRoomPage />} />
+                        <Route path="/room/:roomId" element={<CollaborationRoomPage />} />
                         <Route path="/" element={<HomePage />} />
 
                         <Route element={<AdminProtectedRoute />}>
