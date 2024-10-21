@@ -1,17 +1,34 @@
-Hey, this is Nephelite again. 
+Matching service backend. 
 
-This service can be accessed both via REST API routes, and purely through websockets (via socket.Io). If you use REST, you must also send the client's socketId, so you need to retrieve it on the frontend first. If you are communicating purely via websockets, then you just need to send { username, email, category, difficulty } along with the event name of `startMatching`.
+To configure the .env files, create a copy of .env.example and rename it .env. 
+If you edited the .env file on the root level, copy and paste it in.
 
-To test the local implementation of this service without frontend, follow the steps below:
+.env variables:
+# Database Connection String Details
+DATABASE_NAME=peerprepMatchingServiceDB
+Should be the same as the root .env file.
 
-1. Run `npm install` at this level (root of matching-service).
-2. Configure the .env file. Edit the `DB_REQUIRE_AUTH` field in .env to be false for local.
-3. Successful match events will be recorded in MongoDB, under the Database `peerprepMatchingServiceDB` and `matchingevents` collection.
-4. Open 2 terminals: One to run the service, the other to run the test script.
-5. On either terminal: Open Docker, then run `docker pull redis:latest`, then `docker run --name redis-local -p 6379:6379 -d redis`.
-6. First terminal: Run `npm run dev`. Wait for the messages that the server is running and that it has successfully connected to MongoDB.
-7. Second terminal: Run `node testClientREST` or `node testClientEvent` and watch the tests go. The former uses the API calls, the latter uses exclusively the socket.io communication.
+# Port to run service on
+PORT=3003
+Port of the service.
 
-To add test cases, add them at the bottom of the testClient.js file.
+# Redis configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+Redis uri configurations. Note: The port matters for all forms of deployment, but
+editing REDIS_HOST here only affects the local deployment. To affect the name of
+the redis uri, edit the docker-compose.yml file instead. This environment variable is
+overriden there.
 
-The testClient.js file also allows you to define delay as you wish, so you can use that to test your race condition prevention delay measures, though I also tried to ensure the implementation of matching here avoids race conditions as much as possible.
+# Matching time periods (In milliseconds)
+MATCHING_INTERVAL=1000
+The matching worker checks for matches for matches every ^ milliseconds.
+RELAXATION_INTERVAL=3000
+The matching worker relaxes requirements from users for matching every ^ milliseconds. 
+The first time ^ milliseconds passes, the users will be matched with only category considered.
+The second time ^ milliseconds passes, the users will be matched with only difficulty considered.
+At least one of category or difficulty must match.
+MATCH_TIMEOUT=30000
+Users will be considered as having timed out if the ^ milliseconds have passed.
+CLEANUP_INTERVAL=75000
+Stale users will be checked and cleansed every ^ milliseconds by the staleUserCleaner.

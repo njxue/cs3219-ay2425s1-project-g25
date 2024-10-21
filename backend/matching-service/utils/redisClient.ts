@@ -10,7 +10,6 @@ const REDIS_PORT = process.env.REDIS_PORT || '6379';
 
 const redisUrl = `redis://${REDIS_HOST}:${REDIS_PORT}`;
 
-// Regular Redis client for commands and publishing
 const redisClient: RedisClientType = createClient({
     url: redisUrl,
 });
@@ -21,7 +20,6 @@ redisClient.on('error', (err) => console.error('Redis Client Error', err));
     await redisClient.connect();
 })();
 
-// Function to create a new Redis client (used for subscribing)
 export function createRedisClient(): RedisClientType {
     const client: RedisClientType = createClient({
         url: redisUrl,
@@ -34,16 +32,20 @@ export function createRedisClient(): RedisClientType {
 
 export async function logAllQueues() {
     try {
-        const queueKeys = await redisClient.keys('queue:*');
-        if (queueKeys.length === 0) {
-            console.log('Match queue is empty')
-        }
-        for (const queueKey of queueKeys) {
-            const queueContents = await redisClient.lRange(queueKey, 0, -1);
-            console.log(`Contents of ${queueKey}:`, queueContents);
+        const matchQueueKey = 'matching_queue';
+        const queueLength = await redisClient.zCard(matchQueueKey);
+        
+        if (queueLength === 0) {
+            console.log('Matching queue is empty.');
+        } else {
+            const queueContents = await redisClient.zRangeWithScores(matchQueueKey, 0, -1);
+            console.log(`Contents of '${matchQueueKey}':`);
+            queueContents.forEach(entry => {
+                console.log(`Value: ${entry.value}, Score: ${entry.score}`);
+            });
         }
     } catch (error) {
-        console.error('Error retrieving queue contents:', error);
+        console.error('Error retrieving match queue contents:', error);
     }
 }
 
