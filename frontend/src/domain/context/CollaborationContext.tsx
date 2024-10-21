@@ -22,7 +22,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
 
     const { USER_ID, SELECTED_LANGUAGE } = AWARENESS_KEYS;
 
-    const [selectedLanguage, setSelectedLanguage] = useState<string>("Javascript");
+    const [selectedLanguage, setSelectedLanguage] = useState<string>("javascript");
     const [languages, setLanguages] = useState<{ label: string; value: string }[]>([]);
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
