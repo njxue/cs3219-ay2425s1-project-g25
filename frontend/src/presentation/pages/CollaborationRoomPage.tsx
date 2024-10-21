@@ -13,14 +13,14 @@ const CollaborationRoomPage: React.FC = () => {
     if (!roomId || !user?._id) {
         return <></>;
     }
-    
+
     return (
         <div className={styles.container}>
             <div className={styles.questionContainer}>
                 <QuestionDetail question={initialQuestions[0]} />
             </div>
             <div className={styles.editorContainer}>
-                <CodeEditor roomId={roomId} userId={user?._id} />
+                <CodeEditor roomId={roomId} />
             </div>
         </div>
     );
