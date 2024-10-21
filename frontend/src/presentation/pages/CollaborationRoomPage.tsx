@@ -10,7 +10,20 @@ import { useResizable } from "react-resizable-layout";
 const CollaborationRoomPage: React.FC = () => {
     const { roomId } = useParams();
     const { user } = useAuth();
-    const { position, separatorProps } = useResizable({ axis: "x", min: 300, initial: 600, max: 800 });
+    const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
+        axis: "x",
+        min: 300,
+        initial: 600,
+        max: 800
+    });
+
+    const { position: outputPosition, separatorProps: horizontalSeparatorProps } = useResizable({
+        axis: "y",
+        min: 50,
+        initial: 50,
+        max: 500,
+        reverse: true
+    });
 
     if (!roomId || !user?._id) {
         return <></>;
@@ -18,12 +31,18 @@ const CollaborationRoomPage: React.FC = () => {
 
     return (
         <div className={styles.container}>
-            <div className={`${styles.questionContainer}`} style={{ width: position }}>
+            <div className={styles.questionContainer} style={{ width: questionPosition }}>
                 <QuestionDetail question={initialQuestions[0]} />
             </div>
-            <div className={styles.verticalSeparator} {...separatorProps} />;
-            <div className={`${styles.editorContainer}`}>
-                <CodeEditor roomId={roomId} />
+            <div className={styles.verticalSeparator} {...verticalSeparatorProps} />
+            <div className={styles.editorAndOutputContainer}>
+                <div className={styles.editorContainer}>
+                    <CodeEditor roomId={roomId} />
+                </div>
+                <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
+                <div className={styles.output} style={{ height: outputPosition }}>
+                    <p>Output</p>
+                </div>
             </div>
         </div>
     );

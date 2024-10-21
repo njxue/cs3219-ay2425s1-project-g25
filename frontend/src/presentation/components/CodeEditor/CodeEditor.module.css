@@ -4,11 +4,13 @@
     display: flex;
     flex-direction: column;
     padding: 0 8px;
+    overflow-y: hidden;
 }
 
 .toolbar {
     padding: 4px;
     display: flex;
+    width: 100%;
     justify-content: space-between;
 }
 
