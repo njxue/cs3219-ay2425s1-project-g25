@@ -33,6 +33,7 @@ const HomePage: React.FC = () => {
     };
 
     const startMatchingProcess = useCallback(() => {
+        console.log("oioi");
         try {
             const correctedInput = MatchmakingValidator.validateAndCorrectMatchmakingInput({
                 username: user?.username,
@@ -40,11 +41,11 @@ const HomePage: React.FC = () => {
                 selectedCategories: filters.selectedCategories,
                 selectedDifficulty: filters.selectedDifficulty
             });
-            startMatching(
-                correctedInput.selectedCategories[0].name,
-                correctedInput.selectedDifficulty
-            );
+            console.log("oioi2");
+            startMatching(correctedInput.selectedCategories[0].name, correctedInput.selectedDifficulty);
+            console.log("oioi3");
         } catch (error) {
+            console.log(error);
             if (error instanceof ValidationError) {
                 message.error(error.message);
             }
