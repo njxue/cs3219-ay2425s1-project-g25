@@ -1,13 +1,24 @@
 .container {
     height: 100%;
     width: 100%;
+    overflow-x: hidden;
     display: flex;
 }
 
 .editorContainer {
-    flex: 1;
+    width: 100%;
+    min-width: 0;
 }
 
 .questionContainer {
-    flex: 1;
+    flex-shrink: 0;
+}
+
+.verticalSeparator {
+    cursor: col-resize;
+    width: 8px;
+    transition: background-color 0.1s ease;
+}
+.verticalSeparator:hover {
+    background-color: #ffa500;
 }
