@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./CollaborationRoomPage.module.css";
 import CodeEditor from "presentation/components/CodeEditor/CodeEditor";
 import { QuestionDetail } from "presentation/components/QuestionDetail";
@@ -6,6 +6,7 @@ import { initialQuestions } from "data/repositories/mockQuestionRepository";
 import { useParams } from "react-router-dom";
 import { useAuth } from "domain/context/AuthContext";
 import { useResizable } from "react-resizable-layout";
+import NotFound from "./NotFound";
 
 const CollaborationRoomPage: React.FC = () => {
     const { roomId } = useParams();
@@ -25,8 +26,8 @@ const CollaborationRoomPage: React.FC = () => {
         reverse: true
     });
 
-    if (!roomId || !user?._id) {
-        return <></>;
+    if (!roomId) {
+        return <NotFound />;
     }
 
     return (

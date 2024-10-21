@@ -4,15 +4,15 @@ import Editor, { Monaco } from "@monaco-editor/react";
 import { Button, Select } from "antd";
 import { useCollaboration } from "domain/context/CollaborationContext";
 import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
+import * as monaco from "monaco-editor";
 
 interface CodeEditorProps {
-    initialLanguage?: string;
     roomId: string;
 }
 const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     const { initialiseEditor, languages, selectedLanguage, handleChangeLanguage } = useCollaboration();
 
-    function handleEditorDidMount(editor: any, monaco: Monaco) {
+    function handleEditorDidMount(editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) {
         initialiseEditor(roomId, editor, monaco);
     }
 
