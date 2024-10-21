@@ -4,13 +4,11 @@ import CodeEditor from "presentation/components/CodeEditor/CodeEditor";
 import { QuestionDetail } from "presentation/components/QuestionDetail";
 import { initialQuestions } from "data/repositories/mockQuestionRepository";
 import { useParams } from "react-router-dom";
-import { useAuth } from "domain/context/AuthContext";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
 
 const CollaborationRoomPage: React.FC = () => {
     const { roomId } = useParams();
-    const { user } = useAuth();
     const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
         axis: "x",
         min: 300,
