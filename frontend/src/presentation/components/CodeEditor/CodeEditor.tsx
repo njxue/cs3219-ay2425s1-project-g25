@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import styles from "./CodeEditor.module.css";
 import Editor, { Monaco } from "@monaco-editor/react";
 import { Button, Select } from "antd";
 import { useCollaboration } from "domain/context/CollaborationContext";
+import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
 
 interface CodeEditorProps {
     initialLanguage?: string;
@@ -26,6 +27,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                     value={selectedLanguage}
                     onChange={handleChangeLanguage}
                 />
+                <div className={styles.buttonGroup}>
+                    <Button className={styles.runButton} icon={<PlayCircleOutlined />}>
+                        Run
+                    </Button>
+                    <Button className={styles.submitButton} icon={<CloudUploadOutlined />}>
+                        Submit
+                    </Button>
+                </div>
             </div>
             <div className={styles.editor}>
                 <Editor
@@ -38,10 +47,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                         formatOnPaste: true
                     }}
                 />
-            </div>
-            <div className={styles.buttonGroup}>
-                <Button className={styles.runButton}>Run</Button>
-                <Button className={styles.submitButton}>Submit</Button>
             </div>
         </div>
     );
