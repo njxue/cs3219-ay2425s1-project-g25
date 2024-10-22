@@ -6,7 +6,7 @@ import { MonacoBinding } from "y-monaco";
 import { WebsocketProvider } from "y-websocket";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
-import { AWARENESS_KEYS } from "presentation/utils/constants";
+import { COLLABORATION_AWARENESS_KEYS, COLLABORATION_YMAP_KEYS } from "presentation/utils/constants";
 
 interface CollaborationContextType {
     initialiseEditor: (roomId: string, editor: any, monaco: Monaco) => void;
@@ -18,9 +18,10 @@ const CollaborationContext = createContext<CollaborationContextType | undefined>
 
 export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user } = useAuth();
-    const userId = user?._id;
+    const username = user?.username;
 
-    const { USER_ID, SELECTED_LANGUAGE } = AWARENESS_KEYS;
+    const { USERNAME } = COLLABORATION_AWARENESS_KEYS;
+    const { SELECTED_LANGUAGE } = COLLABORATION_YMAP_KEYS;
 
     const [selectedLanguage, setSelectedLanguage] = useState<string>("javascript");
     const [languages, setLanguages] = useState<{ label: string; value: string }[]>([]);
@@ -40,6 +41,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         const { yDoc, provider, yMap } = initialiseYdoc(roomId);
         bindEditorToDoc(editor, yDoc, provider);
         setUpObserver(yMap);
+        setUpConnectionAwareness(provider);
     };
 
     const initialiseLanguages = (monaco: Monaco) => {
@@ -63,7 +65,9 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         // Test locally across browers with 'HOST=localhost PORT 1234 npx y-websocket'
         const provider = new WebsocketProvider("ws://localhost:1234", roomId, yDoc);
         provider.on("status", (event: any) => {
-            console.log(event.status);
+            if (event.status === "disconnected") {
+                toast.error("You have disconnected");
+            }
         });
         providerRef.current = provider;
         return { yDoc, yMap, provider };
@@ -80,6 +84,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         bindingRef.current = binding;
     };
 
+    // Observer to listen to any changes to shared state (e.g. language changes)
     const setUpObserver = (yMap: Y.Map<string>) => {
         yMap.observe((event) => {
             event.changes.keys.forEach((change, key) => {
@@ -90,6 +95,15 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                     }
                 }
             });
+        });
+    };
+
+    // Observer to listen to any changes to users' presence (e.g. connection status, is typing, cursor)
+    const setUpConnectionAwareness = (provider: WebsocketProvider) => {
+        provider.awareness.setLocalStateField(USERNAME, username);
+        provider.awareness.on("change", (update: any) => {
+            const users = provider.awareness.getStates();
+            // TODO: Some UI feedback about connection status of the other user
         });
     };
 
