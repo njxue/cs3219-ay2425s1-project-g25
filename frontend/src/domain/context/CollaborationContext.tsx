@@ -30,10 +30,19 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const bindingRef = useRef<MonacoBinding | null>(null);
     const providerRef = useRef<WebsocketProvider | null>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
+    const yMapRef = useRef<Y.Map<string> | null>(null);
 
     const initialiseEditor = (roomId: string, editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
         editorRef.current = editor;
         monacoRef.current = monaco;
+
+        initialiseLanguages(monaco);
+        const { yDoc, provider, yMap } = initialiseYdoc(roomId);
+        bindEditorToDoc(editor, yDoc, provider);
+        setUpObserver(yMap);
+    };
+
+    const initialiseLanguages = (monaco: Monaco) => {
         const allLanguages = monaco.languages.getLanguages();
 
         // TODO: Filter all the useless ones like HTML
@@ -43,60 +52,59 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 value: lang.id
             }))
         );
+    };
 
-        const doc = new Y.Doc();
-        ydocRef.current = doc;
-
+    const initialiseYdoc = (roomId: string): { yDoc: Y.Doc; yMap: Y.Map<string>; provider: WebsocketProvider } => {
+        const yDoc = new Y.Doc();
+        const yMap: Y.Map<string> = yDoc.getMap("sharedMap");
+        ydocRef.current = yDoc;
+        yMapRef.current = yMap;
         // TODO: Replace serverUrl once BE ready
         // Test locally across browers with 'HOST=localhost PORT 1234 npx y-websocket'
-        const provider = new WebsocketProvider("ws://localhost:1234", roomId, doc);
+        const provider = new WebsocketProvider("ws://localhost:1234", roomId, yDoc);
         provider.on("status", (event: any) => {
             console.log(event.status);
         });
         providerRef.current = provider;
-        const type = doc.getText("monaco");
-        const editorModel = editor.getModel();
+        return { yDoc, yMap, provider };
+    };
 
+    const bindEditorToDoc = (editor: monaco.editor.IStandaloneCodeEditor, yDoc: Y.Doc, provider: WebsocketProvider) => {
+        const type = yDoc.getText("monaco");
+        const editorModel = editor.getModel();
         if (editorModel == null) {
             toast.error("There was an issue with initialising the code editor");
             return;
         }
         const binding = new MonacoBinding(type, editorModel, new Set([editor]), provider.awareness);
         bindingRef.current = binding;
+    };
 
-        // Initialise awareness states
-        provider.awareness.setLocalStateField(USER_ID, userId);
-
-        // TODO: initialise with correct language on page reload
-        provider.awareness.setLocalStateField(SELECTED_LANGUAGE, selectedLanguage);
-
-        provider.awareness.on("change", ({ updated }: { updated: any }) => {
-            // On change language
-            updated.forEach((id: number) => {
-                const trigger = provider.awareness.getStates().get(id); // Get the user who initiated the change
-                if (trigger && trigger.selectedLanguage) {
-                    // Ignore all state updates caused by the current user
-                    if (trigger.userId !== userId) {
-                        setSelectedLanguage(trigger.selectedLanguage);
+    const setUpObserver = (yMap: Y.Map<string>) => {
+        yMap.observe((event) => {
+            event.changes.keys.forEach((change, key) => {
+                if (key === SELECTED_LANGUAGE) {
+                    const language = yMap.get(SELECTED_LANGUAGE);
+                    if (language) {
+                        setSelectedLanguage(language);
                     }
                 }
             });
         });
     };
 
-    const handleChangeLanguage = (lang: string) => {
-        setSelectedLanguage(lang);
-        providerRef.current?.awareness.setLocalStateField(SELECTED_LANGUAGE, lang);
-    };
     useEffect(() => {
         return () => {
             bindingRef.current?.destroy();
-            providerRef.current?.awareness.setLocalState(null);
             providerRef.current?.disconnect();
             editorRef.current?.dispose();
             ydocRef.current?.destroy();
         };
     }, []);
+
+    const handleChangeLanguage = (lang: string) => {
+        yMapRef.current?.set(SELECTED_LANGUAGE, lang);
+    };
 
     return (
         <CollaborationContext.Provider value={{ initialiseEditor, selectedLanguage, languages, handleChangeLanguage }}>
