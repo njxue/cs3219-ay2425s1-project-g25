@@ -7,12 +7,15 @@ import { WebsocketProvider } from "y-websocket";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
 import { COLLABORATION_AWARENESS_KEYS, COLLABORATION_YMAP_KEYS } from "presentation/utils/constants";
+import PistonClient from "data/piston/PistonClient";
+import { Language } from "domain/entities/Language";
 
 interface CollaborationContextType {
     initialiseEditor: (roomId: string, editor: any, monaco: Monaco) => void;
-    selectedLanguage: string;
-    languages: any;
-    handleChangeLanguage: (lang: string) => void;
+    selectedLanguage: Language;
+    languages: Language[];
+    handleChangeLanguage: (lang: Language) => void;
+    handleExecuteCode: () => void;
 }
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
 
@@ -23,42 +26,48 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const { USERNAME } = COLLABORATION_AWARENESS_KEYS;
     const { SELECTED_LANGUAGE } = COLLABORATION_YMAP_KEYS;
 
-    const [selectedLanguage, setSelectedLanguage] = useState<string>("javascript");
-    const [languages, setLanguages] = useState<{ label: string; value: string }[]>([]);
+    const [selectedLanguage, setSelectedLanguage] = useState<Language>({
+        language: "javascript",
+        version: "",
+        alias: "Javascript"
+    });
+    const [languages, setLanguages] = useState<Language[]>([]);
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<Monaco | null>(null);
     const bindingRef = useRef<MonacoBinding | null>(null);
     const providerRef = useRef<WebsocketProvider | null>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
-    const yMapRef = useRef<Y.Map<string> | null>(null);
+    const yMapRef = useRef<Y.Map<any> | null>(null);
 
-    const initialiseEditor = (roomId: string, editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
+    const initialiseEditor = async (roomId: string, editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
         editorRef.current = editor;
         monacoRef.current = monaco;
 
-        initialiseLanguages(monaco);
+        await initialiseLanguages(monaco);
         const { yDoc, provider, yMap } = initialiseYdoc(roomId);
         bindEditorToDoc(editor, yDoc, provider);
         setUpObserver(yMap);
         setUpConnectionAwareness(provider);
     };
 
-    const initialiseLanguages = (monaco: Monaco) => {
+    const initialiseLanguages = async (monaco: Monaco) => {
         const allLanguages = monaco.languages.getLanguages();
-
-        // TODO: Filter all the useless ones like HTML
+        const pistonLanguageVersions = await PistonClient.getLanguageVersions();
         setLanguages(
-            allLanguages.map((lang) => ({
-                label: lang.aliases && lang.aliases.length > 0 ? lang.aliases[0] : lang.id,
-                value: lang.id
-            }))
+            allLanguages
+                .filter((lang) => pistonLanguageVersions.some((pistonLang: any) => pistonLang.language === lang.id))
+                .map((lang) => ({
+                    alias: lang.aliases && lang.aliases.length > 0 ? lang.aliases[0] : lang.id,
+                    language: lang.id,
+                    version: pistonLanguageVersions.find((pistonLang: any) => pistonLang.language === lang.id)?.version
+                }))
         );
     };
 
-    const initialiseYdoc = (roomId: string): { yDoc: Y.Doc; yMap: Y.Map<string>; provider: WebsocketProvider } => {
+    const initialiseYdoc = (roomId: string): { yDoc: Y.Doc; yMap: Y.Map<any>; provider: WebsocketProvider } => {
         const yDoc = new Y.Doc();
-        const yMap: Y.Map<string> = yDoc.getMap("sharedMap");
+        const yMap: Y.Map<any> = yDoc.getMap("sharedMap");
         ydocRef.current = yDoc;
         yMapRef.current = yMap;
         // TODO: Replace serverUrl once BE ready
@@ -66,7 +75,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         const provider = new WebsocketProvider("ws://localhost:1234", roomId, yDoc);
         provider.on("status", (event: any) => {
             if (event.status === "disconnected") {
-                toast.error("You have disconnected");
+                //toast.error("You have disconnected");
             }
         });
         providerRef.current = provider;
@@ -85,7 +94,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     };
 
     // Observer to listen to any changes to shared state (e.g. language changes)
-    const setUpObserver = (yMap: Y.Map<string>) => {
+    const setUpObserver = (yMap: Y.Map<any>) => {
         yMap.observe((event) => {
             event.changes.keys.forEach((change, key) => {
                 if (key === SELECTED_LANGUAGE) {
@@ -116,12 +125,18 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         };
     }, []);
 
-    const handleChangeLanguage = (lang: string) => {
+    const handleChangeLanguage = (lang: Language) => {
         yMapRef.current?.set(SELECTED_LANGUAGE, lang);
     };
 
+    const handleExecuteCode = () => {
+        const sourceCode = editorRef.current?.getValue();
+    };
+
     return (
-        <CollaborationContext.Provider value={{ initialiseEditor, selectedLanguage, languages, handleChangeLanguage }}>
+        <CollaborationContext.Provider
+            value={{ initialiseEditor, selectedLanguage, languages, handleChangeLanguage, handleExecuteCode }}
+        >
             {children}
         </CollaborationContext.Provider>
     );

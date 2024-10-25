@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import styles from "./CodeEditor.module.css";
 import Editor, { Monaco } from "@monaco-editor/react";
 import { Button, Select } from "antd";
@@ -6,17 +6,33 @@ import { useCollaboration } from "domain/context/CollaborationContext";
 import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import * as monaco from "monaco-editor";
 import { SunOutlined, MoonFilled } from "@ant-design/icons";
+import { Language } from "domain/entities/Language";
 
 interface CodeEditorProps {
     roomId: string;
 }
-const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
-    const { initialiseEditor, languages, selectedLanguage, handleChangeLanguage } = useCollaboration();
-    const [theme, setTheme] = useState("vs-light");
 
+interface LanguageOption {
+    label: string;
+    value: string;
+    langData: Language;
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
+    const { initialiseEditor, languages, selectedLanguage, handleChangeLanguage, handleExecuteCode } =
+        useCollaboration();
+    const [theme, setTheme] = useState("vs-light");
     const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
         initialiseEditor(roomId, editor, monaco);
     };
+
+    const languageOptions: LanguageOption[] = useMemo(() => {
+        return languages.map((lang: Language) => ({
+            label: lang.alias,
+            value: lang.language,
+            langData: lang
+        }));
+    }, [languages]);
 
     const handleToggleTheme = () => {
         if (theme === "vs-light") {
@@ -33,9 +49,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                     variant="borderless"
                     style={{ width: "150px" }}
                     placeholder="Select language"
-                    options={languages}
-                    value={selectedLanguage}
-                    onChange={handleChangeLanguage}
+                    options={languageOptions}
+                    value={selectedLanguage.language}
+                    onChange={(_, option) => {
+                        const langOption = option as LanguageOption;
+                        handleChangeLanguage(langOption.langData);
+                    }}
                 />
                 <div className={styles.buttonGroup}>
                     <Button
@@ -44,7 +63,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                         icon={theme === "vs-light" ? <SunOutlined /> : <MoonFilled />}
                     />
 
-                    <Button className={styles.runButton} icon={<PlayCircleOutlined />}>
+                    <Button onClick={handleExecuteCode} className={styles.runButton} icon={<PlayCircleOutlined />}>
                         Run
                     </Button>
                     <Button className={styles.submitButton} icon={<CloudUploadOutlined />}>
@@ -55,7 +74,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
             <div className={styles.editor}>
                 <Editor
                     theme={theme}
-                    language={selectedLanguage}
+                    language={selectedLanguage.language}
                     onMount={handleEditorDidMount}
                     options={{
                         minimap: { enabled: false },
