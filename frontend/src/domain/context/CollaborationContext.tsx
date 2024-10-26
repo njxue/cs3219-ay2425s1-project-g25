@@ -16,6 +16,8 @@ interface CollaborationContextType {
     languages: Language[];
     handleChangeLanguage: (lang: Language) => void;
     handleExecuteCode: () => void;
+    stdout: string;
+    stderr: string;
 }
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
 
@@ -33,6 +35,10 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     });
     const [languages, setLanguages] = useState<Language[]>([]);
 
+    const [stdout, setStdout] = useState<string>("");
+    const [stderr, setStderr] = useState<string>("");
+    const [isExecuting, setIsExecuting] = useState<boolean>(false);
+
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<Monaco | null>(null);
     const bindingRef = useRef<MonacoBinding | null>(null);
@@ -44,14 +50,20 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         editorRef.current = editor;
         monacoRef.current = monaco;
 
-        await initialiseLanguages(monaco);
         const { yDoc, provider, yMap } = initialiseYdoc(roomId);
+
         bindEditorToDoc(editor, yDoc, provider);
         setUpObserver(yMap);
         setUpConnectionAwareness(provider);
+        await initialiseLanguages(monaco, yMap, editor);
     };
 
-    const initialiseLanguages = async (monaco: Monaco) => {
+    const initialiseLanguages = async (
+        monaco: Monaco,
+        yMap: Y.Map<any>,
+        editor: monaco.editor.IStandaloneCodeEditor
+    ) => {
+        // Initialise language dropdown
         const allLanguages = monaco.languages.getLanguages();
         const pistonLanguageVersions = await PistonClient.getLanguageVersions();
         setLanguages(
@@ -63,6 +75,13 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                     version: pistonLanguageVersions.find((pistonLang: any) => pistonLang.language === lang.id)?.version
                 }))
         );
+
+        // Set the editor's language
+        const language: Language = yMap.get(SELECTED_LANGUAGE);
+        const model = editor?.getModel();
+        if (model) {
+            monaco.editor.setModelLanguage(model, language?.language ?? "javascript");
+        }
     };
 
     const initialiseYdoc = (roomId: string): { yDoc: Y.Doc; yMap: Y.Map<any>; provider: WebsocketProvider } => {
@@ -98,9 +117,11 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         yMap.observe((event) => {
             event.changes.keys.forEach((change, key) => {
                 if (key === SELECTED_LANGUAGE) {
-                    const language = yMap.get(SELECTED_LANGUAGE);
-                    if (language) {
-                        setSelectedLanguage(language);
+                    const language: Language = yMap.get(SELECTED_LANGUAGE);
+                    setSelectedLanguage(language);
+                    const model = editorRef.current?.getModel();
+                    if (model) {
+                        monaco.editor.setModelLanguage(model, language.language);
                     }
                 }
             });
@@ -129,13 +150,36 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         yMapRef.current?.set(SELECTED_LANGUAGE, lang);
     };
 
-    const handleExecuteCode = () => {
-        const sourceCode = editorRef.current?.getValue();
+    const handleExecuteCode = async () => {
+        try {
+            setIsExecuting(true);
+            const sourceCode = editorRef.current?.getValue();
+            if (!sourceCode) {
+                // TODO
+                return;
+            }
+            const output = await PistonClient.executeCode(selectedLanguage, sourceCode);
+            const { stdout, stderr } = output;
+            setStdout(stdout);
+            setStderr(stderr);
+        } catch (e) {
+            toast.error("There was an issue running the code");
+        } finally {
+            setIsExecuting(false);
+        }
     };
 
     return (
         <CollaborationContext.Provider
-            value={{ initialiseEditor, selectedLanguage, languages, handleChangeLanguage, handleExecuteCode }}
+            value={{
+                initialiseEditor,
+                selectedLanguage,
+                languages,
+                handleChangeLanguage,
+                handleExecuteCode,
+                stdout,
+                stderr
+            }}
         >
             {children}
         </CollaborationContext.Provider>

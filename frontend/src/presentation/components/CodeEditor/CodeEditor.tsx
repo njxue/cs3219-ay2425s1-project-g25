@@ -7,6 +7,7 @@ import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import * as monaco from "monaco-editor";
 import { SunOutlined, MoonFilled } from "@ant-design/icons";
 import { Language } from "domain/entities/Language";
+import { LanguageSelector } from "./LanguageSelector";
 
 interface CodeEditorProps {
     roomId: string;
@@ -19,20 +20,11 @@ interface LanguageOption {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
-    const { initialiseEditor, languages, selectedLanguage, handleChangeLanguage, handleExecuteCode } =
-        useCollaboration();
+    const { initialiseEditor, handleExecuteCode } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
     const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
         initialiseEditor(roomId, editor, monaco);
     };
-
-    const languageOptions: LanguageOption[] = useMemo(() => {
-        return languages.map((lang: Language) => ({
-            label: lang.alias,
-            value: lang.language,
-            langData: lang
-        }));
-    }, [languages]);
 
     const handleToggleTheme = () => {
         if (theme === "vs-light") {
@@ -45,17 +37,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     return (
         <div className={styles.container}>
             <div className={styles.toolbar}>
-                <Select
-                    variant="borderless"
-                    style={{ width: "150px" }}
-                    placeholder="Select language"
-                    options={languageOptions}
-                    value={selectedLanguage.language}
-                    onChange={(_, option) => {
-                        const langOption = option as LanguageOption;
-                        handleChangeLanguage(langOption.langData);
-                    }}
-                />
+                <LanguageSelector />
                 <div className={styles.buttonGroup}>
                     <Button
                         onClick={handleToggleTheme}
@@ -74,7 +56,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
             <div className={styles.editor}>
                 <Editor
                     theme={theme}
-                    language={selectedLanguage.language}
                     onMount={handleEditorDidMount}
                     options={{
                         minimap: { enabled: false },

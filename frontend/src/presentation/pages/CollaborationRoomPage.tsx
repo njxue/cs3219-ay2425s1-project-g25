@@ -6,9 +6,11 @@ import { initialQuestions } from "data/repositories/mockQuestionRepository";
 import { useParams } from "react-router-dom";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
+import { useCollaboration } from "domain/context/CollaborationContext";
 
 const CollaborationRoomPage: React.FC = () => {
     const { roomId } = useParams();
+    const { stdout, stderr } = useCollaboration();
     const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
         axis: "x",
         min: 300,
@@ -41,6 +43,8 @@ const CollaborationRoomPage: React.FC = () => {
                 <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
                 <div className={styles.output} style={{ height: outputPosition }}>
                     <p>Output</p>
+                    {stdout}
+                    {stderr}
                 </div>
             </div>
         </div>
