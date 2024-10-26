@@ -25,4 +25,6 @@ export interface IUser {
     logoutUser(userId: string): Promise<any>;
     updateUser(userId: string, userUpdateInput: IUserUpdateInput): Promise<any>;
     getUser(userId: string): Promise<any>;
+    getAllUsers(): Promise<any>;
+    deleteUser(userId: string): Promise<any>;
 }

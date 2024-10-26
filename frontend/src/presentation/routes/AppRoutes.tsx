@@ -10,6 +10,7 @@ import HomePage from "presentation/pages/HomePage";
 import { ProtectedRoute } from "presentation/pages/ProtectedRoute";
 import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
 import { MatchmakingProvider } from "domain/context/MatchmakingContext";
+import { UserManagement } from "presentation/pages/UserManagement";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -25,6 +26,7 @@ const AppRoutes: React.FC = () => {
 
                         <Route element={<AdminProtectedRoute />}>
                             <Route path="/question-management" element={<QuestionManagement />} />
+                            <Route path="/user-management" element={<UserManagement />} />
                         </Route>
                     </Route>
 

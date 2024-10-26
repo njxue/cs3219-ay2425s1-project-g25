@@ -29,9 +29,17 @@ export class UserImpl implements IUser {
     async verifyToken(): Promise<any> {
         return this.dataSource.verifyToken();
     }
-    
+
     async getUser(userId: string): Promise<any> {
         return this.dataSource.getUser(userId);
+    }
+
+    async getAllUsers(): Promise<any> {
+        return this.dataSource.getAllUsers();
+    }
+
+    async deleteUser(userId: string): Promise<any> {
+        return this.dataSource.deleteUser(userId);
     }
 }
 

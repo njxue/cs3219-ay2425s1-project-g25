@@ -51,6 +51,13 @@ export class UserRemoteDataSource extends BaseApi {
         return await this.protectedGet<any>(`/users/${userId}`);
     }
 
+    async getAllUsers() {
+        return await this.protectedGet<any>("/users/");
+    }
+
+    async deleteUser(userId: string) {
+        return await this.protectedDelete<any>(`/users/${userId}`);
+    }
 }
 
 export const userRemoteDataSource = new UserRemoteDataSource();

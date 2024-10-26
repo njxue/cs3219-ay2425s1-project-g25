@@ -101,11 +101,11 @@ export class UserUseCases {
     }
 
     /**
-    * Retrieves a user by their ID.
-    * @param userId - The ID of the user to retrieve.
-    * @returns Promise resolving with the retrieved user.
-    * @throws AuthenticationError if the user cannot be found or access is denied.
-    */
+     * Retrieves a user by their ID.
+     * @param userId - The ID of the user to retrieve.
+     * @returns Promise resolving with the retrieved user.
+     * @throws AuthenticationError if the user cannot be found or access is denied.
+     */
     async getUser(userId: string): Promise<User> {
         const data = await this.user.getUser(userId);
         if (!data) {
@@ -114,6 +114,17 @@ export class UserUseCases {
         return data.data;
     }
 
+    async getAllUsers(): Promise<User[]> {
+        const data = await this.user.getAllUsers();
+        if (!data) {
+            throw new AuthenticationError("Unable to fetch users or access denied");
+        }
+        return data.data;
+    }
+
+    async deleteUser(userId: string): Promise<void> {
+        await this.user.deleteUser(userId);
+    }
 }
 
 export const userUseCases = new UserUseCases(userImpl);
