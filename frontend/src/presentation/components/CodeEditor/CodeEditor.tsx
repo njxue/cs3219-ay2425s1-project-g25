@@ -1,26 +1,20 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import styles from "./CodeEditor.module.css";
 import Editor, { Monaco } from "@monaco-editor/react";
-import { Button, Select } from "antd";
+import { Button, Spin } from "antd";
 import { useCollaboration } from "domain/context/CollaborationContext";
 import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import * as monaco from "monaco-editor";
 import { SunOutlined, MoonFilled } from "@ant-design/icons";
-import { Language } from "domain/entities/Language";
 import { LanguageSelector } from "./LanguageSelector";
+import { CodeActionButtons } from "./CodeActionButtons";
 
 interface CodeEditorProps {
     roomId: string;
 }
 
-interface LanguageOption {
-    label: string;
-    value: string;
-    langData: Language;
-}
-
 const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
-    const { initialiseEditor, handleExecuteCode } = useCollaboration();
+    const { initialiseEditor, isExecuting } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
     const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
         initialiseEditor(roomId, editor, monaco);
@@ -38,6 +32,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
         <div className={styles.container}>
             <div className={styles.toolbar}>
                 <LanguageSelector />
+                {isExecuting && (
+                    <div className={styles.pendingExecution}>
+                        <Spin />
+                        <p>Running...</p>
+                    </div>
+                )}
                 <div className={styles.buttonGroup}>
                     <Button
                         onClick={handleToggleTheme}
@@ -45,12 +45,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                         icon={theme === "vs-light" ? <SunOutlined /> : <MoonFilled />}
                     />
 
-                    <Button onClick={handleExecuteCode} className={styles.runButton} icon={<PlayCircleOutlined />}>
-                        Run
-                    </Button>
-                    <Button className={styles.submitButton} icon={<CloudUploadOutlined />}>
-                        Submit
-                    </Button>
+                    <CodeActionButtons disabled={isExecuting} />
                 </div>
             </div>
             <div className={styles.editor}>

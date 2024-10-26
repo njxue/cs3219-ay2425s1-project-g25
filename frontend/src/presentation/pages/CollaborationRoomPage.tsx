@@ -6,11 +6,11 @@ import { initialQuestions } from "data/repositories/mockQuestionRepository";
 import { useParams } from "react-router-dom";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
-import { useCollaboration } from "domain/context/CollaborationContext";
+import { OutputBox } from "presentation/components/CodeEditor/OutputBox";
 
 const CollaborationRoomPage: React.FC = () => {
     const { roomId } = useParams();
-    const { stdout, stderr } = useCollaboration();
+
     const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
         axis: "x",
         min: 300,
@@ -20,8 +20,8 @@ const CollaborationRoomPage: React.FC = () => {
 
     const { position: outputPosition, separatorProps: horizontalSeparatorProps } = useResizable({
         axis: "y",
-        min: 50,
-        initial: 50,
+        min: 60,
+        initial: 60,
         max: 500,
         reverse: true
     });
@@ -41,10 +41,8 @@ const CollaborationRoomPage: React.FC = () => {
                     <CodeEditor roomId={roomId} />
                 </div>
                 <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
-                <div className={styles.output} style={{ height: outputPosition }}>
-                    <p>Output</p>
-                    {stdout}
-                    {stderr}
+                <div className={styles.outputContainer} style={{ height: outputPosition }}>
+                    <OutputBox />
                 </div>
             </div>
         </div>

@@ -9,16 +9,18 @@ import { toast } from "react-toastify";
 import { COLLABORATION_AWARENESS_KEYS, COLLABORATION_YMAP_KEYS } from "presentation/utils/constants";
 import PistonClient from "data/piston/PistonClient";
 import { Language } from "domain/entities/Language";
+import { CodeExecResult } from "domain/entities/CodeExecResult";
 
 interface CollaborationContextType {
     initialiseEditor: (roomId: string, editor: any, monaco: Monaco) => void;
     selectedLanguage: Language;
     languages: Language[];
     handleChangeLanguage: (lang: Language) => void;
-    handleExecuteCode: () => void;
-    stdout: string;
-    stderr: string;
+    handleExecuteCode: () => Promise<void>;
+    isExecuting: boolean;
+    execResult: CodeExecResult | null;
 }
+
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
 
 export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -35,8 +37,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     });
     const [languages, setLanguages] = useState<Language[]>([]);
 
-    const [stdout, setStdout] = useState<string>("");
-    const [stderr, setStderr] = useState<string>("");
+    const [execResult, setExecResult] = useState<CodeExecResult | null>(null);
+
     const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -158,10 +160,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 // TODO
                 return;
             }
-            const output = await PistonClient.executeCode(selectedLanguage, sourceCode);
-            const { stdout, stderr } = output;
-            setStdout(stdout);
-            setStderr(stderr);
+            const output: CodeExecResult = await PistonClient.executeCode(selectedLanguage, sourceCode);
+            setExecResult(output);
         } catch (e) {
             toast.error("There was an issue running the code");
         } finally {
@@ -177,8 +177,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 languages,
                 handleChangeLanguage,
                 handleExecuteCode,
-                stdout,
-                stderr
+                isExecuting,
+                execResult
             }}
         >
             {children}

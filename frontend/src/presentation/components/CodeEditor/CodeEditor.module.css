@@ -9,9 +9,11 @@
 
 .toolbar {
     padding: 4px;
+    height: 40px;
     display: flex;
     width: 100%;
     justify-content: space-between;
+    align-items: center;
 }
 
 .editor {
@@ -25,15 +27,12 @@
     gap: 8px;
 }
 
-button {
-    width: fit-content;
+.pendingExecution {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.submitButton {
-    background-color: #ffa500;
-}
-
-.runButton {
-    background-color: black;
-    color: white;
+.pendingExecution p {
+    padding: 0;
 }

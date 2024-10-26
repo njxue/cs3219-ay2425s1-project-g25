@@ -43,7 +43,7 @@
     height: 6px;
 }
 
-.output {
+.outputContainer {
     flex-shrink: 0;
-    padding: 0 8px;
+    overflow-y: auto;
 }
