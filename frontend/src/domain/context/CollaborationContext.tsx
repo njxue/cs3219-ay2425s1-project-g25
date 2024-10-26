@@ -32,7 +32,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
 
     const [selectedLanguage, setSelectedLanguage] = useState<Language>({
         language: "javascript",
-        version: "",
+        version: "1.32.3",
         alias: "Javascript"
     });
     const [languages, setLanguages] = useState<Language[]>([]);
