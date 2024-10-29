@@ -13,7 +13,7 @@ interface CodeEditorProps {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
-    const { onEditorIsMounted, isExecuting, setRoomId } = useCollaboration();
+    const { onEditorIsMounted, isExecuting, setRoomId, connectedUsers } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
 
     const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -32,21 +32,34 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     return (
         <div className={styles.container}>
             <div className={styles.toolbar}>
-                <LanguageSelector />
-                {isExecuting && (
-                    <div className={styles.pendingExecution}>
-                        <Spin />
-                        <p>Running...</p>
+                <div className={styles.toolbarLeft}>
+                    <LanguageSelector />
+                    {isExecuting && (
+                        <div className={styles.pendingExecution}>
+                            <Spin />
+                            <p>Running...</p>
+                        </div>
+                    )}
+                </div>
+                <div className={styles.toolbarRight}>
+                    <div className={styles.connectionStatusContainer}>
+                        {connectedUsers.map((user) => (
+                            <div key={user} className={styles.connectionStatus}>
+                                <div className={styles.greenCircle}></div>
+                                <div className={styles.statusUsername}>{user}</div>
+                            </div>
+                        ))}
                     </div>
-                )}
-                <div className={styles.buttonGroup}>
-                    <Button
-                        onClick={handleToggleTheme}
-                        type="text"
-                        icon={theme === "vs-light" ? <SunOutlined /> : <MoonFilled />}
-                    />
 
-                    <CodeActionButtons disabled={isExecuting} />
+                    <div className={styles.buttonGroup}>
+                        <Button
+                            onClick={handleToggleTheme}
+                            type="text"
+                            icon={theme === "vs-light" ? <SunOutlined /> : <MoonFilled />}
+                        />
+
+                        <CodeActionButtons disabled={isExecuting} />
+                    </div>
                 </div>
             </div>
             <div className={styles.editor}>

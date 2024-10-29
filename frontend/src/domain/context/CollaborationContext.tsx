@@ -1,5 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect, useRef, useMemo } from "react";
-import { Monaco } from "@monaco-editor/react";
+import React, { createContext, useState, useContext, ReactNode, useEffect, useMemo } from "react";
 import * as Y from "yjs";
 import * as monaco from "monaco-editor";
 import { MonacoBinding } from "y-monaco";
@@ -20,6 +19,7 @@ interface CollaborationContextType {
     isExecuting: boolean;
     execResult: CodeExecResult | null;
     setRoomId: (roomId: string) => void;
+    connectedUsers: string[];
 }
 
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
@@ -36,14 +36,17 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         version: "1.32.3",
         alias: "Javascript"
     });
-    const [languages, setLanguages] = useState<Language[]>([]);
-    const [execResult, setExecResult] = useState<CodeExecResult | null>(null);
-    const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
     const ydoc = useMemo(() => new Y.Doc(), []);
     const ymap: Y.Map<any> = useMemo(() => ydoc.getMap("sharedMap"), [ydoc]);
 
     const [roomId, setRoomId] = useState<string | null>(null);
+
+    const [languages, setLanguages] = useState<Language[]>([]);
+    const [execResult, setExecResult] = useState<CodeExecResult | null>(null);
+    const [isExecuting, setIsExecuting] = useState<boolean>(false);
+    const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+
     const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [provider, setProvider] = useState<WebsocketProvider | null>(null);
     const [binding, setBinding] = useState<MonacoBinding | null>(null);
@@ -55,11 +58,14 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         }
         const provider = new WebsocketProvider("ws://localhost:1234", roomId, ydoc);
         setProvider(provider);
+
         provider.awareness.setLocalStateField(USERNAME, username);
         provider.awareness.on("change", (update: any) => {
-            const users = provider.awareness.getStates();
+            const users = Array.from(provider.awareness.getStates().values());
+            setConnectedUsers(users.map((user) => user[USERNAME]));
             // TODO: Some UI feedback about connection status of the other user
         });
+
         return () => {
             provider?.destroy();
             ydoc?.destroy();
@@ -156,7 +162,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 handleChangeLanguage,
                 handleExecuteCode,
                 isExecuting,
-                execResult
+                execResult,
+                connectedUsers
             }}
         >
             {children}
