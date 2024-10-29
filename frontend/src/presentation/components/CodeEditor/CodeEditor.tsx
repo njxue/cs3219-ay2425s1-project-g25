@@ -3,7 +3,6 @@ import styles from "./CodeEditor.module.css";
 import Editor, { Monaco } from "@monaco-editor/react";
 import { Button, Spin } from "antd";
 import { useCollaboration } from "domain/context/CollaborationContext";
-import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import * as monaco from "monaco-editor";
 import { SunOutlined, MoonFilled } from "@ant-design/icons";
 import { LanguageSelector } from "./LanguageSelector";
@@ -14,10 +13,12 @@ interface CodeEditorProps {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
-    const { initialiseEditor, isExecuting } = useCollaboration();
+    const { onEditorIsMounted, isExecuting, setRoomId } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
-    const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
-        initialiseEditor(roomId, editor, monaco);
+
+    const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+        onEditorIsMounted(editor);
+        setRoomId(roomId);
     };
 
     const handleToggleTheme = () => {
