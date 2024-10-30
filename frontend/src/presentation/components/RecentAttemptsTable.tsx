@@ -4,9 +4,9 @@ import type { ColumnsType } from 'antd/es/table';
 import styles from "./RecentAttemptsTable.module.css";
 import AuthClientStore from "data/auth/AuthClientStore";
 
-interface RecentAttempt {
-  key: string;
+interface HistoryEntry {
   id: string;
+  key: string;
   date: string;
   title: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
@@ -14,7 +14,7 @@ interface RecentAttempt {
 }
 
 export const RecentAttemptsTable: React.FC = () => {
-  const [recentAttemptsData, setRecentAttemptsData] = useState<RecentAttempt[]>([]);
+  const [recentAttemptsData, setRecentAttemptsData] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -39,9 +39,10 @@ export const RecentAttemptsTable: React.FC = () => {
       }
 
       const data = await response.json();
+      console.log(data);
 
       // Transform data to match RecentAttempt interface
-      const formattedData: RecentAttempt[] = data.map((entry: any) => ({
+      const formattedData: HistoryEntry[] = data.map((entry: any) => ({
         key: entry._id,
         id: entry._id,
         date: new Date(entry.attemptStartedAt).toLocaleDateString(),
@@ -133,7 +134,7 @@ export const RecentAttemptsTable: React.FC = () => {
     }
   };
 
-  const columns: ColumnsType<RecentAttempt> = [
+  const columns: ColumnsType<HistoryEntry> = [
     {
       title: 'Date',
       dataIndex: 'date',

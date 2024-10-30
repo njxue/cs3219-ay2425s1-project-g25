@@ -1,9 +1,10 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import { Question } from './Question';
 
 export interface HistoryEntry extends mongoose.Document {
   _id: Types.ObjectId;
   userId: string;
-  question: Types.ObjectId;
+  question: Types.ObjectId | Question;
   attemptStartedAt: Date;
   attemptCompletedAt: Date;
   collaborator: string;

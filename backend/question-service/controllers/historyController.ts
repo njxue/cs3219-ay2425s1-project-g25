@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import historyEntryModel from '../models/HistoryEntry';
+import { Question } from 'models/Question';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
@@ -56,7 +57,14 @@ export const getUserHistoryEntries = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid or missing token' });
     }
 
-    const historyEntries = await historyEntryModel.find({ userId }).populate('question');
+    const historyEntries = await historyEntryModel.find({ userId })
+    .populate({
+      path: 'question',
+      populate: {
+        path: 'categories',
+        model: 'category',
+      },
+    });;
     res.status(200).json(historyEntries);
   } catch (error) {
     res.status(500).json({ error: getErrorMessage(error) });
@@ -72,13 +80,14 @@ export const createUserHistoryEntry = async (req: Request, res: Response) => {
     }
 
     const { question, attemptStartedAt, attemptCompletedAt, collaborator } = req.body;
+    const collaboratorId = collaborator === null || collaborator === undefined || collaborator === '' ? userId : collaborator;
 
     const newHistoryEntry = new historyEntryModel({
       userId,
       question,
       attemptStartedAt,
       attemptCompletedAt,
-      collaborator: collaborator ?? userId, // TODO: Remove this in final impl, this is just temporary
+      collaborator: collaboratorId, // TODO: Remove this in final impl, this is just temporary
     });
 
     const savedEntry = await newHistoryEntry.save();
