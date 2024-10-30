@@ -1,4 +1,4 @@
-import { createSession } from "controllers/collaborationController";
+import { createSession } from "../controllers/collaborationController";
 import { Kafka } from "kafkajs";
 
 const HOST = process.env.KAFKA_HOST || "localhost";

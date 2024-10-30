@@ -32,6 +32,7 @@ export async function createSession(message: EachMessagePayload) {
      *  }
      * }
      */
+    console.log("Collab service creating session");
 
     // Validation for message format. Can remove if not needed.
     const matchId = message.message.key?.toString();
@@ -45,7 +46,7 @@ export async function createSession(message: EachMessagePayload) {
     const session = handleMatchNotification();
 
     // Send the session ID back to the matching service
-    const messageBody = JSON.stringify({ session._id }); // modify the param to get the ID from whatver is returned.
+    const messageBody = JSON.stringify({ session }); // modify the param to get the ID from whatver is returned.
     await producer.send({
         topic: COLLAB_TOPIC,
         messages: [
@@ -56,5 +57,5 @@ export async function createSession(message: EachMessagePayload) {
         ],
     });
 
-    console.log(`Sent Session ID ${session._id} to collab service.`); // modify
+    console.log(`Sent Session ID ${session} to collab service.`); // modify
 }
