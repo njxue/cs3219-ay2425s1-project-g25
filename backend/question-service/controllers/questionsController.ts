@@ -226,7 +226,9 @@ export async function getSuitableQuestion(message: EachMessagePayload) {
 
 async function findSuitableQuestion(categoryName: string, difficulty: string) {
     try {
-        const category = await categoryModel.findOne({ name: categoryName });
+        const category = await categoryModel.findOne({
+            name: new RegExp(`^${categoryName}$`, "i"),
+        });
 
         if (!category) {
             throw new Error(`Category '${categoryName}' not found.`);
@@ -234,14 +236,14 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
 
         let question = await questionModel.findOne({
             categories: category._id,
-            difficulty: difficulty,
+            difficulty: new RegExp(`^${difficulty}$`, "i"),
         });
 
         if (question) {
             return question;
         }
 
-        const difficultyIndex = DIFFICULTIES.indexOf(difficulty);
+        const difficultyIndex = DIFFICULTIES.indexOf(difficulty.toLowerCase());
         if (difficultyIndex === -1) {
             throw new Error(`Invalid difficulty level: ${difficulty}`);
         }
@@ -250,7 +252,7 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
         for (let i = difficultyIndex - 1; i >= 0; i--) {
             question = await questionModel.findOne({
                 categories: category._id,
-                difficulty: DIFFICULTIES[i],
+                difficulty: new RegExp(`^${DIFFICULTIES[i]}$`, "i"),
             });
             if (question) {
                 return question;
@@ -261,7 +263,7 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
         for (let i = difficultyIndex + 1; i < DIFFICULTIES.length; i++) {
             question = await questionModel.findOne({
                 categories: category._id,
-                difficulty: DIFFICULTIES[i],
+                difficulty: new RegExp(`^${DIFFICULTIES[i]}$`, "i"),
             });
             if (question) {
                 return question;

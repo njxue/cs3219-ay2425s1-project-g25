@@ -1,8 +1,8 @@
 // controllers/collaborationController.js
 import { EachMessagePayload } from 'kafkajs';
 import { COLLAB_TOPIC, producer } from '../utils/kafkaClient';
-import Session from 'models/Session';
-import { YDocManager } from 'utils/yjs';
+import Session from '../models/Session';
+import { YDocManager } from '../utils/yjs';
 
 
 export const createSession = async ( matchId: string, userIds: string[]) => {
