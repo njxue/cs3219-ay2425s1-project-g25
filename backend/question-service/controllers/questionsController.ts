@@ -189,6 +189,7 @@ export async function getQuestion(
  * @param message - Kafka message payload
  */
 export async function getSuitableQuestion(message: EachMessagePayload) {
+    console.log("Question service getting suitable question.");
     const body = message.message.value?.toString();
     const matchId = message.message.key?.toString();
 

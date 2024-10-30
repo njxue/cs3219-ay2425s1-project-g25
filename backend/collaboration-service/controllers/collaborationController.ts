@@ -42,6 +42,7 @@ export async function handleMatchNotification(message: EachMessagePayload) {
      *  }
      * }
      */
+    console.log("Collab service creating session");
 
     // Validation for message format
     const matchId = message.message.key?.toString();

@@ -13,7 +13,7 @@ export const MATCH_TOPIC = "match_topic";
 export const QUESTION_TOPIC = "question_topic";
 
 export const producer = kafka.producer();
-export const consumer = kafka.consumer({ groupId: "collab-service-group" });
+export const consumer = kafka.consumer({ groupId: "question-service-group" });
 
 async function initKafka() {
     await producer.connect();

@@ -7,6 +7,7 @@ import { WebSocket } from "ws";
 import collaborationRoutes from "./routes/collaborationRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { connectToDatabase } from "./utils/database";
+import { setUpKafkaSubscribers } from "./utils/kafkaClient";
 
 dotenv.config({ path: path.resolve(__dirname, "./.env") });
 
@@ -37,6 +38,8 @@ wss.on("connection", (ws) => {
 });
 
 // Start the server
-server.listen(port, () => {
+server.listen(port, async () => {
     console.log(`Collaboration service running on http://localhost:${port}`);
+
+    await setUpKafkaSubscribers();
 });

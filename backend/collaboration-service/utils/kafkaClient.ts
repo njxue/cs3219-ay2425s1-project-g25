@@ -1,4 +1,4 @@
-import { handleMatchNotification } from "controllers/collaborationController";
+import { handleMatchNotification } from "../controllers/collaborationController";
 import { Kafka } from "kafkajs";
 
 const HOST = process.env.KAFKA_HOST || "localhost";

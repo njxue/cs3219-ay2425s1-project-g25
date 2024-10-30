@@ -4,7 +4,7 @@ import { SOCKET_EVENTS } from "../constants/socketEventNames";
 import MatchingEventModel from "../models/MatchingEvent";
 import Room from "../models/RoomSchema";
 import { MATCH_TOPIC, producer } from "../utils/kafkaClient";
-import { EachMessagePayload } from "kafkajs";
+import { KafkaMessage } from "kafkajs";
 
 const MATCHING_INTERVAL = parseInt(process.env.MATCHING_INTERVAL || "3000");
 const RELAXATION_INTERVAL = parseInt(
@@ -323,9 +323,9 @@ async function handleTimeouts(
  * Updates the room ID in the Redis store with the ID created by Collaboration-service.
  * @param message - The Kafka message payload from Collaboration-service.
  */
-export async function handleCollabMessage(message: EachMessagePayload) {
-    const roomId = message.message.value?.toString();
-    const matchId = message.message.key?.toString();
+export async function handleCollabMessage(message: KafkaMessage) {
+    const roomId = message.value?.toString();
+    const matchId = message.key?.toString();
 
     if (!matchId) {
         console.error("Match ID is undefined");
@@ -352,9 +352,9 @@ export async function handleCollabMessage(message: EachMessagePayload) {
  * Updates the Question ID in the Redis store with the ID created by Question-service.
  * @param message - The Kafka message payload from Question-service.
  */
-export async function handleQuestionMessage(message: EachMessagePayload) {
-    const questionId = message.message.value?.toString();
-    const matchId = message.message.key?.toString();
+export async function handleQuestionMessage(message: KafkaMessage) {
+    const questionId = message.value?.toString();
+    const matchId = message.key?.toString();
 
     if (!matchId) {
         console.error("Match ID is undefined");
