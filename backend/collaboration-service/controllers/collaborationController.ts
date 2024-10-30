@@ -1,12 +1,22 @@
 // controllers/collaborationController.js
 import { EachMessagePayload } from 'kafkajs';
 import { COLLAB_TOPIC, producer } from '../utils/kafkaClient';
+import Session from 'models/Session';
+import { YDocManager } from 'utils/yjs';
 
 
-// Placeholder function to create a session. Can change or rename as needed, just need to edit accordingly in createSession.
-export const handleMatchNotification = async () => {
-    // do whatever to create a session.
-    // return the session ID or model.
+export const createSession = async ( matchId: string, userIds: string[]) => {
+    // Create unique sessionId:
+    const sessionId = `session-${Date.now()}-${userIds.join('-')}`;
+
+    // Create new Session document in mongodb
+    const newSession = new Session({ sessionId, matchId, userIds, codeContent: '' });
+    await newSession.save();
+    
+    // Initialize Yjs document manager for this session
+    YDocManager.initializeDoc(sessionId);
+
+    return sessionId;
 };
 
 /**
@@ -14,7 +24,7 @@ export const handleMatchNotification = async () => {
  * Emits a Kafka message back to the matching service with the session ID.
  * @param message - Kafka message payload
  */
-export async function createSession(message: EachMessagePayload) {
+export async function handleMatchNotification(message: EachMessagePayload) {
     /**
      * message contains all the info from the kafka message from matching-service. 
      * message looks like this:
@@ -34,19 +44,28 @@ export async function createSession(message: EachMessagePayload) {
      */
     console.log("Collab service creating session");
 
-    // Validation for message format. Can remove if not needed.
+    // Validation for message format
     const matchId = message.message.key?.toString();
-    if (!matchId) {
-        console.error("No match ID found in message.");
+    if (!matchId || !message.message.value) {
+        console.error("No match ID/value found in message.");
         return;
     }
 
-    // TODO: Exact necessary fields from message and create session.
-    // We want the ID from this session that was created, to return.
-    const session = handleMatchNotification();
+    // Create session and get sessionId
+    const messageValue = JSON.parse(message.message.value.toString());
+
+    const user1Id = messageValue.user1?.userId;
+    const user2Id = messageValue.user2?.userId;
+
+    if (!user1Id || !user2Id) {
+        console.error("User IDs not found in message.");
+        return;
+    }
+
+    const sessionId = await createSession(matchId, [user1Id, user2Id]);
 
     // Send the session ID back to the matching service
-    const messageBody = JSON.stringify({ session }); // modify the param to get the ID from whatver is returned.
+    const messageBody = JSON.stringify({ sessionId });
     await producer.send({
         topic: COLLAB_TOPIC,
         messages: [
@@ -57,5 +76,5 @@ export async function createSession(message: EachMessagePayload) {
         ],
     });
 
-    console.log(`Sent Session ID ${session} to collab service.`); // modify
+    console.log(`Sent Session ID ${sessionId} to collab service.`); // modify
 }
