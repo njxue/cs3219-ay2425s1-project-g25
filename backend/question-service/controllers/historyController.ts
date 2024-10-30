@@ -64,7 +64,7 @@ export const getUserHistoryEntries = async (req: Request, res: Response) => {
         path: 'categories',
         model: 'category',
       },
-    });;
+    });
     res.status(200).json(historyEntries);
   } catch (error) {
     res.status(500).json({ error: getErrorMessage(error) });
