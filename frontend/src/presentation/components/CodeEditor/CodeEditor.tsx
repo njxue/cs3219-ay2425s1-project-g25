@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./CodeEditor.module.css";
-import Editor, { Monaco } from "@monaco-editor/react";
+import Editor from "@monaco-editor/react";
 import { Button, Spin } from "antd";
 import { useCollaboration } from "domain/context/CollaborationContext";
 import * as monaco from "monaco-editor";
@@ -22,11 +22,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     };
 
     const handleToggleTheme = () => {
-        if (theme === "vs-light") {
-            setTheme("vs-dark");
-        } else {
-            setTheme("vs-light");
-        }
+        setTheme(theme === "vs-light" ? "vs-dark" : "vs-light");
     };
 
     return (
