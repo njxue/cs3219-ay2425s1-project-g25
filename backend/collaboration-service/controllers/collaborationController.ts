@@ -45,14 +45,23 @@ export async function handleMatchNotification(message: EachMessagePayload) {
 
     // Validation for message format
     const matchId = message.message.key?.toString();
-    if (!matchId) {
-        console.error("No match ID found in message.");
+    if (!matchId || !message.message.value) {
+        console.error("No match ID/value found in message.");
         return;
     }
 
-    // TODO: Exact necessary fields from message and create session.
-    // We want the ID from this session that was created, to return.
-    const sessionId = await createSession(matchId, [ message.message.value?.user1?.userId, message.message.value?.user2?.userId]);
+    // Create session and get sessionId
+    const messageValue = JSON.parse(message.message.value.toString());
+
+    const user1Id = messageValue.user1?.userId;
+    const user2Id = messageValue.user2?.userId;
+
+    if (!user1Id || !user2Id) {
+        console.error("User IDs not found in message.");
+        return;
+    }
+
+    const sessionId = await createSession(matchId, [user1Id, user2Id]);
 
     // Send the session ID back to the matching service
     const messageBody = JSON.stringify({ sessionId });
