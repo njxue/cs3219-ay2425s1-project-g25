@@ -4,7 +4,7 @@ import { COLLAB_TOPIC, producer } from '../utils/kafkaClient';
 
 
 // Placeholder function to create a session. Can change or rename as needed, just need to edit accordingly in createSession.
-export const handleMatchNotification = async () => {
+export const createSession = async () => {
     // do whatever to create a session.
     // return the session ID or model.
 };
@@ -14,7 +14,7 @@ export const handleMatchNotification = async () => {
  * Emits a Kafka message back to the matching service with the session ID.
  * @param message - Kafka message payload
  */
-export async function createSession(message: EachMessagePayload) {
+export async function handleMatchNotification(message: EachMessagePayload) {
     /**
      * message contains all the info from the kafka message from matching-service. 
      * message looks like this:
@@ -42,7 +42,7 @@ export async function createSession(message: EachMessagePayload) {
 
     // TODO: Exact necessary fields from message and create session.
     // We want the ID from this session that was created, to return.
-    const session = handleMatchNotification();
+    const session = createSession();
 
     // Send the session ID back to the matching service
     const messageBody = JSON.stringify({ session._id }); // modify the param to get the ID from whatver is returned.
