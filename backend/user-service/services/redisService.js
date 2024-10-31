@@ -20,6 +20,7 @@ class RedisService {
   async setKeyWithExpiration(key, value, expiration) {
     try {
       await this.redisClient.set(key, value, { EX: expiration });
+      console.log(`Set ${key}: ${value}`);
     } catch (error) {
       console.error("Error setting key in Redis:", error);
     }

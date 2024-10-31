@@ -15,6 +15,8 @@ import {
 } from "../model/repository.js";
 import { BadRequestError, ConflictError, NotFoundError } from "../utils/httpErrors.js";
 import TokenService from "../services/tokenService.js";
+import { sendEmail } from "../services/emailService.js";
+import redisService from "../services/redisService.js";
 
 export async function createUser(req, res, next) {
   try {
@@ -42,11 +44,10 @@ export async function createUser(req, res, next) {
       data: { accessToken, user: { ...formatUserResponse(createdUser) } },
     });
   } catch (err) {
-    console.error('Error creating user:', err);
+    console.error("Error creating user:", err);
     next(err);
   }
 }
-
 
 export async function getUser(req, res, next) {
   try {
@@ -157,6 +158,25 @@ export async function deleteUser(req, res, next) {
 
     await _deleteUserById(userId);
     return res.status(200).json({ message: `Deleted user ${userId} successfully` });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function forgetPassword(req, res, next) {
+  try {
+    const { email } = req.body;
+    const emailToken = TokenService.generateEmailToken(email);
+    redisService.setKeyWithExpiration(email, emailToken, 300);
+
+    const resetPasswordLink = `http://localhost:3000/reset-password/${emailToken}`;
+    await sendEmail({
+      to: email,
+      subject: "Reset password",
+      html: `Click <a href=${resetPasswordLink}>here</a> to reset your password`,
+    });
+
+    res.sendStatus(204);
   } catch (err) {
     next(err);
   }

@@ -4,7 +4,6 @@ import { formatUserResponse } from "./user-controller.js";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 import TokenService from "../services/tokenService.js";
 import { BadRequestError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
-import { decode } from "jsonwebtoken";
 
 export async function handleLogin(req, res, next) {
   const { email, password } = req.body;
@@ -89,6 +88,14 @@ export async function refresh(req, res, next) {
       message: "Access token refreshed",
       data: accessToken,
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function sendResetPasswordLinkToEmail(req, res, next) {
+  try {
+
   } catch (err) {
     next(err);
   }

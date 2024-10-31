@@ -2,6 +2,7 @@ import express from "express";
 import {
   createUser,
   deleteUser,
+  forgetPassword,
   getAllUsers,
   getUser,
   updateUser,
@@ -179,5 +180,7 @@ router.patch("/:id/privilege", verifyAccessToken, verifyIsAdmin, updateUserPrivi
  *         description: Internal server error
  */
 router.delete("/:id", verifyAccessToken, verifyIsOwnerOrAdmin, deleteUser);
+
+router.post("/forgetPassword", forgetPassword);
 
 export default router;

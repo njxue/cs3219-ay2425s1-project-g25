@@ -14,6 +14,11 @@ class TokenService {
     return accessToken;
   }
 
+  static generateEmailToken(email) {
+    const emailToken = jwt.sign({ email, jti: uuidv4() }, jwtConfig.accessTokenSecret, { expiresIn: "5m" }); // TODO: change
+    return emailToken;
+  }
+
   static generateRefreshToken(user) {
     const refreshToken = jwt.sign(
       { id: user.id, jti: uuidv4() },
