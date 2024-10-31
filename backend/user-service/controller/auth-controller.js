@@ -4,7 +4,6 @@ import { formatUserResponse } from "./user-controller.js";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 import TokenService from "../services/tokenService.js";
 import { BadRequestError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
-import { decode } from "jsonwebtoken";
 
 export async function handleLogin(req, res, next) {
   const { email, password } = req.body;
@@ -12,12 +11,12 @@ export async function handleLogin(req, res, next) {
     try {
       const user = await _findUserByEmail(email);
       if (!user) {
-        throw new UnauthorisedError("Wrong email");
+        throw new UnauthorisedError("Wrong email/password");
       }
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) {
-        throw new UnauthorisedError("Wrong password");
+        throw new UnauthorisedError("Wrong email/password");
       }
 
       // Generate access and refresh token
