@@ -55,14 +55,12 @@ export const QUESTIONS_FILTER_TEXT = {
     SELECT_TITLE: "Search by title"
 };
 
-
 export const FILTER_DIFFICULTY_TEXT = {
     ALL: "All" as QuestionDifficulty | "All",
     EASY: "Easy" as QuestionDifficulty,
     MEDIUM: "Medium" as QuestionDifficulty,
     HARD: "Hard" as QuestionDifficulty
 };
-
 
 export const LANDING_CARD_TEXT = {
     ADMIN_WELCOME: "Welcome, Admin",
@@ -71,7 +69,6 @@ export const LANDING_CARD_TEXT = {
     PEER_WELCOME: "Welcome",
     PEER_INSTRUCTIONS: "Please select a question from the list to begin with your peer."
 };
-
 
 export const QUESTION_FORM_FIELDS = {
     FIELD_TITLE: { label: "Title", name: "title" },
@@ -93,4 +90,12 @@ export const SIGN_UP_FORM_FIELDS = {
     FIELD_USERNAME: { label: "Username", name: "username" },
     FIELD_PASSWORD: { label: "Password", name: "password" },
     FIELD_CONFIRM_PASSWORD: { label: "Confirm password", name: "confirmPassword" }
+};
+
+export const COLLABORATION_AWARENESS_KEYS = {
+    USERNAME: "username"
+};
+
+export const COLLABORATION_YMAP_KEYS = {
+    SELECTED_LANGUAGE: "selectedLanguage"
 };
