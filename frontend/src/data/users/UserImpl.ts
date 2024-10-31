@@ -41,6 +41,10 @@ export class UserImpl implements IUser {
     async deleteUser(userId: string): Promise<any> {
         return this.dataSource.deleteUser(userId);
     }
+
+    async updateUserPrivilege(userId: string, isAdmin: boolean): Promise<any> {
+        return this.dataSource.updateUserPrivilege(userId, isAdmin);
+    }
 }
 
 export const userImpl = new UserImpl();

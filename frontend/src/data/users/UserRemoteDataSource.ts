@@ -58,6 +58,10 @@ export class UserRemoteDataSource extends BaseApi {
     async deleteUser(userId: string) {
         return await this.protectedDelete<any>(`/users/${userId}`);
     }
+
+    async updateUserPrivilege(userId: string, isAdmin: boolean) {
+        return await this.protectedPatch(`/users/${userId}/privilege`, { isAdmin });
+    }
 }
 
 export const userRemoteDataSource = new UserRemoteDataSource();

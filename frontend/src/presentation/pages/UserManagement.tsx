@@ -1,17 +1,20 @@
 import { User } from "domain/entities/User";
 import { userUseCases } from "domain/usecases/UserUseCases";
 import { useEffect, useState } from "react";
-import { EditOutlined, DeleteOutlined, CrownFilled } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, CrownFilled, CrownOutlined } from "@ant-design/icons";
 import styles from "./UserManagement..module.css";
-import { Button, Modal } from "antd";
+import { Modal } from "antd";
 import { UpdateProfileForm } from "presentation/components/UpdateProfileForm/UpdateProfileForm";
 import { DeleteUserForm } from "presentation/components/DeleteUserForm/DeleteUserForm";
-import { toast } from "react-toastify";
+import { UpdateUserPrivilegeForm } from "presentation/components/UpdateUserPrivilegeForm/UpdateUserPrivilegeForm";
+
 
 export const UserManagement: React.FC<{}> = () => {
     const [users, setUsers] = useState<User[]>([]);
+
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [deletingUser, setDeletingUser] = useState<User | null>(null);
+    const [promotingUser, setPromotingUser] = useState<User | null>(null);
 
     useEffect(() => {
         const getAllUsers = async () => {
@@ -42,6 +45,11 @@ export const UserManagement: React.FC<{}> = () => {
                 {!user.isAdmin && (
                     <div className={styles.userControls}>
                         <DeleteOutlined onClick={() => setDeletingUser(user)} />
+                        <CrownOutlined
+                            onClick={() => {
+                                setPromotingUser(user);
+                            }}
+                        />
                         <EditOutlined onClick={() => setEditingUser(user)} />
                     </div>
                 )}
@@ -50,6 +58,21 @@ export const UserManagement: React.FC<{}> = () => {
     };
 
     const onEditUser = (updatedUser: User) => {
+        refreshUsersList(updatedUser);
+        setEditingUser(null);
+    };
+
+    const onDeleteUser = (userId: string) => {
+        setUsers((users) => users.filter((user) => user._id !== userId));
+        setDeletingUser(null);
+    };
+
+    const onPromoteUser = (updatedUser: User) => {
+        refreshUsersList(updatedUser);
+        setPromotingUser(null);
+    };
+
+    const refreshUsersList = (updatedUser: User) => {
         const updatedUsers = users.map((user) => {
             if (user._id === updatedUser._id) {
                 return updatedUser;
@@ -57,12 +80,6 @@ export const UserManagement: React.FC<{}> = () => {
             return user;
         });
         setUsers(updatedUsers);
-        setEditingUser(null);
-    };
-
-    const onDelete = (userId: string) => {
-        setUsers((users) => users.filter((user) => user._id !== userId));
-        setDeletingUser(null);
     };
 
     return (
@@ -90,7 +107,22 @@ export const UserManagement: React.FC<{}> = () => {
                     <DeleteUserForm
                         user={deletingUser}
                         onCancel={() => setDeletingUser(null)}
-                        onSubmit={() => onDelete(deletingUser?._id)}
+                        onSubmit={() => onDeleteUser(deletingUser?._id)}
+                    />
+                </Modal>
+            )}
+            {promotingUser && (
+                <Modal
+                    open={promotingUser !== null}
+                    closable={false}
+                    title="Promote user"
+                    footer={null}
+                    maskClosable={false}
+                >
+                    <UpdateUserPrivilegeForm
+                        user={promotingUser}
+                        onSubmit={onPromoteUser}
+                        onCancel={() => setPromotingUser(null)}
                     />
                 </Modal>
             )}
