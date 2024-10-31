@@ -155,7 +155,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                         stopTimer();
                         isMatchingRef.current = false;
                     }
-                }, 30000);
+                }, 60000);
             })
             .catch(() => {
                 dispatch({ type: "SOCKET_DISCONNECTED" });
