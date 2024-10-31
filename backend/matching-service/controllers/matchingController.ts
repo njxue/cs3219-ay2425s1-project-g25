@@ -234,12 +234,13 @@ async function processMatchEvents(
 
                     for (const message of messages) {
                         const id = message.id;
-                        const fields = message.message;
+                        const fields = JSON.parse(message.message.data);
 
                         const user1 = JSON.parse(fields.user1);
                         const user2 = JSON.parse(fields.user2);
                         const roomId = fields.roomId;
                         const matchId = fields.matchId;
+                        const questionId = fields.questionId;
 
                         console.log(
                             `Processing MatchEvent ID: ${matchId} from Stream ID: ${id}`
@@ -249,9 +250,10 @@ async function processMatchEvents(
                             user2,
                             roomId,
                             matchId,
+                            questionId,
                         });
 
-                        await handleMatchEvent(user1, user2, roomId, matchId);
+                        await handleMatchEvent(user1, user2, roomId, matchId, questionId);
 
                         console.log(
                             "Before processing messages, message queue state:"
@@ -289,7 +291,8 @@ async function handleMatchEvent(
     user1: any,
     user2: any,
     roomId: string,
-    matchId: string
+    matchId: string,
+    questionId: string
 ) {
     try {
         const io = getSocket();
@@ -298,8 +301,6 @@ async function handleMatchEvent(
         const socket2 = io.sockets.sockets.get(user2.socketId);
 
         if (socket1 && socket2) {
-            socket1.join(roomId);
-            socket2.join(roomId);
 
             socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with User ID: ${user2.userId}`,
@@ -308,6 +309,7 @@ async function handleMatchEvent(
                 matchId: matchId,
                 roomId: roomId,
                 matchUserId: user2.userId,
+                questionId: questionId,
             });
 
             socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
@@ -317,6 +319,7 @@ async function handleMatchEvent(
                 matchId: matchId,
                 roomId: roomId,
                 matchUserId: user1.userId,
+                questionId: questionId,
             });
 
             console.log(

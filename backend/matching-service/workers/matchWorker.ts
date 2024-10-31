@@ -10,7 +10,7 @@ const MATCHING_INTERVAL = parseInt(process.env.MATCHING_INTERVAL || "3000");
 const RELAXATION_INTERVAL = parseInt(
     process.env.RELAXATION_INTERVAL || "10000"
 );
-const MATCH_TIMEOUT = parseInt(process.env.MATCH_TIMEOUT || "30000");
+const MATCH_TIMEOUT = parseInt(process.env.MATCH_TIMEOUT || "60000");
 
 /**
  * Starts the matchmaking worker that periodically attempts to match users
@@ -324,11 +324,12 @@ async function handleTimeouts(
  * @param message - The Kafka message payload from Collaboration-service.
  */
 export async function handleCollabMessage(message: KafkaMessage) {
-    const roomId = message.value?.toString();
+    console.log("Handling collab message:");
+    const room = message.value?.toString();
     const matchId = message.key?.toString();
 
-    if (!matchId) {
-        console.error("Match ID is undefined");
+    if (!matchId || !room) {
+        console.error("Incorrect format for collab to match message");
         return;
     }
 
@@ -341,7 +342,7 @@ export async function handleCollabMessage(message: KafkaMessage) {
 
     const roomObject = JSON.parse(data);
 
-    roomObject.roomId = roomId;
+    roomObject.roomId = JSON.parse(room).sessionId;
 
     await redisClient.hSet(matchId, "data", JSON.stringify(roomObject));
 
@@ -353,11 +354,14 @@ export async function handleCollabMessage(message: KafkaMessage) {
  * @param message - The Kafka message payload from Question-service.
  */
 export async function handleQuestionMessage(message: KafkaMessage) {
-    const questionId = message.value?.toString();
+    console.log("Handling question message");
+    const question = message.value?.toString();
     const matchId = message.key?.toString();
 
-    if (!matchId) {
-        console.error("Match ID is undefined");
+    console.log(question)
+
+    if (!matchId || !question) {
+        console.error("Incorrect format for question to match message");
         return;
     }
 
@@ -370,7 +374,7 @@ export async function handleQuestionMessage(message: KafkaMessage) {
 
     const roomObject = JSON.parse(data);
 
-    roomObject.questionId = questionId;
+    roomObject.questionId = JSON.parse(question).question;
 
     await redisClient.hSet(matchId, "data", JSON.stringify(roomObject));
 
