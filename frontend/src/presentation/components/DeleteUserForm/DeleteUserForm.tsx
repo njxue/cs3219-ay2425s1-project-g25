@@ -46,7 +46,7 @@ export const DeleteUserForm: React.FC<DeleteUserFormProps> = ({ user: userToDele
                     placeholder={`Type "${textToMatch}" to confirm`}
                 />
             )}
-            <div className={styles.deleteModalBtnGroup}>
+            <div className={styles.btnGroup}>
                 <Button onClick={handleCancel}>Cancel</Button>
                 <Button type="primary" onClick={handleDeleteUser} disabled={isConfirmBtnDisabled}>
                     Confirm

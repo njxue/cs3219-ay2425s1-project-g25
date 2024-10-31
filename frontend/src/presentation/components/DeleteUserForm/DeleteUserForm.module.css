@@ -1,5 +1,9 @@
-.deleteModalBtnGroup {
+.btnGroup {
     display: flex;
     gap: 8px;
     margin-top: 8px;
+}
+
+.btnGroup button {
+    width: 100%;
 }
