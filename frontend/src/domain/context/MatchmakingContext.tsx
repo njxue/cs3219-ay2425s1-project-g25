@@ -198,7 +198,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     if (intervalId) clearInterval(intervalId);
                     if (!isResetting.current) {
                         reset();
-                        navigate(`/room/${roomId}/${matchUserId}`);
+                        navigate(`/room/${roomId}`);
                     }
                 }
             }, 1000);

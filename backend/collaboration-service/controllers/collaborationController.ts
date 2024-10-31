@@ -2,7 +2,6 @@
 import { EachMessagePayload } from 'kafkajs';
 import { COLLAB_TOPIC, producer } from '../utils/kafkaClient';
 import Session from '../models/Session';
-import { YDocManager } from '../utils/yjs';
 
 
 export const createSession = async ( matchId: string, userIds: string[]) => {
@@ -12,9 +11,6 @@ export const createSession = async ( matchId: string, userIds: string[]) => {
     // Create new Session document in mongodb
     const newSession = new Session({ sessionId, matchId, userIds, codeContent: '' });
     await newSession.save();
-    
-    // Initialize Yjs document manager for this session
-    YDocManager.initializeDoc(sessionId);
 
     return sessionId;
 };

@@ -50,8 +50,11 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     // Connect to the server-managed Yjs document when roomId is set
     useEffect(() => {
         if (roomId == null) {
+            console.log(`RoomId is null!`)
             return;
         }
+        console.log(`Starting Collaboration Context with roomId: ${roomId}`)
+
         const provider = new WebsocketProvider(`ws://localhost:3004/${roomId}`, roomId, new Y.Doc());
         setProvider(provider);
 
@@ -100,6 +103,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     }, [provider, editor]);
 
     useEffect(() => {
+        console.log("Initialising Languages!");
         initialiseLanguages();
     }, []);
 
