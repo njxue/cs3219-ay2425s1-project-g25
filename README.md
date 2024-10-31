@@ -7,9 +7,10 @@ This project follows a microservices architecture with the following services:
 2. **User Service** - Port `3001`
 3. **Question Service** - Port `3002`
 4. **Matching Service** - Port `3003`
-5. **MongoDB** - Port `27017` (Database)
-6. **Nginx API Gateway** - Port `80`
-7. **Redis** - Port `6379`
+5. **Collaboration Service** - Port `3004`
+6. **MongoDB** - Port `27017` (Database)
+7. **Nginx API Gateway** - Port `80`
+8. **Redis** - Port `6379`
 
 ### Setting up the Project
 Copy and paste the .env.example files in each service. Rename them as .env files.
