@@ -226,16 +226,27 @@ export async function getSuitableQuestion(message: EachMessagePayload) {
 
 async function findSuitableQuestion(categoryName: string, difficulty: string) {
     try {
-        const category = await categoryModel.findOne({
-            name: new RegExp(`^${categoryName}$`, "i"),
-        });
+        let category = null;
 
-        if (!category) {
-            throw new Error(`Category '${categoryName}' not found.`);
+        if (categoryName.toLowerCase() !== "all") {
+            category = await categoryModel.findOne({
+                name: new RegExp(`^${categoryName}$`, "i"),
+            });
+
+            if (!category) {
+                throw new Error(`Category '${categoryName}' not found.`);
+            }
+        }
+
+        // If difficulty is "any", return any question from the category
+        if (difficulty.toLowerCase() === "all") {
+            return await questionModel.findOne({
+                ...(category ? { categories: category._id } : {}),
+            });
         }
 
         let question = await questionModel.findOne({
-            categories: category._id,
+            ...(category ? { categories: category._id } : {}),
             difficulty: new RegExp(`^${difficulty}$`, "i"),
         });
 
@@ -248,10 +259,10 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
             throw new Error(`Invalid difficulty level: ${difficulty}`);
         }
 
-        // Find lower difficulty question if not found
+        // Find lower difficulty question if exact match is not found
         for (let i = difficultyIndex - 1; i >= 0; i--) {
             question = await questionModel.findOne({
-                categories: category._id,
+                ...(category ? { categories: category._id } : {}),
                 difficulty: new RegExp(`^${DIFFICULTIES[i]}$`, "i"),
             });
             if (question) {
@@ -259,10 +270,10 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
             }
         }
 
-        // Find higher difficulty question if not found
+        // Find higher difficulty question if lower difficulty not found
         for (let i = difficultyIndex + 1; i < DIFFICULTIES.length; i++) {
             question = await questionModel.findOne({
-                categories: category._id,
+                ...(category ? { categories: category._id } : {}),
                 difficulty: new RegExp(`^${DIFFICULTIES[i]}$`, "i"),
             });
             if (question) {
