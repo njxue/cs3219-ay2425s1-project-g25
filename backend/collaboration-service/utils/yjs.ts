@@ -5,6 +5,15 @@ class YDocManager {
 
     static initializeDoc(sessionId: string): Y.Doc {
         const ydoc = new Y.Doc();
+
+        // Initialize the shared map and set default language
+        const ymap = ydoc.getMap("sharedMap");
+        ymap.set("SELECTED_LANGUAGE", {
+            language: "javascript",
+            version: "1.32.3",
+            alias: "Javascript",
+        });
+
         this.docs.set(sessionId, ydoc);
         return ydoc;
     }
