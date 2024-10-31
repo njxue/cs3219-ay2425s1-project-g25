@@ -54,6 +54,9 @@ export const UserManagement: React.FC<{}> = () => {
         [sortedUsers, searchTerm]
     );
 
+    const numFilteredUsers = filteredUsers.length;
+    const userCountText = `Found: ${numFilteredUsers} ${numFilteredUsers == 1 ? "user" : "users"}`;
+
     const renderUser = (user: User) => {
         return (
             <div className={styles.userRow} key={user._id}>
@@ -107,6 +110,7 @@ export const UserManagement: React.FC<{}> = () => {
     return (
         <div className={styles.container}>
             <SearchBar searchTerm={searchTerm} onSearch={(s) => setSearchTerm(s)} placeholder="Search users..." />
+            <h3>{userCountText}</h3>
             {filteredUsers.map((user) => renderUser(user))}
             {editingUser && (
                 <Modal
