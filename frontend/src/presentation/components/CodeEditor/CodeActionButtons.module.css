@@ -1,0 +1,12 @@
+.submitButton {
+    background-color: #ffa500;
+}
+
+.runButton {
+    background-color: black;
+    color: white;
+}
+
+button {
+    width: fit-content;
+}
