@@ -1,20 +1,23 @@
 import { User } from "domain/entities/User";
 import { userUseCases } from "domain/usecases/UserUseCases";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EditOutlined, DeleteOutlined, CrownFilled, CrownOutlined } from "@ant-design/icons";
 import styles from "./UserManagement..module.css";
 import { Modal } from "antd";
 import { UpdateProfileForm } from "presentation/components/UpdateProfileForm/UpdateProfileForm";
 import { DeleteUserForm } from "presentation/components/DeleteUserForm/DeleteUserForm";
 import { UpdateUserPrivilegeForm } from "presentation/components/UpdateUserPrivilegeForm/UpdateUserPrivilegeForm";
-
+import { useAuth } from "domain/context/AuthContext";
+import { SearchBar } from "presentation/components/SearchBar";
 
 export const UserManagement: React.FC<{}> = () => {
     const [users, setUsers] = useState<User[]>([]);
-
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [deletingUser, setDeletingUser] = useState<User | null>(null);
     const [promotingUser, setPromotingUser] = useState<User | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+
+    const { user: currUser } = useAuth();
 
     useEffect(() => {
         const getAllUsers = async () => {
@@ -24,21 +27,40 @@ export const UserManagement: React.FC<{}> = () => {
         getAllUsers();
     }, []);
 
-    const sortedUsers = users.sort((u1, u2) => {
-        if (u1.isAdmin && !u2.isAdmin) {
-            return -1;
-        } else if (!u1.isAdmin && u2.isAdmin) {
-            return 1;
-        } else {
-            return u1.username.localeCompare(u2.username);
-        }
-    });
+    const sortedUsers = useMemo(
+        () =>
+            users.sort((u1, u2) => {
+                if (u1._id === currUser?._id) {
+                    return -1;
+                }
+
+                if (u2._id === currUser?._id) {
+                    return 1;
+                }
+                if (u1.isAdmin && !u2.isAdmin) {
+                    return -1;
+                }
+
+                if (!u1.isAdmin && u2.isAdmin) {
+                    return 1;
+                }
+                return u1.username.localeCompare(u2.username);
+            }),
+        [users]
+    );
+
+    const filteredUsers = useMemo(
+        () => sortedUsers.filter((user) => user.username.toLowerCase().includes(searchTerm.toLowerCase())),
+        [sortedUsers, searchTerm]
+    );
 
     const renderUser = (user: User) => {
         return (
             <div className={styles.userRow} key={user._id}>
                 <div className={styles.username}>
-                    <p>{user.username}</p>
+                    <p>
+                        {user.username} {currUser?._id === user._id && <span style={{ color: "gray" }}>(you)</span>}
+                    </p>
                     {user.isAdmin && <CrownFilled />}
                 </div>
 
@@ -84,7 +106,8 @@ export const UserManagement: React.FC<{}> = () => {
 
     return (
         <div className={styles.container}>
-            {sortedUsers.map((user) => renderUser(user))}
+            <SearchBar searchTerm={searchTerm} onSearch={(s) => setSearchTerm(s)} placeholder="Search users..." />
+            {filteredUsers.map((user) => renderUser(user))}
             {editingUser && (
                 <Modal
                     open={editingUser !== null}
