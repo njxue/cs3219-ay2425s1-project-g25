@@ -16,8 +16,8 @@ export const producer = kafka.producer();
 export const consumer = kafka.consumer({ groupId: "matching-service-group" });
 
 export const MATCH_TOPIC = "match_topic";
-export const ROOM_TOPIC = "collab-room";
-export const QUESTION_TOPIC = "question-ids";
+export const COLLAB_TOPIC = "collaboration_topic";
+export const QUESTION_TOPIC = "question_topic";
 
 export const initKafka = async () => {
     await producer.connect();
@@ -27,12 +27,12 @@ export const initKafka = async () => {
 export async function setUpKafkaSubscribers() {
     await initKafka();
 
-    await consumer.subscribe({ topic: ROOM_TOPIC, fromBeginning: true });
+    await consumer.subscribe({ topic: COLLAB_TOPIC, fromBeginning: true });
     await consumer.subscribe({ topic: QUESTION_TOPIC, fromBeginning: true });
 
     await consumer.run({
         eachMessage: async ({ topic, message }) => {
-            if (topic === ROOM_TOPIC) {
+            if (topic === COLLAB_TOPIC) {
                 await handleCollabMessage(message);
             } else if (topic === QUESTION_TOPIC) {
                 await handleQuestionMessage(message);
