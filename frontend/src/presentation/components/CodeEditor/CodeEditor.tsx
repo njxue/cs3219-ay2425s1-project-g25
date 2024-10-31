@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./CodeEditor.module.css";
 import Editor from "@monaco-editor/react";
 import { Button, Spin } from "antd";
@@ -15,8 +15,37 @@ interface CodeEditorProps {
 const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     const { onEditorIsMounted, isExecuting, setRoomId, connectedUsers } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        let resizeObserver: ResizeObserver | null = null;
+        let resizeTimeout: NodeJS.Timeout;
+
+        if (containerRef.current && editorRef.current) {
+            resizeObserver = new ResizeObserver((entries) => {
+                // Debounce resize events
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    if (editorRef.current) {
+                        editorRef.current.layout();
+                    }
+                }, 100);
+            });
+
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+            }
+            clearTimeout(resizeTimeout);
+        };
+    }, []);
 
     const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+        editorRef.current = editor;
         onEditorIsMounted(editor);
         setRoomId(roomId);
     };
@@ -26,7 +55,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} ref={containerRef}>
             <div className={styles.toolbar}>
                 <div className={styles.toolbarLeft}>
                     <LanguageSelector />
@@ -65,7 +94,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                     options={{
                         minimap: { enabled: false },
                         scrollbar: { verticalScrollbarSize: 4 },
-                        formatOnPaste: true
+                        formatOnPaste: true,
+                        automaticLayout: false // Disable automatic layout
                     }}
                 />
             </div>
