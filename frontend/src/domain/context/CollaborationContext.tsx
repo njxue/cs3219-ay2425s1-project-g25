@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect, useMemo } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect, useMemo, useCallback } from "react";
 import * as Y from "yjs";
 import * as monaco from "monaco-editor";
 import { MonacoBinding } from "y-monaco";
@@ -20,6 +20,7 @@ interface CollaborationContextType {
     execResult: CodeExecResult | null;
     setRoomId: (roomId: string) => void;
     connectedUsers: string[];
+    disconnect: () => void;
 }
 
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
@@ -42,12 +43,10 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const [execResult, setExecResult] = useState<CodeExecResult | null>(null);
     const [isExecuting, setIsExecuting] = useState<boolean>(false);
     const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
-
     const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [provider, setProvider] = useState<WebsocketProvider | null>(null);
     const [binding, setBinding] = useState<MonacoBinding | null>(null);
 
-    // Connect to the server-managed Yjs document when roomId is set
     useEffect(() => {
         if (roomId == null) {
             console.log(`RoomId is null!`)
@@ -70,11 +69,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         };
     }, [roomId]);
 
-    // Set up Monaco editor with server-managed Yjs document
-    useEffect(() => {
-        if (provider == null || editor == null || editor.getModel() == null) {
-            return;
-        }
+    // Set up Monaco editor with server-managed Yjs document    useEffect(() => {
+        if (!provider || !editor?.getModel()) return;
 
         // Access the server-managed ydoc via provider.doc
         const ytext = provider.doc.getText("monaco");
@@ -88,11 +84,11 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 if (key === SELECTED_LANGUAGE) {
                     const language: Language = ymap.get(SELECTED_LANGUAGE) as Language;
                     setSelectedLanguage(language);
-                    const model = editor.getModel();
-                    monaco.editor.setModelLanguage(model!, language.language);
+                    monaco.editor.setModelLanguage(editor.getModel()!, language.language);
                 }
             });
         });
+
 
         // Initialize editor language from the shared Yjs map
         const language = ymap.get(SELECTED_LANGUAGE) as Language;
@@ -108,14 +104,13 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     }, []);
 
     const initialiseLanguages = async () => {
-        // Initialise language dropdown
         const allLanguages = monaco.languages.getLanguages();
         const pistonLanguageVersions = await PistonClient.getLanguageVersions();
         setLanguages(
             allLanguages
                 .filter((lang) => pistonLanguageVersions.some((pistonLang: any) => pistonLang.language === lang.id))
                 .map((lang) => ({
-                    alias: lang.aliases && lang.aliases.length > 0 ? lang.aliases[0] : lang.id,
+                    alias: lang.aliases?.[0] || lang.id,
                     language: lang.id,
                     version: pistonLanguageVersions.find((pistonLang: any) => pistonLang.language === lang.id)?.version
                 }))
@@ -131,11 +126,9 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         try {
             setIsExecuting(true);
             const sourceCode = editor?.getValue();
-            if (!sourceCode) {
-                // TODO
-                return;
-            }
-            const output: CodeExecResult = await PistonClient.executeCode(selectedLanguage, sourceCode);
+            if (!sourceCode) return;
+
+            const output = await PistonClient.executeCode(selectedLanguage, sourceCode);
             setExecResult(output);
         } catch (e) {
             toast.error("There was an issue running the code");
@@ -159,7 +152,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 handleExecuteCode,
                 isExecuting,
                 execResult,
-                connectedUsers
+                connectedUsers,
+                disconnect
             }}
         >
             {children}
