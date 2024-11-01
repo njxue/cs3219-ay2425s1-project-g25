@@ -1,20 +1,10 @@
 .submitButton {
-    background-color: #ffa500 !important;
-    color: black !important;
-    font-weight: bold !important;
+    background-color: #ffa500;
 }
 
 .runButton {
-    background-color: #1a1a1a !important;
-    color: white !important;
-}
-
-.runButton:hover {
-    background-color: #333 !important;
-}
-
-.submitButton:hover {
-    background-color: #ffb52e !important;
+    background-color: black;
+    color: white;
 }
 
 button {

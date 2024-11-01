@@ -7,7 +7,7 @@ import { UnauthorisedError } from "../utils/httpErrors.js";
 class TokenService {
   static generateAccessToken(user) {
     const accessToken = jwt.sign(
-      { id: user.id, isAdmin: user.isAdmin, username: user.username },
+      { id: user.id, isAdmin: user.isAdmin },
       jwtConfig.accessTokenSecret,
       jwtConfig.accessTokenOptions
     );
@@ -16,7 +16,7 @@ class TokenService {
 
   static generateRefreshToken(user) {
     const refreshToken = jwt.sign(
-      { id: user.id, jti: uuidv4(), username: user.username },
+      { id: user.id, jti: uuidv4() },
       jwtConfig.refreshTokenSecret,
       jwtConfig.refreshTokenOptions
     );
