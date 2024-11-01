@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Table, Tag, Typography, Badge, Button, message, Empty } from 'antd';
+import { Table, Tag, Typography, Badge, Button, message, Empty, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import styles from "./RecentAttemptsTable.module.css";
 import { HistoryEntry } from "domain/entities/HistoryEntry";
 import { historyUseCases } from "domain/usecases/HistoryUseCases";
+import { ReactMarkdown } from "./common/ReactMarkdown";
 
 export const RecentAttemptsTable: React.FC = () => {
   const [recentAttemptsData, setRecentAttemptsData] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [currentCode, setCurrentCode] = useState<string>("");
 
   useEffect(() => {
     fetchRecentAttempts();
@@ -71,12 +74,31 @@ export const RecentAttemptsTable: React.FC = () => {
     }
   };
 
+  const showModal = (code: string) => {
+    setCurrentCode(code);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setCurrentCode("");
+  };
+
   const columns: ColumnsType<HistoryEntry> = [
     {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
       sorter: (a, b) => new Date(a.attemptCompletedAt).getTime() - new Date(b.attemptCompletedAt).getTime(),
+      render: (_text, record) => {
+        const startDate = new Date(record.attemptStartedAt).toLocaleString();
+        const endDate = new Date(record.attemptCompletedAt).toLocaleString();
+        return (
+          <span>
+            {startDate} - {endDate}
+          </span>
+        );
+      },
     },
     {
       title: 'Title',
@@ -118,6 +140,15 @@ export const RecentAttemptsTable: React.FC = () => {
         </>
       ),
     },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_text, record) => (
+        <Button type="link" onClick={() => showModal(record.attemptCode)}>
+          View Code
+        </Button>
+      ),
+    },
   ];
 
   // Row Selection Configuration
@@ -152,7 +183,23 @@ export const RecentAttemptsTable: React.FC = () => {
         locale={{
           emptyText: <Empty description="No attempts yet" />,
         }}
+        rowKey="key" // Ensure that each row has a unique key
       />
+      
+      {/* Modal for Viewing Code */}
+      <Modal
+        title="Attempt Code"
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={[
+          <Button key="close" onClick={handleModalClose}>
+            Close
+          </Button>,
+        ]}
+        width={800}
+      >
+        <ReactMarkdown isReadOnly value={currentCode} />
+      </Modal>
     </div>
   );
 };
