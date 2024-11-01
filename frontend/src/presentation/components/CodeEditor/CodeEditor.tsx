@@ -7,6 +7,7 @@ import * as monaco from "monaco-editor";
 import { SunOutlined, MoonFilled } from "@ant-design/icons";
 import { LanguageSelector } from "./LanguageSelector";
 import { CodeActionButtons } from "./CodeActionButtons";
+import EndButton from "./EndButton";
 
 interface CodeEditorProps {
     roomId: string;
@@ -84,6 +85,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                         />
 
                         <CodeActionButtons disabled={isExecuting} />
+                        <EndButton getEditorText={() => editorRef.current?.getValue() || ""} />
                     </div>
                 </div>
             </div>
