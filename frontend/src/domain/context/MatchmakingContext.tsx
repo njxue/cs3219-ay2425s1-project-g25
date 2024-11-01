@@ -193,6 +193,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
             message: string | null = null,
             category: string | null = null,
             difficulty: string | null = null,
+            attemptStartedAt: string | null = null,
             matchId: string | null = null,
             roomId: string | null = null,
             matchUserId: string | null = null, 
@@ -209,7 +210,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                         reset();
                         navigate(`/room/${roomId}`, {
                             state: {
-                                message, category, difficulty, roomId, matchId, matchUserId, questionId
+                                message, category, difficulty, attemptStartedAt, roomId, matchId, matchUserId, questionId
                             }
                         });
                     }
@@ -218,8 +219,8 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
 
         // Listen for match found event and start countdown
-        matchService.onMatchFound(({ message, category, difficulty, matchId, roomId, matchUserId, questionId }) => {
-            console.log({ message, category, difficulty, matchId, roomId, matchUserId, questionId })
+        matchService.onMatchFound(({ message, category, difficulty, attemptStartedAt, matchId, roomId, matchUserId, questionId }) => {
+            console.log({ message, category, difficulty, attemptStartedAt, matchId, roomId, matchUserId, questionId })
             if (isMatchingRef.current) {
                 dispatch({ type: "MATCH_FOUND" });
                 isMatchingRef.current = false;
@@ -228,7 +229,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     clearTimeout(matchTimeoutRef.current);
                 }
 
-                startCountdown(message, category, difficulty, matchId, roomId, matchUserId, questionId); // Start countdown with roomId for navigation
+                startCountdown(message, category, difficulty, attemptStartedAt, matchId, roomId, matchUserId, questionId); // Start countdown with roomId for navigation
             }
         });
 

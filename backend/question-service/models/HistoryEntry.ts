@@ -5,17 +5,21 @@ export interface HistoryEntry extends mongoose.Document {
   _id: Types.ObjectId;
   userId: string;
   question: Types.ObjectId | Question;
+  roomId: string; // Note: This should not be used to retrieve the room from matching service! This is only here to serve as a uniqueness check for updating attempt information!
   attemptStartedAt: Date;
   attemptCompletedAt: Date;
-  collaborator: string;
+  collaboratorId: string;
+  attemptCode: string;
 }
 
 const historyEntrySchema: Schema = new Schema<HistoryEntry>({
   userId: { type: String, required: true },
   question: { type: Schema.Types.ObjectId, ref: 'question', required: true },
+  roomId: { type: String, required: true, unique: true },
   attemptStartedAt: { type: Date, required: true, default: Date.now() },
   attemptCompletedAt: { type: Date, required: true, default: Date.now() },
-  collaborator: { type: String, required: true },
+  collaboratorId: { type: String, required: true },
+  attemptCode: { type: String, required: true },
 });
 
 const historyEntryModel = mongoose.model<HistoryEntry>('historyEntry', historyEntrySchema);

@@ -89,6 +89,7 @@ class MatchService {
         message: string;
         category: string;
         difficulty: string;
+        attemptStartedAt: string;
         matchId: string;
         roomId: string;
         matchUserId: string; 

@@ -8,20 +8,6 @@ const getErrorMessage = (error: unknown): string => {
   return 'An unexpected error occurred';
 };
 
-const decodeToken = (token: string): { id: string; isAdmin: boolean } | null => {
-  try {
-    const decoded = jwt.decode(token) as { id: string; isAdmin: boolean };
-    if (decoded && decoded.id) {
-      return decoded;
-    } else {
-      throw new Error("Invalid token payload");
-    }
-  } catch (error) {
-    return null;
-  }
-};
-
-
 const extractUserIdFromToken = (req: Request): string | null => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -71,56 +57,53 @@ export const getUserHistoryEntries = async (req: Request, res: Response) => {
   }
 };
 
-export const createUserHistoryEntry = async (req: Request, res: Response) => {
+export const createOrUpdateUserHistoryEntry = async (req: Request, res: Response) => {
   try {
+    // Extract userId from the token
     const userId = extractUserIdFromToken(req);
 
     if (!userId) {
       return res.status(401).json({ error: 'Invalid or missing token' });
     }
 
-    const { question, attemptStartedAt, attemptCompletedAt, collaborator } = req.body;
-    const collaboratorId = collaborator === null || collaborator === undefined || collaborator === '' ? userId : collaborator;
+    // Destructure required fields from the request body
+    const { questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode } = req.body;
 
-    const newHistoryEntry = new historyEntryModel({
-      userId,
-      question,
-      attemptStartedAt,
-      attemptCompletedAt,
-      collaborator: collaboratorId, // TODO: Remove this in final impl, this is just temporary
-    });
-
-    const savedEntry = await newHistoryEntry.save();
-    res.status(201).json(savedEntry);
-  } catch (error) {
-    res.status(500).json({ error: getErrorMessage(error) });
-  }
-};
-
-export const updateUserHistoryEntry = async (req: Request, res: Response) => {
-  try {
-    const userId = extractUserIdFromToken(req);
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Invalid or missing token' });
+    // Validate required fields (optional but recommended)
+    if (!roomId) {
+      return res.status(400).json({ error: 'roomId is required' });
     }
 
-    const { id } = req.params;
-    const updates = req.body;
+    // Attempt to find an existing history entry with the same userId and roomId
+    const existingEntry = await historyEntryModel.findOne({ userId, roomId });
 
-    const updatedEntry = await historyEntryModel.findOneAndUpdate(
-      { _id: id, userId },
-      updates,
-      { new: true }
-    );
+    if (existingEntry) {
+      existingEntry.question = questionId;
+      existingEntry.attemptStartedAt = attemptStartedAt;
+      existingEntry.attemptCompletedAt = attemptCompletedAt;
+      existingEntry.collaboratorId = collaboratorId;
+      existingEntry.attemptCode = attemptCode;
 
-    if (!updatedEntry) {
-      return res.status(404).json({ message: 'History entry not found' });
+      const updatedEntry = await existingEntry.save();
+
+      return res.status(200).json(updatedEntry);
+    } else {
+      const newHistoryEntry = new historyEntryModel({
+        userId,
+        question: questionId,
+        roomId,
+        attemptStartedAt,
+        attemptCompletedAt,
+        collaboratorId,
+        attemptCode,
+      });
+
+      const savedEntry = await newHistoryEntry.save();
+
+      return res.status(201).json(savedEntry);
     }
-
-    res.status(200).json(updatedEntry);
   } catch (error) {
-    res.status(500).json({ error: getErrorMessage(error) });
+    return res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 

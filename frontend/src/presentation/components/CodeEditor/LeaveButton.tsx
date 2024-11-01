@@ -1,13 +1,26 @@
 import React, { useState } from "react";
 import { Button, Modal } from "antd";
 import { StopOutlined } from "@ant-design/icons";
-import styles from "./EndButton.module.css";
+import styles from "./LeaveButton.module.css";
+import AuthClientStore from "data/auth/AuthClientStore";
+import { useNavigate } from "react-router-dom";
 
-interface EndButtonProps {
+interface LeaveButtonProps {
     getEditorText: () => string;
+    questionId: string;
+    roomId: string;
+    attemptStartedAt: Date;
+    collaboratorId: string;
 }
 
-const EndButton: React.FC<EndButtonProps> = ({ getEditorText }) => {
+const LeaveButton: React.FC<LeaveButtonProps> = ({
+    getEditorText,
+    questionId,
+    roomId,
+    attemptStartedAt,
+    collaboratorId,
+}) => {
+    const navigate = useNavigate();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editorContent, setEditorContent] = useState("");
 
@@ -17,7 +30,24 @@ const EndButton: React.FC<EndButtonProps> = ({ getEditorText }) => {
         setIsModalVisible(true);
     };
 
-    const handleOk = () => {
+    const handleOk = async () => {
+        const token = AuthClientStore.getAccessToken();
+        await fetch('http://localhost:3002/api/history', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            questionId,
+            roomId,
+            attemptStartedAt,
+            attemptCompletedAt: new Date(),
+            collaboratorId,
+            attemptCode: getEditorText(),
+          })
+        });
+        navigate('/')
         setIsModalVisible(false);
     };
 
@@ -52,4 +82,4 @@ const EndButton: React.FC<EndButtonProps> = ({ getEditorText }) => {
     );
 };
 
-export default EndButton;
+export default LeaveButton;

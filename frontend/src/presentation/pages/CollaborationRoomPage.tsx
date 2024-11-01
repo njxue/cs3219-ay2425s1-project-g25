@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import styles from "./CollaborationRoomPage.module.css";
 import CodeEditor from "presentation/components/CodeEditor/CodeEditor";
 import { QuestionDetail } from "presentation/components/QuestionDetail";
-import { initialQuestions } from "data/repositories/mockQuestionRepository";
 import { useLocation } from "react-router-dom";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
@@ -14,7 +13,8 @@ import { questionUseCases } from "domain/usecases/QuestionUseCases";
 
 const CollaborationRoomPage: React.FC = () => {
     const location = useLocation();
-    const { message, category, difficulty, roomId, matchId, matchUserId, questionId } = location.state;
+    const { message, category, difficulty, roomId, attemptStartedAt, matchId, matchUserId, questionId } = location.state;
+    console.log(attemptStartedAt, parseInt(attemptStartedAt), new Date(parseInt(attemptStartedAt)))
     const [question, setQuestion] = useState<Question>();
     const [showChat, setShowChat] = useState(false);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
@@ -86,7 +86,12 @@ const CollaborationRoomPage: React.FC = () => {
 
                     <div className={styles.editorAndOutputContainer}>
                         <div className={styles.editorContainer}>
-                            <CodeEditor roomId={roomId} />
+                            <CodeEditor
+                                questionId={questionId}
+                                roomId={roomId}
+                                attemptStartedAt={new Date(attemptStartedAt)}
+                                collaboratorId={matchUserId}
+                            />
                         </div>
 
                         <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
