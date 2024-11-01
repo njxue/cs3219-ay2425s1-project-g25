@@ -2,16 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Table, Tag, Typography, Badge, Button, message, Empty } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import styles from "./RecentAttemptsTable.module.css";
-import AuthClientStore from "data/auth/AuthClientStore";
-
-interface HistoryEntry {
-  id: string;
-  key: string;
-  date: string;
-  title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  topics: string[];
-}
+import { HistoryEntry } from "domain/entities/HistoryEntry";
+import { historyUseCases } from "domain/usecases/HistoryUseCases";
 
 export const RecentAttemptsTable: React.FC = () => {
   const [recentAttemptsData, setRecentAttemptsData] = useState<HistoryEntry[]>([]);
@@ -25,33 +17,8 @@ export const RecentAttemptsTable: React.FC = () => {
   const fetchRecentAttempts = async () => {
     setLoading(true);
     try {
-      const token = AuthClientStore.getAccessToken();
-      const response = await fetch('http://localhost:3002/api/history', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error fetching data: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log(data);
-
-      // Transform data to match RecentAttempt interface
-      const formattedData: HistoryEntry[] = data.map((entry: any) => ({
-        key: entry._id,
-        id: entry._id,
-        date: new Date(entry.attemptStartedAt).toLocaleDateString(),
-        title: entry.question.title || 'Unknown Title',
-        difficulty: entry.question.difficulty || 'Easy',
-        topics: entry.question.categories.map((cat: any) => cat.name) || [],
-      }));
-
-      setRecentAttemptsData(formattedData);
+      const data = await historyUseCases.getAllCategories();
+      setRecentAttemptsData(data);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Failed to fetch recent attempts:", error.message);
@@ -65,22 +32,9 @@ export const RecentAttemptsTable: React.FC = () => {
     }
   };
 
-  // Function to handle clearing all attempts
   const handleClearAllAttempts = async () => {
     try {
-      const token = AuthClientStore.getAccessToken();
-      const response = await fetch('http://localhost:3002/api/history/all', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error clearing attempts: ${response.statusText}`);
-      }
-
+      await historyUseCases.deleteAllUserHistories();
       message.success("All attempts cleared successfully");
       setRecentAttemptsData([]);
     } catch (error) {
@@ -94,31 +48,14 @@ export const RecentAttemptsTable: React.FC = () => {
     }
   };
 
-  // Function to handle deleting selected attempts
   const handleDeleteSelectedAttempts = async () => {
     try {
       if (selectedRowKeys.length === 0) {
         message.info("No attempts selected");
         return;
       }
-
-      const token = AuthClientStore.getAccessToken();
-      const response = await fetch('http://localhost:3002/api/history', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ ids: selectedRowKeys }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error deleting attempts: ${response.statusText}`);
-      }
-
+      await historyUseCases.deleteSelectedUserHistories(selectedRowKeys.map((key) => key.toString()));
       message.success(`${selectedRowKeys.length} attempt(s) deleted successfully`);
-
-      // Remove deleted attempts from the state
       setRecentAttemptsData((prevData) =>
         prevData.filter((attempt) => !selectedRowKeys.includes(attempt.key))
       );
@@ -139,7 +76,7 @@ export const RecentAttemptsTable: React.FC = () => {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      sorter: (a, b) => new Date(a.attemptCompletedAt).getTime() - new Date(b.attemptCompletedAt).getTime(),
     },
     {
       title: 'Title',

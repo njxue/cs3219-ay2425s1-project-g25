@@ -51,7 +51,18 @@ export const getUserHistoryEntries = async (req: Request, res: Response) => {
         model: 'category',
       },
     });
-    res.status(200).json(historyEntries);
+    const historyViewModels = historyEntries.map((entry) => {
+      return {
+        id: entry._id,
+        key: entry._id,
+        attemptStartedAt: entry.attemptStartedAt.getTime(),
+        attemptCompletedAt: entry.attemptCompletedAt.getTime(),
+        title: entry.question.title,
+        difficulty: entry.question.difficulty,
+        topics: entry.question.categories.map((cat: any) => cat.name),
+        attemptCode: entry.attemptCode,
+    }});
+    res.status(200).json(historyViewModels);
   } catch (error) {
     res.status(500).json({ error: getErrorMessage(error) });
   }

@@ -17,11 +17,13 @@ export class BaseApi {
     }
 
     private createAxiosInstance(baseUrl: string): AxiosInstance {
+        const token = AuthClientStore.getAccessToken();
         return axios.create({
             baseURL: API_URL + baseUrl,
             timeout: 10000,
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${token}`,
             },
             withCredentials: true
         });

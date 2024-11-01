@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Button, Modal } from "antd";
 import { StopOutlined } from "@ant-design/icons";
 import styles from "./LeaveButton.module.css";
-import AuthClientStore from "data/auth/AuthClientStore";
 import { useNavigate } from "react-router-dom";
+import { historyUseCases } from "domain/usecases/HistoryUseCases";
 
 interface LeaveButtonProps {
     getEditorText: () => string;
@@ -31,22 +31,14 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
     };
 
     const handleOk = async () => {
-        const token = AuthClientStore.getAccessToken();
-        await fetch('http://localhost:3002/api/history', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
+        await historyUseCases.createOrUpdateUserHistory(
             questionId,
             roomId,
-            attemptStartedAt,
-            attemptCompletedAt: new Date(),
+            attemptStartedAt.getTime().toString(),
+            Date.now().toString(),
             collaboratorId,
-            attemptCode: getEditorText(),
-          })
-        });
+            getEditorText(),
+        );
         navigate('/')
         setIsModalVisible(false);
     };

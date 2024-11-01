@@ -4,7 +4,7 @@ import { Question } from './Question';
 export interface HistoryEntry extends mongoose.Document {
   _id: Types.ObjectId;
   userId: string;
-  question: Types.ObjectId | Question;
+  question: Question;
   roomId: string; // Note: This should not be used to retrieve the room from matching service! This is only here to serve as a uniqueness check for updating attempt information!
   attemptStartedAt: Date;
   attemptCompletedAt: Date;
