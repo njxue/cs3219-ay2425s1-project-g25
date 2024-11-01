@@ -9,11 +9,13 @@ import NotFound from "./NotFound";
 import { OutputBox } from "presentation/components/CodeEditor/OutputBox";
 import ToggleButton from "presentation/components/buttons/ToggleButton";
 import ChatFrame from "presentation/components/iframe/ChatFrame";
+import { Question } from "domain/entities/Question";
+import { questionUseCases } from "domain/usecases/QuestionUseCases";
 
 const CollaborationRoomPage: React.FC = () => {
     const location = useLocation();
     const { message, category, difficulty, roomId, matchId, matchUserId, questionId } = location.state;
-    console.log(message, category, difficulty, matchId, roomId, matchUserId, questionId);
+    const [question, setQuestion] = useState<Question>();
     const [showChat, setShowChat] = useState(false);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -25,6 +27,18 @@ const CollaborationRoomPage: React.FC = () => {
             console.log("Resizing...");
         }, 100);
     }, []);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const fetchedQuestion = await questionUseCases.getQuestion(questionId);
+                setQuestion(fetchedQuestion);
+            } catch (err) {
+                console.warn(err);
+            }
+        };
+        fetchQuestions();
+    }, [questionId]);
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
@@ -58,28 +72,32 @@ const CollaborationRoomPage: React.FC = () => {
     if (!roomId) return <NotFound />;
 
     return (
-        <div className={styles.container}>
-            <div className={styles.questionContainer} style={{ width: questionPosition }}>
-                <div className={styles.questionContent}>
-                    <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
-                    {showChat ? <ChatFrame roomId={roomId} /> : <QuestionDetail question={initialQuestions[0]} />}
+        <>
+            {question &&
+                <div className={styles.container}>
+                    <div className={styles.questionContainer} style={{ width: questionPosition }}>
+                        <div className={styles.questionContent}>
+                            <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
+                            {showChat ? <ChatFrame roomId={roomId} /> : <QuestionDetail question={question} />}
+                        </div>
+                    </div>
+
+                    <div className={styles.verticalSeparator} {...verticalSeparatorProps} />
+
+                    <div className={styles.editorAndOutputContainer}>
+                        <div className={styles.editorContainer}>
+                            <CodeEditor roomId={roomId} />
+                        </div>
+
+                        <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
+
+                        <div className={styles.outputContainer} style={{ height: outputPosition }}>
+                            <OutputBox />
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div className={styles.verticalSeparator} {...verticalSeparatorProps} />
-
-            <div className={styles.editorAndOutputContainer}>
-                <div className={styles.editorContainer}>
-                    <CodeEditor roomId={roomId} />
-                </div>
-
-                <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
-
-                <div className={styles.outputContainer} style={{ height: outputPosition }}>
-                    <OutputBox />
-                </div>
-            </div>
-        </div>
+            }
+        </>
     );
 };
 
