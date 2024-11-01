@@ -147,6 +147,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                 dispatch({ type: "SOCKET_CONNECTED" });
                 matchService.startMatch(category, difficulty);
                 dispatch({ type: "START_MATCHING" });
+                timerDispatch({ type: "RESET_TIMER" });
                 startTimer();
 
                 matchTimeoutRef.current = setTimeout(() => {
@@ -155,7 +156,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                         stopTimer();
                         isMatchingRef.current = false;
                     }
-                }, 30000);
+                }, 60000);
             })
             .catch(() => {
                 dispatch({ type: "SOCKET_DISCONNECTED" });
@@ -198,7 +199,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     if (intervalId) clearInterval(intervalId);
                     if (!isResetting.current) {
                         reset();
-                        navigate(`/room/${roomId}/${matchUserId}`);
+                        navigate(`/room/${roomId}`);
                     }
                 }
             }, 1000);
@@ -230,7 +231,6 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                 stopTimer();
             }
         });
-
 
         // When the match status is "found", start countdown (if triggered elsewhere)
         if (state.status === "found" && !intervalId) {

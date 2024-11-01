@@ -8,6 +8,7 @@ import { connectToDatabase } from './utils/database';
 import { errorHandler } from './middlewares/errorHandler';
 import { populateQuestions } from './utils/populateQuestions';
 import historyRoutes from './routes/historyRoutes';
+import { setUpKafkaSubscribers } from './utils/kafkaClient';
 
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
@@ -33,6 +34,8 @@ if (process.env.POPULATE_DB === 'true') {
   populateQuestions();
 }
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
+
+  await setUpKafkaSubscribers();
 });
