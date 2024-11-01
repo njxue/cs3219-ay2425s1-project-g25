@@ -38,9 +38,6 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         alias: "Javascript"
     });
 
-    const ydoc = useMemo(() => new Y.Doc(), []);
-    const ymap: Y.Map<any> = useMemo(() => ydoc.getMap("sharedMap"), [ydoc]);
-
     const [roomId, setRoomId] = useState<string | null>(null);
     const [languages, setLanguages] = useState<Language[]>([]);
     const [execResult, setExecResult] = useState<CodeExecResult | null>(null);
@@ -50,62 +47,59 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const [provider, setProvider] = useState<WebsocketProvider | null>(null);
     const [binding, setBinding] = useState<MonacoBinding | null>(null);
 
-    const disconnect = useCallback(() => {
-        binding?.destroy();
-        provider?.destroy();
-        ydoc?.destroy();
-        setConnectedUsers([]);
-        setProvider(null);
-        setBinding(null);
-        setRoomId(null);
-    }, [binding, provider, ydoc]);
-
     useEffect(() => {
-        if (!roomId) return;
+        if (roomId == null) {
+            console.log(`RoomId is null!`)
+            return;
+        }
+        console.log(`Starting Collaboration Context with roomId: ${roomId}`)
 
-        const newProvider = new WebsocketProvider("ws://localhost:1234", roomId, ydoc);
-        setProvider(newProvider);
+        const provider = new WebsocketProvider(`ws://localhost:3004/${roomId}`, roomId, new Y.Doc());
+        setProvider(provider);
 
-        newProvider.awareness.setLocalStateField(USERNAME, username);
-        newProvider.awareness.on("change", () => {
-            const users = Array.from(newProvider.awareness.getStates().values());
-            const uniqueUsers = new Set(users.map((user) => user[USERNAME])); // Use Set for uniqueness
-            setConnectedUsers(Array.from(uniqueUsers)); // Convert Set back to Array
+        provider.awareness.setLocalStateField(USERNAME, username);
+        provider.awareness.on("change", (update: any) => {
+            const users = Array.from(provider.awareness.getStates().values());
+            setConnectedUsers(users.map((user) => user[USERNAME]));
+            // TODO: Some UI feedback about connection status of the other user
         });
 
         return () => {
-            disconnect();
+            provider?.destroy();
         };
-    }, [ydoc, roomId, username, USERNAME, disconnect]);
+    }, [roomId]);
 
-    useEffect(() => {
+    // Set up Monaco editor with server-managed Yjs document    useEffect(() => {
         if (!provider || !editor?.getModel()) return;
 
-        const newBinding = new MonacoBinding(
-            ydoc.getText("monaco"),
-            editor.getModel()!,
-            new Set([editor]),
-            provider.awareness
-        );
-        setBinding(newBinding);
+        // Access the server-managed ydoc via provider.doc
+        const ytext = provider.doc.getText("monaco");
+        const binding = new MonacoBinding(ytext, editor.getModel()!, new Set([editor]), provider.awareness);
+        setBinding(binding);
 
+        // Listen for changes in selected language from the shared Yjs map
+        const ymap = provider.doc.getMap("sharedMap");
         ymap.observe((event) => {
             event.changes.keys.forEach((change, key) => {
                 if (key === SELECTED_LANGUAGE) {
-                    const language: Language = ymap.get(SELECTED_LANGUAGE);
+                    const language: Language = ymap.get(SELECTED_LANGUAGE) as Language;
                     setSelectedLanguage(language);
                     monaco.editor.setModelLanguage(editor.getModel()!, language.language);
                 }
             });
         });
 
-        const language: Language = ymap.get(SELECTED_LANGUAGE);
-        monaco.editor.setModelLanguage(editor.getModel()!, language?.language ?? "javascript");
 
-        return () => newBinding.destroy();
-    }, [ydoc, provider, editor, ymap, SELECTED_LANGUAGE]);
+        // Initialize editor language from the shared Yjs map
+        const language = ymap.get(SELECTED_LANGUAGE) as Language;
+        const model = editor.getModel();
+        monaco.editor.setModelLanguage(model!, language?.language ?? "javascript");
+
+        return () => binding.destroy();
+    }, [provider, editor]);
 
     useEffect(() => {
+        console.log("Initialising Languages!");
         initialiseLanguages();
     }, []);
 
@@ -124,7 +118,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     };
 
     const handleChangeLanguage = (lang: Language) => {
-        ymap.set(SELECTED_LANGUAGE, lang);
+        const ymap = provider?.doc.getMap("sharedMap");
+        ymap?.set(SELECTED_LANGUAGE, lang);
     };
 
     const handleExecuteCode = async () => {

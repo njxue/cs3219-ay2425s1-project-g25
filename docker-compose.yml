@@ -36,8 +36,10 @@ services:
             - ./backend/question-service/.env
         environment:
             DB_HOST: peerprep-mongodb # Override localhost
+            KAFKA_HOST: peerprep-kafka # Override localhost
         depends_on:
             - peerprep-mongodb
+            - peerprep-kafka
         networks:
             - peerprep-network
 
@@ -57,9 +59,34 @@ services:
         environment:
             DB_HOST: peerprep-mongodb # Override localhost
             REDIS_HOST: peerprep-redis # Override localhost
+            KAFKA_HOST: peerprep-kafka # Override localhost
         depends_on:
             - peerprep-mongodb
             - peerprep-redis
+            - peerprep-kafka
+        networks:
+            - peerprep-network
+
+    # Collaboration Service
+    collaboration-service:
+        build: 
+            context: ./backend/collaboration-service
+            target: dev
+        container_name: collaboration-service
+        ports:
+            - "3004:3004"
+        volumes:
+            - ./backend/collaboration-service:/app
+            - /app/node_modules
+        env_file:
+            - ./backend/collaboration-service/.env
+        environment:
+            DB_HOST: peerprep-mongodb # Override localhost
+            KAFKA_HOST: peerprep-kafka # Override localhost
+        depends_on:
+            - peerprep-mongodb
+            - peerprep-redis
+            - peerprep-kafka
         networks:
             - peerprep-network
 
@@ -116,6 +143,37 @@ services:
         container_name: peerprep-redis-container
         ports:
             - "6379:6379"
+        networks:
+            - peerprep-network
+
+    # Kafka Service
+    peerprep-kafka:
+        image: confluentinc/cp-kafka:latest
+        container_name: peerprep-kafka
+        depends_on:
+            - peerprep-zookeeper
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: peerprep-zookeeper:2181
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://peerprep-kafka:9092,PLAINTEXT_HOST://localhost:29092
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        ports:
+            - 9092:9092
+            - 29092:29092
+        networks:
+            - peerprep-network
+
+    # Zookeeper Service (Required for Kafka)
+    peerprep-zookeeper:
+        image: confluentinc/cp-zookeeper:latest
+        container_name: peerprep-zookeeper
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        ports:
+            - "2181:2181"
         networks:
             - peerprep-network
 
