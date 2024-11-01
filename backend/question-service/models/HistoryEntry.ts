@@ -15,7 +15,7 @@ export interface HistoryEntry extends mongoose.Document {
 const historyEntrySchema: Schema = new Schema<HistoryEntry>({
   userId: { type: String, required: true },
   question: { type: Schema.Types.ObjectId, ref: 'question', required: true },
-  roomId: { type: String, required: true, unique: true },
+  roomId: { type: String, required: true },
   attemptStartedAt: { type: Date, required: true, default: Date.now() },
   attemptCompletedAt: { type: Date, required: true, default: Date.now() },
   collaboratorId: { type: String, required: true },

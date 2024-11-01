@@ -19,7 +19,7 @@ export class HistoryRemoteDataSource extends BaseApi {
 
     async deleteSelectedHistories(selectedHistoryIds: string[]): Promise<void> {
         selectedHistoryIds.forEach(async (id) => {
-            await this.delete<void>(`/${id}`);
+            await this.delete<void>(`/user/${id}`);
         });
     }
 
