@@ -26,4 +26,5 @@ export interface IUser {
     updateUser(userId: string, userUpdateInput: IUserUpdateInput): Promise<any>;
     getUser(userId: string): Promise<any>;
     forgetPassword(email: string): Promise<any>;
+    resetPassword(password: string, token: string): Promise<any>;
 }

@@ -117,6 +117,10 @@ export class UserUseCases {
     async forgetPassword(email: string): Promise<void> {
         await this.user.forgetPassword(email);
     }
+
+    async resetPassword(password: string, token: string): Promise<void> {
+        await this.user.resetPassword(password, token);
+    }
 }
 
 export const userUseCases = new UserUseCases(userImpl);

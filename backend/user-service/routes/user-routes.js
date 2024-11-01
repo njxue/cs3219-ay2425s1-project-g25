@@ -5,6 +5,7 @@ import {
   forgetPassword,
   getAllUsers,
   getUser,
+  resetPassword,
   updateUser,
   updateUserPrivilege,
 } from "../controller/user-controller.js";
@@ -182,5 +183,7 @@ router.patch("/:id/privilege", verifyAccessToken, verifyIsAdmin, updateUserPrivi
 router.delete("/:id", verifyAccessToken, verifyIsOwnerOrAdmin, deleteUser);
 
 router.post("/forgetPassword", forgetPassword);
+
+router.post("/resetPassword", resetPassword);
 
 export default router;

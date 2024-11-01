@@ -43,7 +43,7 @@ export async function handleLogout(req, res, next) {
     }
     const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
     const decodedToken = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
-    await TokenService.blacklistToken(decodedToken);
+    await TokenService.blacklistRefreshToken(decodedToken);
     return res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -82,20 +82,12 @@ export async function refresh(req, res, next) {
     const accessToken = TokenService.generateAccessToken(dbUser);
     const newRefreshToken = TokenService.generateRefreshToken(dbUser);
     res.cookie(REFRESH_TOKEN_COOKIE_KEY, newRefreshToken, refreshTokenCookieOptions);
-    await TokenService.blacklistToken(decodedRefreshToken);
+    await TokenService.blacklistRefreshToken(decodedRefreshToken);
 
     return res.status(200).json({
       message: "Access token refreshed",
       data: accessToken,
     });
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function sendResetPasswordLinkToEmail(req, res, next) {
-  try {
-
   } catch (err) {
     next(err);
   }

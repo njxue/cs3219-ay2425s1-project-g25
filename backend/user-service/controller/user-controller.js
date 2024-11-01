@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 import { isValidObjectId } from "mongoose";
 import {
@@ -12,12 +11,13 @@ import {
   findUserByUsernameOrEmail as _findUserByUsernameOrEmail,
   updateUserById as _updateUserById,
   updateUserPrivilegeById as _updateUserPrivilegeById,
+  findUserByEmail,
 } from "../model/repository.js";
-import { BadRequestError, ConflictError, NotFoundError } from "../utils/httpErrors.js";
+import { BadRequestError, ConflictError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
 import TokenService from "../services/tokenService.js";
 import { sendEmail } from "../services/emailService.js";
-import redisService from "../services/redisService.js";
 
+const PASSWORD_SALT = 10;
 export async function createUser(req, res, next) {
   try {
     const { username, email, password } = req.body;
@@ -30,7 +30,7 @@ export async function createUser(req, res, next) {
       throw new ConflictError("Username or email already exists");
     }
 
-    const salt = bcrypt.genSaltSync(10);
+    const salt = bcrypt.genSaltSync(PASSWORD_SALT);
     const hashedPassword = bcrypt.hashSync(password, salt);
     const createdUser = await _createUser(username, email, hashedPassword);
 
@@ -102,7 +102,7 @@ export async function updateUser(req, res, next) {
 
       let hashedPassword;
       if (password) {
-        const salt = bcrypt.genSaltSync(10);
+        const salt = bcrypt.genSaltSync(PASSWORD_SALT);
         hashedPassword = bcrypt.hashSync(password, salt);
       }
       const updatedUser = await _updateUserById(userId, username, email, hashedPassword);
@@ -166,10 +166,8 @@ export async function deleteUser(req, res, next) {
 export async function forgetPassword(req, res, next) {
   try {
     const { email } = req.body;
-    const emailToken = TokenService.generateEmailToken(email);
-    redisService.setKeyWithExpiration(email, emailToken, 300);
-
-    const resetPasswordLink = `http://localhost:3000/reset-password/${emailToken}`;
+    const resetToken = await TokenService.generateResetToken(email);
+    const resetPasswordLink = `http://localhost:3000/reset-password?token=${resetToken}`;
     await sendEmail({
       to: email,
       subject: "Reset password",
@@ -178,6 +176,38 @@ export async function forgetPassword(req, res, next) {
 
     res.sendStatus(204);
   } catch (err) {
+    next(err);
+  }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const { password, token } = req.body;
+    if (password) {
+      const decoded = await TokenService.verifyResetToken(token, jwtConfig.resetTokenSecret);
+
+      if (await TokenService.isResetTokenBlacklisted(decoded)) {
+        throw new UnauthorisedError("Reset token is invalid");
+      }
+
+      const email = decoded.email;
+      const user = await findUserByEmail(email);
+      if (!user) {
+        throw new NotFoundError(`No user with the email ${email} is found`);
+      }
+      const salt = bcrypt.genSaltSync(PASSWORD_SALT);
+      const hashedPassword = bcrypt.hashSync(password, salt);
+      const updatedUser = await _updateUserById(user.id, user.username, user.email, hashedPassword);
+
+      await TokenService.blacklistResetToken(decoded);
+
+      return res.status(200).json({
+        message: "Password has been resetted",
+        data: formatUserResponse(updatedUser),
+      });
+    }
+  } catch (err) {
+    console.error(err);
     next(err);
   }
 }
