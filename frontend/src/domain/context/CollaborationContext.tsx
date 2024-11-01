@@ -37,11 +37,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         alias: "Javascript"
     });
 
-    const ydoc = useMemo(() => new Y.Doc(), []);
-    const ymap: Y.Map<any> = useMemo(() => ydoc.getMap("sharedMap"), [ydoc]);
-
     const [roomId, setRoomId] = useState<string | null>(null);
-
     const [languages, setLanguages] = useState<Language[]>([]);
     const [execResult, setExecResult] = useState<CodeExecResult | null>(null);
     const [isExecuting, setIsExecuting] = useState<boolean>(false);
@@ -51,12 +47,15 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const [provider, setProvider] = useState<WebsocketProvider | null>(null);
     const [binding, setBinding] = useState<MonacoBinding | null>(null);
 
-    // This effect manages the lifetime of the yjs doc and the provider
+    // Connect to the server-managed Yjs document when roomId is set
     useEffect(() => {
         if (roomId == null) {
+            console.log(`RoomId is null!`)
             return;
         }
-        const provider = new WebsocketProvider("ws://localhost:1234", roomId, ydoc);
+        console.log(`Starting Collaboration Context with roomId: ${roomId}`)
+
+        const provider = new WebsocketProvider(`ws://localhost:3004/${roomId}`, roomId, new Y.Doc());
         setProvider(provider);
 
         provider.awareness.setLocalStateField(USERNAME, username);
@@ -68,29 +67,26 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
 
         return () => {
             provider?.destroy();
-            ydoc?.destroy();
         };
-    }, [ydoc, roomId]);
+    }, [roomId]);
 
-    // This effect manages the lifetime of the editor binding
+    // Set up Monaco editor with server-managed Yjs document
     useEffect(() => {
         if (provider == null || editor == null || editor.getModel() == null) {
             return;
         }
 
-        const binding = new MonacoBinding(
-            ydoc.getText("monaco"),
-            editor.getModel()!,
-            new Set([editor]),
-            provider?.awareness
-        );
-
+        // Access the server-managed ydoc via provider.doc
+        const ytext = provider.doc.getText("monaco");
+        const binding = new MonacoBinding(ytext, editor.getModel()!, new Set([editor]), provider.awareness);
         setBinding(binding);
 
+        // Listen for changes in selected language from the shared Yjs map
+        const ymap = provider.doc.getMap("sharedMap");
         ymap.observe((event) => {
             event.changes.keys.forEach((change, key) => {
                 if (key === SELECTED_LANGUAGE) {
-                    const language: Language = ymap.get(SELECTED_LANGUAGE);
+                    const language: Language = ymap.get(SELECTED_LANGUAGE) as Language;
                     setSelectedLanguage(language);
                     const model = editor.getModel();
                     monaco.editor.setModelLanguage(model!, language.language);
@@ -98,17 +94,16 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
             });
         });
 
-        // Set the editor's language
-        const language: Language = ymap.get(SELECTED_LANGUAGE);
+        // Initialize editor language from the shared Yjs map
+        const language = ymap.get(SELECTED_LANGUAGE) as Language;
         const model = editor.getModel();
         monaco.editor.setModelLanguage(model!, language?.language ?? "javascript");
 
-        return () => {
-            binding.destroy();
-        };
-    }, [ydoc, provider, editor, ymap]);
+        return () => binding.destroy();
+    }, [provider, editor]);
 
     useEffect(() => {
+        console.log("Initialising Languages!");
         initialiseLanguages();
     }, []);
 
@@ -128,7 +123,8 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     };
 
     const handleChangeLanguage = (lang: Language) => {
-        ymap.set(SELECTED_LANGUAGE, lang);
+        const ymap = provider?.doc.getMap("sharedMap");
+        ymap?.set(SELECTED_LANGUAGE, lang);
     };
 
     const handleExecuteCode = async () => {
