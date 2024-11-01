@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-DOCKER_USERNAME="rjkoh"
+DOCKER_USERNAME="<your_docker_username>"
 TAG="latest"
 
 # Lists of services and their corresponding deployment YAML paths

@@ -69,15 +69,17 @@ rebuilding the services by running `docker-compose up --build` again.
 ### Kubernetes Auto Pod Scaling
 
 All files for Kubernetes deployment and auto scaling of services can be found in the `/kubernetes/` folder
-1. To deploy on Kubernetes, run `./deploy.sh` at root.
-2. View deployments, pods and HPA:
+
+1. Add your docker username in `deploy.sh` at root.
+2. To deploy on Kubernetes, run `./deploy.sh` at root.
+3. View deployments, pods and HPA:
 ```
 kubectl get deployments
 kubectl get pods
 kubectl get hpa
 kubectl get services
 ```
-3. Load testing:
+4. Load testing:
 Use a load-testing tool like ab (Apache Benchmark), hey, or wrk to send multiple requests to your service endpoints.
 
 Example using ab:
@@ -87,13 +89,13 @@ Example using ab:
 Replace <your-service-ip> and <port> with your service's IP and port.
 
 This will generate traffic to your service, potentially triggering autoscaling if CPU or memory utilization increases.
-4. Monitor autoscaling:
+5. Monitor autoscaling:
 
 `kubectl get hpa -w`
 
 This command will watch the HPA in real-time, showing changes in replica counts and metrics.
 
-5. To stop and delete to prevent resource wastage:
+6. To stop and delete to prevent resource wastage:
 ```
 kubectl delete deployments --all
 kubectl delete pods --all
