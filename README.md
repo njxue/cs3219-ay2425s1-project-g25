@@ -11,6 +11,8 @@ This project follows a microservices architecture with the following services:
 6. **MongoDB** - Port `27017` (Database)
 7. **Nginx API Gateway** - Port `80`
 8. **Redis** - Port `6379`
+9. **Zookeeper** - Port `2181`
+10. **Kafka** - Port `9092`, Port `29092`
 
 ### Setting up the Project
 Copy and paste the .env.example files in each service. Rename them as .env files.
@@ -20,6 +22,7 @@ Files to do this in:
 3. /backend/user-service
 4. /backend/question-service
 5. /backend/matching-service
+6. /backend/collaboration-service
 Then, run `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` twice to generate
 your 2 JWT token secrets. For the first one, paste it into the JWT_ACCESS_TOKEN_SECRET variable of
 the .env files in question-service and user-service. Then, copy the second into the
@@ -43,8 +46,10 @@ Once the containers are up:
 - MongoDB: [http://localhost:27017](http://localhost:27017)
 - Nginx API Gateway: [http://localhost:80](http://localhost:80)
 - Redis: [http://localhost:6379](http://localhost:6379)
+- Zookeeper: [http://localhost:2181](http://localhost:2181)
+- Kafka: [http://localhost:9092](http://localhost:9092)
 
-Note that even after docker says that everything is up and running, there is a risk that they aren't when you load the frontend. 
+Note that even after docker says that everything is up and running, there is a risk that they aren't when you load the frontend.  Wait for the frontend logs to show up in the docker logs.
 In this event, wait for about a minute before trying again. If that still doesn't work and there are network errors, try
 rebuilding the services by running `docker-compose up --build` again.
 
