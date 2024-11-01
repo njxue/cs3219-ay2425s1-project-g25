@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect, useMemo, useCallback } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import * as Y from "yjs";
 import * as monaco from "monaco-editor";
 import { MonacoBinding } from "y-monaco";
@@ -48,78 +48,65 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const [binding, setBinding] = useState<MonacoBinding | null>(null);
 
     useEffect(() => {
-        if (roomId == null) {
-            console.log(`RoomId is null!`)
-            return;
-        }
-        console.log(`Starting Collaboration Context with roomId: ${roomId}`)
-
-        const provider = new WebsocketProvider(`ws://localhost:3004/${roomId}`, roomId, new Y.Doc());
+        if (!roomId) return;
+        const ydoc = new Y.Doc();
+        const provider = new WebsocketProvider(`ws://localhost:3004/${roomId}`, roomId, ydoc);
         setProvider(provider);
 
         provider.awareness.setLocalStateField(USERNAME, username);
-        provider.awareness.on("change", (update: any) => {
+        provider.awareness.on("change", () => {
             const users = Array.from(provider.awareness.getStates().values());
             setConnectedUsers(users.map((user) => user[USERNAME]));
-            // TODO: Some UI feedback about connection status of the other user
         });
 
-        return () => {
-            provider?.destroy();
-        };
-    }, [roomId]);
+        return () => provider.destroy();
+    }, [roomId, username, USERNAME]);
 
-    // Set up Monaco editor with server-managed Yjs document    useEffect(() => {
-        if (!provider || !editor?.getModel()) return;
+    useEffect(() => {
+        if (!provider || !editor) return;
 
-        // Access the server-managed ydoc via provider.doc
         const ytext = provider.doc.getText("monaco");
         const binding = new MonacoBinding(ytext, editor.getModel()!, new Set([editor]), provider.awareness);
         setBinding(binding);
 
-        // Listen for changes in selected language from the shared Yjs map
         const ymap = provider.doc.getMap("sharedMap");
         ymap.observe((event) => {
-            event.changes.keys.forEach((change, key) => {
-                if (key === SELECTED_LANGUAGE) {
-                    const language: Language = ymap.get(SELECTED_LANGUAGE) as Language;
-                    setSelectedLanguage(language);
-                    monaco.editor.setModelLanguage(editor.getModel()!, language.language);
-                }
-            });
+            if (event.changes.keys.has(SELECTED_LANGUAGE)) {
+                const language = ymap.get(SELECTED_LANGUAGE) as Language;
+                setSelectedLanguage(language);
+                monaco.editor.setModelLanguage(editor.getModel()!, language.language);
+            }
         });
 
-
-        // Initialize editor language from the shared Yjs map
-        const language = ymap.get(SELECTED_LANGUAGE) as Language;
-        const model = editor.getModel();
-        monaco.editor.setModelLanguage(model!, language?.language ?? "javascript");
+        const initialLanguage = ymap.get(SELECTED_LANGUAGE) as Language;
+        if (initialLanguage) {
+            setSelectedLanguage(initialLanguage);
+            monaco.editor.setModelLanguage(editor.getModel()!, initialLanguage.language);
+        }
 
         return () => binding.destroy();
-    }, [provider, editor]);
+    }, [provider, editor, SELECTED_LANGUAGE]);
 
     useEffect(() => {
-        console.log("Initialising Languages!");
+        const initialiseLanguages = async () => {
+            const allLanguages = monaco.languages.getLanguages();
+            const pistonLanguageVersions = await PistonClient.getLanguageVersions();
+            setLanguages(
+                allLanguages
+                    .filter((lang) => pistonLanguageVersions.some((pistonLang: any) => pistonLang.language === lang.id))
+                    .map((lang) => ({
+                        alias: lang.aliases?.[0] || lang.id,
+                        language: lang.id,
+                        version: pistonLanguageVersions.find((pistonLang: any) => pistonLang.language === lang.id)
+                            ?.version
+                    }))
+            );
+        };
         initialiseLanguages();
     }, []);
 
-    const initialiseLanguages = async () => {
-        const allLanguages = monaco.languages.getLanguages();
-        const pistonLanguageVersions = await PistonClient.getLanguageVersions();
-        setLanguages(
-            allLanguages
-                .filter((lang) => pistonLanguageVersions.some((pistonLang: any) => pistonLang.language === lang.id))
-                .map((lang) => ({
-                    alias: lang.aliases?.[0] || lang.id,
-                    language: lang.id,
-                    version: pistonLanguageVersions.find((pistonLang: any) => pistonLang.language === lang.id)?.version
-                }))
-        );
-    };
-
     const handleChangeLanguage = (lang: Language) => {
-        const ymap = provider?.doc.getMap("sharedMap");
-        ymap?.set(SELECTED_LANGUAGE, lang);
+        provider?.doc.getMap("sharedMap")?.set(SELECTED_LANGUAGE, lang);
     };
 
     const handleExecuteCode = async () => {
@@ -130,16 +117,14 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
 
             const output = await PistonClient.executeCode(selectedLanguage, sourceCode);
             setExecResult(output);
-        } catch (e) {
+        } catch {
             toast.error("There was an issue running the code");
         } finally {
             setIsExecuting(false);
         }
     };
 
-    const onEditorIsMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
-        setEditor(editor);
-    };
+    const onEditorIsMounted = (editor: monaco.editor.IStandaloneCodeEditor) => setEditor(editor);
 
     return (
         <CollaborationContext.Provider
@@ -153,7 +138,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
                 isExecuting,
                 execResult,
                 connectedUsers,
-                disconnect
+                disconnect: () => provider?.disconnect()
             }}
         >
             {children}
