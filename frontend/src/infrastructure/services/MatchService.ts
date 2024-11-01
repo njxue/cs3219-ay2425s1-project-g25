@@ -85,7 +85,15 @@ class MatchService {
         return socketService.isConnected();
     }
 
-    onMatchFound(callback: (data: { matchUserId: string; roomId: string }) => void) {
+    onMatchFound(callback: (data: {
+        message: string;
+        category: string;
+        difficulty: string;
+        matchId: string;
+        roomId: string;
+        matchUserId: string; 
+        questionId: string;
+    }) => void) {
         this.onMatchFoundCallbacks.push(callback);
     }
     onMatchCancel(callback: (data: any) => void) {

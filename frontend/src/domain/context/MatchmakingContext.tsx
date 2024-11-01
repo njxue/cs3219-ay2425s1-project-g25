@@ -189,7 +189,15 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         let intervalId: NodeJS.Timeout | null = null;
 
         // Function to handle countdown and navigation
-        const startCountdown = (roomId: string | null = null, matchUserId: string | null = null) => {
+        const startCountdown = (
+            message: string | null = null,
+            category: string | null = null,
+            difficulty: string | null = null,
+            matchId: string | null = null,
+            roomId: string | null = null,
+            matchUserId: string | null = null, 
+            questionId: string | null = null,
+        ) => {
             let countdown = state.countdown;
             intervalId = setInterval(() => {
                 if (countdown > 0 && !isResetting.current) {
@@ -199,14 +207,19 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     if (intervalId) clearInterval(intervalId);
                     if (!isResetting.current) {
                         reset();
-                        navigate(`/room/${roomId}`);
+                        navigate(`/room/${roomId}`, {
+                            state: {
+                                message, category, difficulty, roomId, matchId, matchUserId, questionId
+                            }
+                        });
                     }
                 }
             }, 1000);
         };
 
         // Listen for match found event and start countdown
-        matchService.onMatchFound(({ matchUserId, roomId }) => {
+        matchService.onMatchFound(({ message, category, difficulty, matchId, roomId, matchUserId, questionId }) => {
+            console.log({ message, category, difficulty, matchId, roomId, matchUserId, questionId })
             if (isMatchingRef.current) {
                 dispatch({ type: "MATCH_FOUND" });
                 isMatchingRef.current = false;
@@ -215,7 +228,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     clearTimeout(matchTimeoutRef.current);
                 }
 
-                startCountdown(roomId, matchUserId); // Start countdown with roomId for navigation
+                startCountdown(message, category, difficulty, matchId, roomId, matchUserId, questionId); // Start countdown with roomId for navigation
             }
         });
 

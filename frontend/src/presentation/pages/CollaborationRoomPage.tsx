@@ -3,7 +3,7 @@ import styles from "./CollaborationRoomPage.module.css";
 import CodeEditor from "presentation/components/CodeEditor/CodeEditor";
 import { QuestionDetail } from "presentation/components/QuestionDetail";
 import { initialQuestions } from "data/repositories/mockQuestionRepository";
-import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
 import { OutputBox } from "presentation/components/CodeEditor/OutputBox";
@@ -11,7 +11,9 @@ import ToggleButton from "presentation/components/buttons/ToggleButton";
 import ChatFrame from "presentation/components/iframe/ChatFrame";
 
 const CollaborationRoomPage: React.FC = () => {
-    const { roomId } = useParams();
+    const location = useLocation();
+    const { message, category, difficulty, roomId, matchId, matchUserId, questionId } = location.state;
+    console.log(message, category, difficulty, matchId, roomId, matchUserId, questionId);
     const [showChat, setShowChat] = useState(false);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
