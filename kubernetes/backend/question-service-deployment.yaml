@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: question-service-container
-        image: cs3219-ay2425s1-project-g25-question-service # replace with the actual image name
+        image: rjkoh/cs3219-ay2425s1-project-g25-question-service:latest
         ports:
           - containerPort: 3002
         env:

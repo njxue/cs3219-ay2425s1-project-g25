@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend-container
-        image: cs3219-ay2425s1-project-g25-frontend # Replace with the actual image name if built separately
+        image: rjkoh/cs3219-ay2425s1-project-g25-frontend:latest
         ports:
           - containerPort: 3000
         env:

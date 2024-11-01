@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: cs3219-ay2425s1-project-g25-nginx  # Replace with the actual image name if built separately
+        image: rjkoh/cs3219-ay2425s1-project-g25-nginx:latest
         ports:
           - containerPort: 80
         volumeMounts:
