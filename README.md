@@ -43,6 +43,7 @@ Once the containers are up:
 - User Service: [http://localhost:3001](http://localhost:3001)
 - Question Service: [http://localhost:3002](http://localhost:3002)
 - Matching Service: [http://localhost:3003](http://localhost:3003)
+- Collaboration Service: [http://localhost:3004](http://localhost:3004)
 - MongoDB: [http://localhost:27017](http://localhost:27017)
 - Nginx API Gateway: [http://localhost:80](http://localhost:80)
 - Redis: [http://localhost:6379](http://localhost:6379)
