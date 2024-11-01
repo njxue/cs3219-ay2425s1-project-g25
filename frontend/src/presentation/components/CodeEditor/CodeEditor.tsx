@@ -69,6 +69,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                     options={{
                         minimap: { enabled: false },
                         scrollbar: { verticalScrollbarSize: 4 },
+                        formatOnPaste: true
                     }}
                 />
             </div>
