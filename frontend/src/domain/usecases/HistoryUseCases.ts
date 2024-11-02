@@ -38,7 +38,7 @@ export class HistoryUseCases {
      * @throws Error if selectedHistoryIds is of length 0 or contains an empty _id.
      */
     async deleteSelectedUserHistories(selectedHistoryIds: string[]): Promise<void> {
-        if (selectedHistoryIds.length === 0 || !selectedHistoryIds.every((_id) => (!_id || _id.trim() === ""))) {
+        if (selectedHistoryIds.length === 0 || selectedHistoryIds.find((_id) => (!_id || _id.trim() === ""))) {
             throw new Error("History ID must be provided");
         }
         await this.historyRepository.deleteSelectedUserHistories(selectedHistoryIds);
