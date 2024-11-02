@@ -32,7 +32,7 @@ services:
       - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
       - MongoDbSettings__DatabaseName=Chatio
       - Redis__ConnectionString=redis:6379,password=your_redis_password,abortConnect=false
-      - OpenAiSettings__ApiKey=your_key
+      - OpenAiSettings__ApiKey=your-key
       - OpenAiSettings__DefaultChatModel=gpt-4-turbo-preview
       - OpenAiSettings__DefaultEmbeddingModel=text-embedding-3-small
       - OpenAiSettings__DefaultTemperature=1.0
