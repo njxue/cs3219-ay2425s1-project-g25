@@ -20,7 +20,7 @@ export const RecentAttemptsTable: React.FC = () => {
   const fetchRecentAttempts = async () => {
     setLoading(true);
     try {
-      const data = await historyUseCases.getAllCategories();
+      const data = await historyUseCases.getAllUserHistories();
       setRecentAttemptsData(data);
     } catch (error) {
       if (error instanceof Error) {

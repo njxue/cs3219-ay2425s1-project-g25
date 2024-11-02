@@ -6,10 +6,10 @@ export class HistoryUseCases {
     constructor(private historyRepository: IHistoryRepository) {}
 
     /**
-     * Retrieves all categories.
-     * @returns Promise resolving to an array of Category objects.
+     * Retrieves all history entries of the logged in user.
+     * @returns Promise resolving to an array of HistoryEntry objects.
      */
-    async getAllCategories(): Promise<HistoryEntry[]> {
+    async getAllUserHistories(): Promise<HistoryEntry[]> {
         const allHistories = this.historyRepository.getAllUserHistories();
 		return allHistories;
     }

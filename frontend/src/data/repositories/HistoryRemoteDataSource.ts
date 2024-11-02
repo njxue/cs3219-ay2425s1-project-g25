@@ -10,7 +10,7 @@ export class HistoryRemoteDataSource extends BaseApi {
     }
 
     async getAllUserHistories(): Promise<HistoryEntry[]> {
-        return await this.get<HistoryEntry[]>("/");
+        return await this.protectedGet<HistoryEntry[]>("/");
     }
 
     async createOrUpdateUserHistory(questionId: string, roomId: string, attemptStartedAt: string, attemptCompletedAt: string, collaboratorId: string, attemptCode: string): Promise<void> {
@@ -21,12 +21,12 @@ export class HistoryRemoteDataSource extends BaseApi {
         console.log("Delete")
         selectedHistoryIds.forEach(async (id) => {
             console.log(id);
-            await this.delete<void>(`/user/${id}`);
+            await this.protectedDelete<void>(`/user/${id}`);
         });
     }
 
     async deleteAllUserHistories(): Promise<void> {
-        await this.delete<void>("/all");
+        await this.protectedDelete<void>("/all");
     }
 }
 
