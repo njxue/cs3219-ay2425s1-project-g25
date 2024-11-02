@@ -1,4 +1,4 @@
-import jwt, { decode } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { jwtConfig } from "../config/authConfig.js";
 import { v4 as uuidv4 } from "uuid";
 import redisService from "./redisService.js";

@@ -1,7 +1,0 @@
-export const getResetPasswordEmailTemplate = (passwordResetLink) => `
-
-<p>Dear user,</p>
-<p>You have requested to change your password.</p>
-<p>You can click <a href=${passwordResetLink}>here</a>, which will bring you to a password reset page to 
-reset your password. The link is only valid for <b>15 minutes</b></p>
-`;
