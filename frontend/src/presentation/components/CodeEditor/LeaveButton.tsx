@@ -55,7 +55,7 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
                 icon={<StopOutlined />}
                 className={styles.endButton}
             >
-                End
+                Leave
             </Button>
             <Modal
                 title="Editor Content"
