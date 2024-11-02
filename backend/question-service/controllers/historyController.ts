@@ -1,41 +1,23 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import historyEntryModel from '../models/HistoryEntry';
-import { Question } from 'models/Question';
+import { AuthenticatedRequest } from 'middlewares/auth';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
   return 'An unexpected error occurred';
 };
 
-const extractUserIdFromToken = (req: Request): string | null => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      console.error('Authorization header missing');
+const extractUserIdFromToken = (req: AuthenticatedRequest): string | null => {
+    const userId = req.userId;
+    if (!userId) {
+      console.error('userId missing - Token is likely invalid');
       return null;
     }
-  
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-      console.error('Token missing from authorization header');
-      return null;
-    }
-  
-    try {
-      const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET as string) as JwtPayload;
-      if (decodedToken && typeof decodedToken === 'object' && 'id' in decodedToken) {
-        return decodedToken.id as string;
-      } else {
-        console.error('Token payload does not contain user ID');
-        return null;
-      }
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      return null;
-    }
+    return userId
   };
 
-export const getUserHistoryEntries = async (req: Request, res: Response) => {
+export const getUserHistoryEntries = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = extractUserIdFromToken(req);
 
@@ -68,24 +50,20 @@ export const getUserHistoryEntries = async (req: Request, res: Response) => {
   }
 };
 
-export const createOrUpdateUserHistoryEntry = async (req: Request, res: Response) => {
+export const createOrUpdateUserHistoryEntry = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // Extract userId from the token
     const userId = extractUserIdFromToken(req);
 
     if (!userId) {
       return res.status(401).json({ error: 'Invalid or missing token' });
     }
 
-    // Destructure required fields from the request body
     const { questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode } = req.body;
 
-    // Validate required fields (optional but recommended)
     if (!roomId) {
       return res.status(400).json({ error: 'roomId is required' });
     }
 
-    // Attempt to find an existing history entry with the same userId and roomId
     const existingEntry = await historyEntryModel.findOne({ userId, roomId });
 
     if (existingEntry) {
@@ -118,7 +96,7 @@ export const createOrUpdateUserHistoryEntry = async (req: Request, res: Response
   }
 };
 
-export const deleteUserHistoryEntry = async (req: Request, res: Response) => {
+export const deleteUserHistoryEntry = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = extractUserIdFromToken(req);
 
@@ -140,7 +118,7 @@ export const deleteUserHistoryEntry = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUserHistoryEntries = async (req: Request, res: Response) => {
+export const deleteUserHistoryEntries = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = extractUserIdFromToken(req);
 
@@ -160,7 +138,7 @@ export const deleteUserHistoryEntries = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteAllUserHistoryEntries = async (req: Request, res: Response) => {
+export const deleteAllUserHistoryEntries = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = extractUserIdFromToken(req);
 
