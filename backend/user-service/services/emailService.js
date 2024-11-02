@@ -1,14 +1,12 @@
 import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { emailOptions } from "../config/emailConfig";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
+  host: emailOptions.smtp_host,
+  port: emailOptions.smtp_port,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
+    user: emailOptions.user,
+    pass: emailOptions.password,
   },
 });
 
@@ -21,9 +19,9 @@ transporter.verify(function (error, success) {
 });
 
 export const sendEmail = async ({ to, subject, text, html }) => {
-  const emailOptions = { from: process.env.SMTP_USER, to, subject, text, html };
+  const emailOptions = { from: emailOptions.user, to, subject, text, html };
   try {
-    const res = await transporter.sendMail(emailOptions);
+    await transporter.sendMail(emailOptions);
   } catch (err) {
     console.error(err);
     throw err;

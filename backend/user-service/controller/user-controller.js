@@ -16,7 +16,9 @@ import {
 import { BadRequestError, ConflictError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
 import TokenService from "../services/tokenService.js";
 import { sendEmail } from "../services/emailService.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const PASSWORD_SALT = 10;
 export async function createUser(req, res, next) {
   try {
@@ -167,7 +169,7 @@ export async function forgetPassword(req, res, next) {
   try {
     const { email } = req.body;
     const resetToken = await TokenService.generateResetToken(email);
-    const resetPasswordLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetPasswordLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
     await sendEmail({
       to: email,
       subject: "Reset password",
