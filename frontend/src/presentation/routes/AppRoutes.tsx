@@ -20,11 +20,10 @@ const AppRoutes: React.FC = () => {
                 <Routes>
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/room/:roomId/:matchUserId" element={<QuestionPage />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route
-                            path="/room/:roomId"
+                            path="/room/:roomId/:questionId"
                             element={
                                 <CollaborationProvider>
                                     <CollaborationRoomPage />

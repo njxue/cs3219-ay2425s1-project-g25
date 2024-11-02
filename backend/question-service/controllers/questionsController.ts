@@ -3,6 +3,7 @@ import categoryModel from "../models/Category";
 import { Request, Response, NextFunction } from "express";
 import { EachMessagePayload } from "kafkajs";
 import { producer, QUESTION_TOPIC } from "../utils/kafkaClient";
+import mongoose from "mongoose";
 
 const DIFFICULTIES = ["easy", "medium", "hard"];
 
@@ -166,7 +167,13 @@ export async function getQuestion(
     next: NextFunction
 ) {
     const { id } = request.params;
-
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return response.status(404).json({
+          message: `Question with _id ${id} not found.`,
+        });
+    }
+    
     try {
         const question = await questionModel.findOne({ _id: id });
         if (!question) {

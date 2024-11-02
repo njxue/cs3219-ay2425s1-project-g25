@@ -189,7 +189,11 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
         let intervalId: NodeJS.Timeout | null = null;
 
         // Function to handle countdown and navigation
-        const startCountdown = (roomId: string | null = null, matchUserId: string | null = null) => {
+        const startCountdown = (
+            questionId: string | null = null,
+            roomId: string | null = null,
+            matchUserId: string | null = null
+        ) => {
             let countdown = state.countdown;
             intervalId = setInterval(() => {
                 if (countdown > 0 && !isResetting.current) {
@@ -199,14 +203,14 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     if (intervalId) clearInterval(intervalId);
                     if (!isResetting.current) {
                         reset();
-                        navigate(`/room/${roomId}`);
+                        navigate(`/room/${roomId}/${questionId}`);
                     }
                 }
             }, 1000);
         };
 
         // Listen for match found event and start countdown
-        matchService.onMatchFound(({ matchUserId, roomId }) => {
+        matchService.onMatchFound(({ questionId, matchUserId, roomId }) => {
             if (isMatchingRef.current) {
                 dispatch({ type: "MATCH_FOUND" });
                 isMatchingRef.current = false;
@@ -215,7 +219,7 @@ export const MatchmakingProvider: React.FC<{ children: ReactNode }> = ({ childre
                     clearTimeout(matchTimeoutRef.current);
                 }
 
-                startCountdown(roomId, matchUserId); // Start countdown with roomId for navigation
+                startCountdown(questionId, roomId, matchUserId); // Start countdown with roomId for navigation
             }
         });
 
