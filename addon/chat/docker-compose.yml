@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./talkio
+      dockerfile: Dockerfile
+    ports:
+      - "7000:3000"
+    volumes:
+      - ./talkio:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    command: npm run dev
+
+  api:
+    build:
+      context: ./Chatio
+      dockerfile: Dockerfile
+    ports:
+      - "7001:8080"
+    volumes:
+      - ./Chatio:/src
+      - /src/bin
+      - /src/obj
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoDbSettings__DatabaseName=Chatio
+      - Redis__ConnectionString=redis:6379,password=your_redis_password,abortConnect=false
+      - OpenAiSettings__ApiKey=your_key
+      - OpenAiSettings__DefaultChatModel=gpt-4-turbo-preview
+      - OpenAiSettings__DefaultEmbeddingModel=text-embedding-3-small
+      - OpenAiSettings__DefaultTemperature=1.0
+      - OpenAiSettings__DefaultTopP=1.0
+      - OpenAiSettings__DefaultFrequencyPenalty=0.0
+      - OpenAiSettings__DefaultPresencePenalty=0.0
+      - OpenAiSettings__DefaultMaxTokens=150
+    depends_on:
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "7002:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass your_redis_password --appendonly yes --port 6379
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "7003:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=Chatio
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  redis_data:
+  mongodb_data:
