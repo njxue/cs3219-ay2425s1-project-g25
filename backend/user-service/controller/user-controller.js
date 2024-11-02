@@ -169,15 +169,17 @@ export async function forgetPassword(req, res, next) {
   try {
     const { email } = req.body;
     const resetToken = await TokenService.generateResetToken(email);
-    const resetPasswordLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
+    const passwordResetLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
+
     await sendEmail({
       to: email,
       subject: "Reset password",
-      html: `Click <a href=${resetPasswordLink}>here</a> to reset your password`,
+      htmlTemplateData: { passwordResetLink },
     });
 
     res.sendStatus(204);
   } catch (err) {
+    console.error(err);
     next(err);
   }
 }
@@ -200,7 +202,6 @@ export async function resetPassword(req, res, next) {
       const salt = bcrypt.genSaltSync(PASSWORD_SALT);
       const hashedPassword = bcrypt.hashSync(password, salt);
       const updatedUser = await _updateUserById(user.id, user.username, user.email, hashedPassword);
-
       await TokenService.blacklistResetToken(decoded);
 
       return res.status(200).json({

@@ -1,12 +1,19 @@
 import nodemailer from "nodemailer";
-import { emailOptions } from "../config/emailConfig";
+import { emailConfig } from "../config/emailConfig.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import ejs from "ejs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const transporter = nodemailer.createTransport({
-  host: emailOptions.smtp_host,
-  port: emailOptions.smtp_port,
+  host: emailConfig.smtp_host,
+  port: emailConfig.smtp_port,
   auth: {
-    user: emailOptions.user,
-    pass: emailOptions.password,
+    user: emailConfig.user,
+    pass: emailConfig.password,
   },
 });
 
@@ -18,8 +25,13 @@ transporter.verify(function (error, success) {
   }
 });
 
-export const sendEmail = async ({ to, subject, text, html }) => {
-  const emailOptions = { from: emailOptions.user, to, subject, text, html };
+export const sendEmail = async ({ to, subject, htmlTemplateData }) => {
+  const pathToTemplateHtml = path.resolve(__dirname, "../utils/emailTemplate.html");
+  const template = fs.readFileSync(pathToTemplateHtml, "utf-8");
+
+  const html = ejs.render(template, htmlTemplateData);
+
+  const emailOptions = { from: emailConfig.user, to, subject, html };
   try {
     await transporter.sendMail(emailOptions);
   } catch (err) {
