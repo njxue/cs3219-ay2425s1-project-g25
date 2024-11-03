@@ -13,7 +13,8 @@ import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
 import { roomUseCases } from "../../domain/usecases/RoomUseCases";
 import { Room } from "../../domain/entities/Room";
 import { useAuth } from "../../domain/context/AuthContext";
-import { message, Spin } from "antd";
+import { Spin } from "antd";
+import { toast } from "react-toastify";
 
 const CollaborationRoomPage: React.FC = () => {
     const location = useLocation();
@@ -30,12 +31,7 @@ const CollaborationRoomPage: React.FC = () => {
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
     // Extract details from location.state if available
-    const {
-        roomId,
-        attemptStartedAt,
-        matchUserId,
-        questionId,
-    } = locationState || {};
+    const { roomId, attemptStartedAt, matchUserId, questionId } = locationState || {};
 
     const handleResize = useCallback(() => {
         if (resizeTimeoutRef.current) {
@@ -52,11 +48,7 @@ const CollaborationRoomPage: React.FC = () => {
             setError(null);
             try {
                 // Check if location.state has all required details
-                const hasAllDetails =
-                    roomId &&
-                    attemptStartedAt &&
-                    matchUserId &&
-                    questionId;
+                const hasAllDetails = roomId && attemptStartedAt && matchUserId && questionId;
 
                 if (hasAllDetails) {
                     // Populate room with details from location.state
@@ -65,10 +57,10 @@ const CollaborationRoomPage: React.FC = () => {
                         attemptStartedAt: attemptStartedAt,
                         userIdOne: user.user!._id,
                         userIdTwo: matchUserId,
-                        questionId: questionId,
+                        questionId: questionId
                     });
                 } else {
-                    if (!urlRoomId) return ;
+                    if (!urlRoomId) return;
                     // Fetch room details from API
                     const fetchedRoom = await roomUseCases.getRoomDetails(urlRoomId);
                     // Ensure the current user is userIdOne
@@ -82,7 +74,7 @@ const CollaborationRoomPage: React.FC = () => {
             } catch (err) {
                 console.error("Failed to populate room:", err);
                 setError("Failed to load room details.");
-                message.error("Failed to load room details.");
+                toast.error("Failed to load room details.", { toastId: "roomError" });
             } finally {
                 setLoading(false);
             }
@@ -101,7 +93,7 @@ const CollaborationRoomPage: React.FC = () => {
                 } catch (err) {
                     console.warn("Failed to fetch question:", err);
                     setError("Failed to load question details.");
-                    message.error("Failed to load question details.");
+                    toast.error("Failed to load question details.", { toastId: "questionError" });
                 }
             }
         };
