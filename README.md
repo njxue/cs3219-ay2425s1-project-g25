@@ -16,6 +16,25 @@ This project follows a microservices architecture with the following services:
 11. **Chat Service** (Located in addon/chat)
 
 ### Setting up the Project
+
+### Running the Project with `start.sh`
+
+A `start.sh` script is provided in the root directory to simplify setup. This script will start all services, check for any `.env.example` files, and create the required `.env` files if they don’t already exist.
+
+To run the project, open a terminal in the `cs3219-ay2425s1-project-g25` directory and execute:
+
+    ./start.sh
+
+This script can be run on **Linux**, **macOS**, and **Windows** (with Git Bash or WSL). It will initialize all services and ensure the environment files are set up as needed. 
+
+Ensure the script has execute permissions. If needed, set them by running:
+
+    chmod +x start.sh
+
+
+This will initialize all services and ensure the environment files are set up as needed. Note that running `start.sh` requires Git Bash, WSL, or a similar terminal environment capable of executing Bash scripts.
+
+### Manual Setup
 Copy and paste the .env.example files in each service. Rename them as .env files.
 Files to do this in:
 1. ./
