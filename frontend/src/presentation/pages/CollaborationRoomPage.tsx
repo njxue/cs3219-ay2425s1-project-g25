@@ -80,7 +80,7 @@ const CollaborationRoomPage: React.FC = () => {
                             <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
                             <div className={styles.contentArea}>
                                 <div className={`${styles.questionDetail} ${showChat ? styles.hidden : ""}`}>
-                                    <QuestionDetail question={initialQuestions[0]} />
+                                    <QuestionDetail question={question} />
                                 </div>
                                 <div className={`${styles.chatFrame} ${showChat ? styles.visible : styles.hidden}`}>
                                     <ChatFrame roomId={roomId} />
