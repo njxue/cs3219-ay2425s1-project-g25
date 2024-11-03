@@ -28,7 +28,7 @@ const AppRoutes: React.FC = () => {
 
                     <Route element={<ProtectedRoute />}>
                         <Route
-                            path="/room/:roomId"
+                            path="/room/:urlRoomId"
                             element={
                                 <CollaborationProvider>
                                     <CollaborationRoomPage />

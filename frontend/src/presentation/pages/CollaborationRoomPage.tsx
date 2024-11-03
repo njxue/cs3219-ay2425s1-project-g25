@@ -1,23 +1,41 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import styles from "./CollaborationRoomPage.module.css";
-import CodeEditor from "presentation/components/CodeEditor/CodeEditor";
-import { QuestionDetail } from "presentation/components/QuestionDetail";
-import { useLocation } from "react-router-dom";
+import CodeEditor from "../../presentation/components/CodeEditor/CodeEditor";
+import { QuestionDetail } from "../../presentation/components/QuestionDetail";
+import { useLocation, useParams } from "react-router-dom";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
-import { OutputBox } from "presentation/components/CodeEditor/OutputBox";
-import ToggleButton from "presentation/components/buttons/ToggleButton";
-import ChatFrame from "presentation/components/iframe/ChatFrame";
-import { Question } from "domain/entities/Question";
-import { questionUseCases } from "domain/usecases/QuestionUseCases";
+import { OutputBox } from "../../presentation/components/CodeEditor/OutputBox";
+import ToggleButton from "../../presentation/components/buttons/ToggleButton";
+import ChatFrame from "../../presentation/components/iframe/ChatFrame";
+import { Question } from "../../domain/entities/Question";
+import { questionUseCases } from "../../domain/usecases/QuestionUseCases";
+import { roomUseCases } from "../../domain/usecases/RoomUseCases";
+import { Room } from "../../domain/entities/Room";
+import { useAuth } from "../../domain/context/AuthContext";
+import { message, Spin } from "antd";
 
 const CollaborationRoomPage: React.FC = () => {
     const location = useLocation();
-    const { message, category, difficulty, roomId, attemptStartedAt, matchId, matchUserId, questionId } = location.state;
-    console.log(attemptStartedAt, parseInt(attemptStartedAt), new Date(parseInt(attemptStartedAt)))
-    const [question, setQuestion] = useState<Question>();
+    const user = useAuth();
+    const locationState = location.state;
+
+    // State Definitions
+    const { urlRoomId } = useParams<{ urlRoomId: string }>();
+    const [room, setRoom] = useState<Room | null>(null);
+    const [question, setQuestion] = useState<Question | undefined>(undefined);
     const [showChat, setShowChat] = useState(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+
+    // Extract details from location.state if available
+    const {
+        roomId,
+        attemptStartedAt,
+        matchUserId,
+        questionId,
+    } = locationState || {};
 
     const handleResize = useCallback(() => {
         if (resizeTimeoutRef.current) {
@@ -29,16 +47,66 @@ const CollaborationRoomPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const fetchQuestions = async () => {
+        const populateRoom = async () => {
+            setLoading(true);
+            setError(null);
             try {
-                const fetchedQuestion = await questionUseCases.getQuestion(questionId);
-                setQuestion(fetchedQuestion);
+                // Check if location.state has all required details
+                const hasAllDetails =
+                    roomId &&
+                    attemptStartedAt &&
+                    matchUserId &&
+                    questionId;
+
+                if (hasAllDetails) {
+                    // Populate room with details from location.state
+                    setRoom({
+                        roomId: roomId,
+                        attemptStartedAt: attemptStartedAt,
+                        userIdOne: user.user!._id,
+                        userIdTwo: matchUserId,
+                        questionId: questionId,
+                    });
+                } else {
+                    if (!urlRoomId) return ;
+                    // Fetch room details from API
+                    const fetchedRoom = await roomUseCases.getRoomDetails(urlRoomId);
+                    // Ensure the current user is userIdOne
+                    if (fetchedRoom.userIdOne !== user.user?._id) {
+                        const temp = fetchedRoom.userIdOne;
+                        fetchedRoom.userIdOne = fetchedRoom.userIdTwo;
+                        fetchedRoom.userIdTwo = temp;
+                    }
+                    setRoom(fetchedRoom);
+                }
             } catch (err) {
-                console.warn(err);
+                console.error("Failed to populate room:", err);
+                setError("Failed to load room details.");
+                message.error("Failed to load room details.");
+            } finally {
+                setLoading(false);
             }
         };
-        fetchQuestions();
-    }, [questionId]);
+        if (user.user) {
+            populateRoom();
+        }
+    }, [roomId, attemptStartedAt, matchUserId, questionId, user.user?._id, user.user, urlRoomId]);
+
+    useEffect(() => {
+        const fetchQuestion = async () => {
+            if (room && room.questionId) {
+                try {
+                    const fetchedQuestion = await questionUseCases.getQuestion(room.questionId);
+                    setQuestion(fetchedQuestion);
+                } catch (err) {
+                    console.warn("Failed to fetch question:", err);
+                    setError("Failed to load question details.");
+                    message.error("Failed to load question details.");
+                }
+            }
+        };
+        fetchQuestion();
+    }, [room]);
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
@@ -54,6 +122,7 @@ const CollaborationRoomPage: React.FC = () => {
         };
     }, [handleResize]);
 
+    // Resizable Layout Configurations
     const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
         axis: "x",
         min: 300,
@@ -69,11 +138,22 @@ const CollaborationRoomPage: React.FC = () => {
         reverse: true
     });
 
-    if (!roomId) return <NotFound />;
+    // Conditional Rendering based on states
+    if (loading) {
+        return (
+            <div className={styles.loadingContainer}>
+                <Spin size="large" tip="Loading room details..." />
+            </div>
+        );
+    }
+
+    if (error) {
+        return <NotFound />;
+    }
 
     return (
         <>
-            {question &&
+            {room && question ? (
                 <div className={styles.container}>
                     <div className={styles.questionContainer} style={{ width: questionPosition }}>
                         <div className={styles.questionContent}>
@@ -83,7 +163,7 @@ const CollaborationRoomPage: React.FC = () => {
                                     <QuestionDetail question={question} />
                                 </div>
                                 <div className={`${styles.chatFrame} ${showChat ? styles.visible : styles.hidden}`}>
-                                    <ChatFrame roomId={roomId} />
+                                    <ChatFrame roomId={room.roomId} />
                                 </div>
                             </div>
                         </div>
@@ -94,10 +174,10 @@ const CollaborationRoomPage: React.FC = () => {
                     <div className={styles.editorAndOutputContainer}>
                         <div className={styles.editorContainer}>
                             <CodeEditor
-                                questionId={questionId}
-                                roomId={roomId}
-                                attemptStartedAt={new Date(attemptStartedAt)}
-                                collaboratorId={matchUserId}
+                                questionId={room.questionId}
+                                roomId={room.roomId}
+                                attemptStartedAt={new Date(room.attemptStartedAt)}
+                                collaboratorId={room.userIdTwo}
                             />
                         </div>
 
@@ -108,7 +188,11 @@ const CollaborationRoomPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            }
+            ) : (
+                <div className={styles.loadingContainer}>
+                    <Spin size="large" tip="Loading question details..." />
+                </div>
+            )}
         </>
     );
 };
