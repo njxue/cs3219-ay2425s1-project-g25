@@ -155,6 +155,10 @@ export class MockUser {
             }
         });
     }
+
+    async forgetPassword(email: string): Promise<any> {}
+
+    async resetPassword(password: string, token: string): Promise<any> {}
 }
 
 export const mockUser = new MockUser();

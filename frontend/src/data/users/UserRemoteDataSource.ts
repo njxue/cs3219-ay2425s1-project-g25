@@ -51,6 +51,13 @@ export class UserRemoteDataSource extends BaseApi {
         return await this.protectedGet<any>(`/users/${userId}`);
     }
 
+    async forgetPassword(email: string) {
+        return await this.post<any>("/users/forgetPassword", { email });
+    }
+
+    async resetPassword(password: string, token: string) {
+        return await this.post<any>("/users/resetPassword", { password, token });
+    }
 }
 
 export const userRemoteDataSource = new UserRemoteDataSource();
