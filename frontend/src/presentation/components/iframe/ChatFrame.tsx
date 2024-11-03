@@ -1,13 +1,15 @@
 // ChatFrame.tsx
 import React from "react";
 import styles from "./ChatFrame.module.css";
+import AuthClientStore from "data/auth/AuthClientStore";
 
 interface ChatFrameProps {
     roomId: string;
 }
 
 const ChatFrame: React.FC<ChatFrameProps> = ({ roomId }) => {
-    const chatUrl = `http://localhost:5173/Assistant`;
+    const token = AuthClientStore.getAccessToken();
+    const chatUrl = `http://localhost:7000/chat/${encodeURIComponent(roomId)}?token=${token}`;
 
     return (
         <div className={styles.chatFrameWrapper}>

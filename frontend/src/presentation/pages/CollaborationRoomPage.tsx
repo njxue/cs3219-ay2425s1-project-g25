@@ -11,7 +11,7 @@ import ToggleButton from "presentation/components/buttons/ToggleButton";
 import ChatFrame from "presentation/components/iframe/ChatFrame";
 
 const CollaborationRoomPage: React.FC = () => {
-    const { roomId } = useParams();
+    const { roomId } = useParams<{ roomId: string }>();
     const [showChat, setShowChat] = useState(false);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -60,7 +60,14 @@ const CollaborationRoomPage: React.FC = () => {
             <div className={styles.questionContainer} style={{ width: questionPosition }}>
                 <div className={styles.questionContent}>
                     <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
-                    {showChat ? <ChatFrame roomId={roomId} /> : <QuestionDetail question={initialQuestions[0]} />}
+                    <div className={styles.contentArea}>
+                        <div className={`${styles.questionDetail} ${showChat ? styles.hidden : ""}`}>
+                            <QuestionDetail question={initialQuestions[0]} />
+                        </div>
+                        <div className={`${styles.chatFrame} ${showChat ? styles.visible : styles.hidden}`}>
+                            <ChatFrame roomId={roomId} />
+                        </div>
+                    </div>
                 </div>
             </div>
 
