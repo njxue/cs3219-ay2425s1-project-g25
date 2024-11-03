@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 
 const CollaborationRoomPage: React.FC = () => {
     const location = useLocation();
-    const user = useAuth();
+    const { user } = useAuth();
     const locationState = location.state;
 
     // State Definitions
@@ -32,7 +32,6 @@ const CollaborationRoomPage: React.FC = () => {
 
     // Extract details from location.state if available
     const { roomId, attemptStartedAt, matchUserId, questionId } = locationState || {};
-
     const handleResize = useCallback(() => {
         if (resizeTimeoutRef.current) {
             clearTimeout(resizeTimeoutRef.current);
@@ -49,14 +48,13 @@ const CollaborationRoomPage: React.FC = () => {
             try {
                 // Check if location.state has all required details
                 const hasAllDetails = roomId && attemptStartedAt && matchUserId && questionId;
-
                 if (hasAllDetails) {
                     // Populate room with details from location.state
                     setRoom({
                         roomId: roomId,
                         attemptStartedAt: attemptStartedAt,
-                        userIdOne: user.user!._id,
-                        userIdTwo: matchUserId,
+                        userIdOne: { _id: user!._id },
+                        userIdTwo: { _id: matchUserId },
                         questionId: questionId
                     });
                 } else {
@@ -64,7 +62,7 @@ const CollaborationRoomPage: React.FC = () => {
                     // Fetch room details from API
                     const fetchedRoom = await roomUseCases.getRoomDetails(urlRoomId);
                     // Ensure the current user is userIdOne
-                    if (fetchedRoom.userIdOne !== user.user?._id) {
+                    if (fetchedRoom.userIdOne._id !== user?._id) {
                         const temp = fetchedRoom.userIdOne;
                         fetchedRoom.userIdOne = fetchedRoom.userIdTwo;
                         fetchedRoom.userIdTwo = temp;
@@ -79,10 +77,10 @@ const CollaborationRoomPage: React.FC = () => {
                 setLoading(false);
             }
         };
-        if (user.user) {
+        if (user) {
             populateRoom();
         }
-    }, [roomId, attemptStartedAt, matchUserId, questionId, user.user?._id, user.user, urlRoomId]);
+    }, [roomId, attemptStartedAt, matchUserId, questionId, user, urlRoomId]);
 
     useEffect(() => {
         const fetchQuestion = async () => {
@@ -169,7 +167,7 @@ const CollaborationRoomPage: React.FC = () => {
                                 questionId={room.questionId}
                                 roomId={room.roomId}
                                 attemptStartedAt={new Date(room.attemptStartedAt)}
-                                collaboratorId={room.userIdTwo}
+                                collaboratorId={room.userIdTwo?._id}
                             />
                         </div>
 
