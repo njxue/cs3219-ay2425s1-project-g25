@@ -4,7 +4,6 @@ import { formatUserResponse } from "./user-controller.js";
 import { jwtConfig, REFRESH_TOKEN_COOKIE_KEY, refreshTokenCookieOptions } from "../config/authConfig.js";
 import TokenService from "../services/tokenService.js";
 import { BadRequestError, NotFoundError, UnauthorisedError } from "../utils/httpErrors.js";
-import { decode } from "jsonwebtoken";
 
 export async function handleLogin(req, res, next) {
   const { email, password } = req.body;
@@ -44,7 +43,7 @@ export async function handleLogout(req, res, next) {
     }
     const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_KEY];
     const decodedToken = await TokenService.verifyToken(refreshToken, jwtConfig.refreshTokenSecret);
-    await TokenService.blacklistToken(decodedToken);
+    await TokenService.blacklistRefreshToken(decodedToken);
     return res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -83,7 +82,7 @@ export async function refresh(req, res, next) {
     const accessToken = TokenService.generateAccessToken(dbUser);
     const newRefreshToken = TokenService.generateRefreshToken(dbUser);
     res.cookie(REFRESH_TOKEN_COOKIE_KEY, newRefreshToken, refreshTokenCookieOptions);
-    await TokenService.blacklistToken(decodedRefreshToken);
+    await TokenService.blacklistRefreshToken(decodedRefreshToken);
 
     return res.status(200).json({
       message: "Access token refreshed",

@@ -12,6 +12,8 @@ import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
 import { MatchmakingProvider } from "domain/context/MatchmakingContext";
 import CollaborationRoomPage from "presentation/pages/CollaborationRoomPage";
 import { CollaborationProvider } from "domain/context/CollaborationContext";
+import { ForgotPasswordPage } from "presentation/pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "presentation/pages/ResetPasswordPage";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -20,6 +22,8 @@ const AppRoutes: React.FC = () => {
                 <Routes>
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/room/:roomId/:matchUserId" element={<QuestionPage />} />
 
                     <Route element={<ProtectedRoute />}>
