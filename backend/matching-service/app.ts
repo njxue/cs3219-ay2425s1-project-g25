@@ -25,12 +25,12 @@ const server = http.createServer(app);
 
 initSocket(server);
 
+app.use(express.json());
+
 app.use(cors({
     origin: true,
     credentials: true,
 }));
-
-app.use(express.json());
 
 app.use("/api/match", matchingRoutes);
 
