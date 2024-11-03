@@ -2,16 +2,20 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import styles from "./CollaborationRoomPage.module.css";
 import CodeEditor from "presentation/components/CodeEditor/CodeEditor";
 import { QuestionDetail } from "presentation/components/QuestionDetail";
-import { initialQuestions } from "data/repositories/mockQuestionRepository";
-import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useResizable } from "react-resizable-layout";
 import NotFound from "./NotFound";
 import { OutputBox } from "presentation/components/CodeEditor/OutputBox";
 import ToggleButton from "presentation/components/buttons/ToggleButton";
 import ChatFrame from "presentation/components/iframe/ChatFrame";
+import { Question } from "domain/entities/Question";
+import { questionUseCases } from "domain/usecases/QuestionUseCases";
 
 const CollaborationRoomPage: React.FC = () => {
-    const { roomId } = useParams<{ roomId: string }>();
+    const location = useLocation();
+    const { message, category, difficulty, roomId, attemptStartedAt, matchId, matchUserId, questionId } = location.state;
+    console.log(attemptStartedAt, parseInt(attemptStartedAt), new Date(parseInt(attemptStartedAt)))
+    const [question, setQuestion] = useState<Question>();
     const [showChat, setShowChat] = useState(false);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -23,6 +27,18 @@ const CollaborationRoomPage: React.FC = () => {
             console.log("Resizing...");
         }, 100);
     }, []);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const fetchedQuestion = await questionUseCases.getQuestion(questionId);
+                setQuestion(fetchedQuestion);
+            } catch (err) {
+                console.warn(err);
+            }
+        };
+        fetchQuestions();
+    }, [questionId]);
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
@@ -56,35 +72,44 @@ const CollaborationRoomPage: React.FC = () => {
     if (!roomId) return <NotFound />;
 
     return (
-        <div className={styles.container}>
-            <div className={styles.questionContainer} style={{ width: questionPosition }}>
-                <div className={styles.questionContent}>
-                    <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
-                    <div className={styles.contentArea}>
-                        <div className={`${styles.questionDetail} ${showChat ? styles.hidden : ""}`}>
-                            <QuestionDetail question={initialQuestions[0]} />
+        <>
+            {question &&
+                <div className={styles.container}>
+                    <div className={styles.questionContainer} style={{ width: questionPosition }}>
+                        <div className={styles.questionContent}>
+                            <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
+                            <div className={styles.contentArea}>
+                                <div className={`${styles.questionDetail} ${showChat ? styles.hidden : ""}`}>
+                                    <QuestionDetail question={initialQuestions[0]} />
+                                </div>
+                                <div className={`${styles.chatFrame} ${showChat ? styles.visible : styles.hidden}`}>
+                                    <ChatFrame roomId={roomId} />
+                                </div>
+                            </div>
                         </div>
-                        <div className={`${styles.chatFrame} ${showChat ? styles.visible : styles.hidden}`}>
-                            <ChatFrame roomId={roomId} />
+                    </div>
+
+                    <div className={styles.verticalSeparator} {...verticalSeparatorProps} />
+
+                    <div className={styles.editorAndOutputContainer}>
+                        <div className={styles.editorContainer}>
+                            <CodeEditor
+                                questionId={questionId}
+                                roomId={roomId}
+                                attemptStartedAt={new Date(attemptStartedAt)}
+                                collaboratorId={matchUserId}
+                            />
+                        </div>
+
+                        <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
+
+                        <div className={styles.outputContainer} style={{ height: outputPosition }}>
+                            <OutputBox />
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className={styles.verticalSeparator} {...verticalSeparatorProps} />
-
-            <div className={styles.editorAndOutputContainer}>
-                <div className={styles.editorContainer}>
-                    <CodeEditor roomId={roomId} />
-                </div>
-
-                <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
-
-                <div className={styles.outputContainer} style={{ height: outputPosition }}>
-                    <OutputBox />
-                </div>
-            </div>
-        </div>
+            }
+        </>
     );
 };
 
