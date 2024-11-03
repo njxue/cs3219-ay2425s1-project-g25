@@ -92,7 +92,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
                             icon={theme === "vs-light" ? <SunOutlined /> : <MoonFilled />}
                         />
 
-                        <CodeActionButtons disabled={isExecuting} />
+                        <CodeActionButtons 
+                            disabled={isExecuting}
+                            getEditorText={() => editorRef.current?.getValue() || ""}
+                            questionId={questionId}
+                            roomId={roomId}
+                            attemptStartedAt={attemptStartedAt}
+                            collaboratorId={collaboratorId}
+                        />
                         <LeaveButton
                             getEditorText={() => editorRef.current?.getValue() || ""}
                             questionId={questionId}
