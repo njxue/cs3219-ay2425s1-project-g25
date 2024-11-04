@@ -27,14 +27,12 @@ initSocket(server);
 
 app.use(express.json());
 
-app.use("/api/match", matchingRoutes);
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
 
-app.use(
-    cors({
-        origin: "*",
-        credentials: true,
-    })
-);
+app.use("/api/match", matchingRoutes);
 
 app.use(errorHandler);
 

@@ -56,7 +56,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
         provider.awareness.setLocalStateField(USERNAME, username);
         provider.awareness.on("change", () => {
             const users = Array.from(provider.awareness.getStates().values());
-            setConnectedUsers(users.map((user) => user[USERNAME]));
+            setConnectedUsers(Array.from(new Set(users.map((user) => user[USERNAME]))));
         });
 
         return () => provider.destroy();

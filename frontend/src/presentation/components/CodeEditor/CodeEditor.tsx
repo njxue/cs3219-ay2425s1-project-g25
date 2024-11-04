@@ -7,12 +7,21 @@ import * as monaco from "monaco-editor";
 import { SunOutlined, MoonFilled } from "@ant-design/icons";
 import { LanguageSelector } from "./LanguageSelector";
 import { CodeActionButtons } from "./CodeActionButtons";
+import LeaveButton from "./LeaveButton";
 
 interface CodeEditorProps {
+    questionId: string;
     roomId: string;
+    attemptStartedAt: Date;
+    collaboratorId: string;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ 
+    questionId,
+    roomId,
+    attemptStartedAt,
+    collaboratorId
+}) => {
     const { onEditorIsMounted, isExecuting, setRoomId, connectedUsers } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -83,7 +92,21 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
                             icon={theme === "vs-light" ? <SunOutlined /> : <MoonFilled />}
                         />
 
-                        <CodeActionButtons disabled={isExecuting} />
+                        <CodeActionButtons 
+                            disabled={isExecuting}
+                            getEditorText={() => editorRef.current?.getValue() || ""}
+                            questionId={questionId}
+                            roomId={roomId}
+                            attemptStartedAt={attemptStartedAt}
+                            collaboratorId={collaboratorId}
+                        />
+                        <LeaveButton
+                            getEditorText={() => editorRef.current?.getValue() || ""}
+                            questionId={questionId}
+                            roomId={roomId}
+                            attemptStartedAt={attemptStartedAt}
+                            collaboratorId={collaboratorId}
+                        />
                     </div>
                 </div>
             </div>

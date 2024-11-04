@@ -7,6 +7,7 @@ import categoriesRoutes from './routes/categoriesRoutes';
 import { connectToDatabase } from './utils/database';
 import { errorHandler } from './middlewares/errorHandler';
 import { populateQuestions } from './utils/populateQuestions';
+import historyRoutes from './routes/historyRoutes';
 import { setUpKafkaSubscribers } from './utils/kafkaClient';
 
 dotenv.config({ path: path.resolve(__dirname, './.env') });
@@ -25,6 +26,7 @@ app.use(cors({
 
 app.use('/api/questions', questionsRoutes);
 app.use('/api/categories', categoriesRoutes);
+app.use('/api/history', historyRoutes)
 
 app.use(errorHandler);
 

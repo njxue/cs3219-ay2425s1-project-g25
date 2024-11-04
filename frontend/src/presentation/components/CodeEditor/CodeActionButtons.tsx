@@ -1,12 +1,25 @@
 import { Button } from "antd";
 import { useCollaboration } from "domain/context/CollaborationContext";
-import { PlayCircleOutlined, CloudUploadOutlined } from "@ant-design/icons";
+import { PlayCircleOutlined } from "@ant-design/icons";
 import styles from "./CodeActionButtons.module.css";
+import SubmitButton from "./SubmitButton";
 
 interface CodeActionButtonsProps {
     disabled?: boolean;
+    getEditorText: () => string;
+    questionId: string;
+    roomId: string;
+    attemptStartedAt: Date;
+    collaboratorId: string;
 }
-export const CodeActionButtons: React.FC<CodeActionButtonsProps> = ({ disabled = false }) => {
+export const CodeActionButtons: React.FC<CodeActionButtonsProps> = ({ 
+    disabled = false,
+    getEditorText,
+    questionId,
+    roomId,
+    attemptStartedAt,
+    collaboratorId,
+}) => {
     const { handleExecuteCode } = useCollaboration();
     return (
         <>
@@ -20,9 +33,13 @@ export const CodeActionButtons: React.FC<CodeActionButtonsProps> = ({ disabled =
             >
                 Run
             </Button>
-            <Button className={styles.submitButton} icon={<CloudUploadOutlined />} disabled={disabled}>
-                Submit
-            </Button>
+            <SubmitButton
+                getEditorText={getEditorText}
+                questionId={questionId}
+                roomId={roomId}
+                attemptStartedAt={attemptStartedAt}
+                collaboratorId={collaboratorId}
+            />
         </>
     );
 };

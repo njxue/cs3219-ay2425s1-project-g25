@@ -1,6 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
-const roomSchema = new mongoose.Schema({
+export interface Room extends mongoose.Document {
+    _id: Types.ObjectId;
+    participants: string[];
+    category: string;
+    difficulty: string;
+    roomId: string;
+    questionId: string;
+    createdAt: Date;
+}
+
+
+const roomSchema: Schema<Room> = new mongoose.Schema<Room>({
     participants: [{ userId: String }],
     category: { type: String, default: 'Any' },
     difficulty: { type: String, default: 'Any' },
@@ -9,6 +20,6 @@ const roomSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-const Room = mongoose.model('Room', roomSchema);
+const roomModel = mongoose.model<Room>('Room', roomSchema);
 
-export default Room;
+export default roomModel;

@@ -9,8 +9,12 @@ export const jwtConfig = {
   accessTokenOptions: {
     expiresIn: process.env.ENV === "production" ? "15m" : "30s", // Shorter duration in dev for testing
   },
+  resetTokenOptions: {
+    expiresIn: "15m",
+  },
   accessTokenSecret: process.env.JWT_ACCESS_TOKEN_SECRET,
   refreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET,
+  resetTokenSecret: process.env.JWT_RESET_TOKEN_SECRET,
 };
 
 export const REFRESH_TOKEN_COOKIE_KEY = "refreshToken";

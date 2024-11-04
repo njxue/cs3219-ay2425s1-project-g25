@@ -10,10 +10,10 @@
     gap: 4vh;
     align-items: center;
     padding: 10vh;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     background: #fff;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     height: 100%;
     width: 100%;
 }
@@ -61,4 +61,8 @@
 
 .button:hover {
     background-color: #555;
+}
+
+.forgotPasswordLink {
+    margin-right: auto;
 }
