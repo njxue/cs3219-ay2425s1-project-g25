@@ -105,5 +105,9 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
+app.listen(port, async () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
+
 export default app;
 export { port };
