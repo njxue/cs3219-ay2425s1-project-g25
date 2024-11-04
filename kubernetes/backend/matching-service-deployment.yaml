@@ -19,11 +19,11 @@ spec:
           - containerPort: 3003
         env:
           - name: REDIS_HOST
-            value: peerprep-redis
+            value: peerprep-redis.default.svc.cluster.local
           - name: DB_HOST
-            value: peerprep-mongodb
+            value: peerprep-mongodb.default.svc.cluster.local
           - name: KAFKA_HOST
-            value: peerprep-kafka
+            value: peerprep-kafka.default.svc.cluster.local
         resources:
           requests:
             cpu: "200m"

@@ -19,9 +19,9 @@ spec:
           - containerPort: 3004
         env:
           - name: DB_HOST
-            value: peerprep-mongodb
+            value: peerprep-mongodb.default.svc.cluster.local
           - name: KAFKA_HOST
-            value: peerprep-kafka
+            value: peerprep-kafka.default.svc.cluster.local
         resources:
           requests:
             cpu: "200m"

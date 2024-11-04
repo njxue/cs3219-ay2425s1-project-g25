@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Variables
-DOCKER_USERNAME="<your_docker_username>"
+DOCKER_USERNAME="rjkoh"
 TAG="latest"
 
 # Lists of services and their corresponding deployment YAML paths
-services=("collaboration-service" "matching-service" "question-service" "user-service" "frontend")
+services=("collaboration-service" "matching-service" "question-service" "user-service")
 
 # Loop through each service
 for i in "${!services[@]}"; do
@@ -44,27 +44,38 @@ for i in "${!services[@]}"; do
   echo "----------------------------------------"
 done
 
-SERVICE_NAME="cs3219-ay2425s1-project-g25-nginx"
-K8S_DEPLOYMENT_FILE="kubernetes/backend/nginx-deployment.yaml"
+# frontend
+SERVICE="frontend"
+SERVICE_NAME="cs3219-ay2425s1-project-g25-${SERVICE}"
+K8S_DEPLOYMENT_FILE="kubernetes/frontend/${SERVICE}-deployment.yaml"
 FULL_IMAGE_NAME="$DOCKER_USERNAME/$SERVICE_NAME:$TAG"
-  
 echo "Tagging image $SERVICE as $FULL_IMAGE_NAME..."
 docker tag $SERVICE_NAME $FULL_IMAGE_NAME
-  
 echo "Pushing image $FULL_IMAGE_NAME to Docker Hub..."
 docker push $FULL_IMAGE_NAME
-  
 echo "Updating image name in Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
 sed -i.bak "s|image: .*$|image: $FULL_IMAGE_NAME|g" $K8S_DEPLOYMENT_FILE
-  
 echo "Applying Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
 kubectl apply -f $K8S_DEPLOYMENT_FILE
-  
 rm "$K8S_DEPLOYMENT_FILE.bak"
-
 echo "Deployment for $SERVICE complete."
 echo "----------------------------------------"
 
+# nginx
+SERVICE_NAME="cs3219-ay2425s1-project-g25-nginx"
+K8S_DEPLOYMENT_FILE="kubernetes/backend/nginx-deployment.yaml"
+FULL_IMAGE_NAME="$DOCKER_USERNAME/$SERVICE_NAME:$TAG"
+echo "Tagging image $SERVICE as $FULL_IMAGE_NAME..."
+docker tag $SERVICE_NAME $FULL_IMAGE_NAME
+echo "Pushing image $FULL_IMAGE_NAME to Docker Hub..."
+docker push $FULL_IMAGE_NAME
+echo "Updating image name in Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
+sed -i.bak "s|image: .*$|image: $FULL_IMAGE_NAME|g" $K8S_DEPLOYMENT_FILE
+echo "Applying Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
+kubectl apply -f $K8S_DEPLOYMENT_FILE
+rm "$K8S_DEPLOYMENT_FILE.bak"
+echo "Deployment for $SERVICE complete."
+echo "----------------------------------------"
 
 echo "Applying Kubernetes deployment file for kafka..."
 kubectl apply -f kubernetes/kafka/kafka-deployment.yaml
