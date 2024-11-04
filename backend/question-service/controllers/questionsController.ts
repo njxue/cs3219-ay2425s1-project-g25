@@ -3,6 +3,7 @@ import categoryModel from "../models/Category";
 import { Request, Response, NextFunction } from "express";
 import { EachMessagePayload } from "kafkajs";
 import { producer, QUESTION_TOPIC } from "../utils/kafkaClient";
+import { Types } from "mongoose";
 
 const DIFFICULTIES = ["easy", "medium", "hard"];
 
@@ -238,20 +239,23 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
             }
         }
 
-        // If difficulty is "any", return any question from the category
-        if (difficulty.toLowerCase() === "all") {
-            return await questionModel.findOne({
-                ...(category ? { categories: category._id } : {}),
-            });
-        }
-
-        let question = await questionModel.findOne({
+        const query: { categories?: Types.ObjectId; difficulty?: RegExp } = {
             ...(category ? { categories: category._id } : {}),
-            difficulty: new RegExp(`^${difficulty}$`, "i"),
-        });
+        };
 
-        if (question) {
-            return question;
+        if (difficulty.toLowerCase() !== "all") {
+            query.difficulty = new RegExp(`^${difficulty}$`, "i");
+        }
+        console.log(query);
+
+        // Attempt to find a question with the exact specified difficulty
+        let questions = await questionModel.aggregate([
+            { $match: query },
+            { $sample: { size: 1 } },
+        ]);
+
+        if (questions.length > 0) {
+            return questions[0];
         }
 
         const difficultyIndex = DIFFICULTIES.indexOf(difficulty.toLowerCase());
@@ -259,25 +263,27 @@ async function findSuitableQuestion(categoryName: string, difficulty: string) {
             throw new Error(`Invalid difficulty level: ${difficulty}`);
         }
 
-        // Find lower difficulty question if exact match is not found
+        // Adjust the search to find the nearest difficulty level, starting with lower levels
         for (let i = difficultyIndex - 1; i >= 0; i--) {
-            question = await questionModel.findOne({
-                ...(category ? { categories: category._id } : {}),
-                difficulty: new RegExp(`^${DIFFICULTIES[i]}$`, "i"),
-            });
-            if (question) {
-                return question;
+            query.difficulty = new RegExp(`^${DIFFICULTIES[i]}$`, "i"); // Case-insensitive exact match for lower difficulty
+            questions = await questionModel.aggregate([
+                { $match: query },
+                { $sample: { size: 1 } },
+            ]);
+            if (questions.length > 0) {
+                return questions[0];
             }
         }
 
-        // Find higher difficulty question if lower difficulty not found
+        // Check higher difficulty levels if lower levels are unavailable
         for (let i = difficultyIndex + 1; i < DIFFICULTIES.length; i++) {
-            question = await questionModel.findOne({
-                ...(category ? { categories: category._id } : {}),
-                difficulty: new RegExp(`^${DIFFICULTIES[i]}$`, "i"),
-            });
-            if (question) {
-                return question;
+            query.difficulty = new RegExp(`^${DIFFICULTIES[i]}$`, "i"); // Case-insensitive exact match for higher difficulty
+            questions = await questionModel.aggregate([
+                { $match: query },
+                { $sample: { size: 1 } },
+            ]);
+            if (questions.length > 0) {
+                return questions[0];
             }
         }
 

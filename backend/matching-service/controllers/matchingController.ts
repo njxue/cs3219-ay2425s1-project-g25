@@ -94,11 +94,11 @@ export function setupSocketListeners() {
                 }
 
                 if (category === "") {
-                    category = "Any";
+                    category = "all";
                 }
 
                 if (difficulty === "") {
-                    category = "Any";
+                    difficulty = "all";
                 }
 
                 const socketId = socket.id;
@@ -304,8 +304,8 @@ async function handleMatchEvent(
 
             socket1.emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with User ID: ${user2.userId}`,
-                category: user1.category || user2.category || "Any",
-                difficulty: user1.difficulty || user2.difficulty || "Any",
+                category: user1.category || user2.category || "all",
+                difficulty: user1.difficulty || user2.difficulty || "all",
                 attemptStartedAt: Date.now(),
                 matchId: matchId,
                 roomId: roomId,
@@ -315,8 +315,8 @@ async function handleMatchEvent(
 
             socket2.emit(SOCKET_EVENTS.MATCH_FOUND, {
                 message: `You have been matched with User ID: ${user1.userId}`,
-                category: user2.category || user1.category || "Any",
-                difficulty: user2.difficulty || user1.difficulty || "Any",
+                category: user2.category || user1.category || "all",
+                difficulty: user2.difficulty || user1.difficulty || "all",
                 attemptStartedAt: Date.now(),
                 matchId: matchId,
                 roomId: roomId,
