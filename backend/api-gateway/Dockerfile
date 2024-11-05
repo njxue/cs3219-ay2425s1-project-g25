@@ -3,6 +3,7 @@ FROM nginx:alpine
 
 # Copy custom Nginx configuration to the container
 COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./proxy_params /etc/nginx/proxy_params
 
 # Expose port 80
 EXPOSE 80
