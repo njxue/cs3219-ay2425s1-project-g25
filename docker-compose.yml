@@ -125,8 +125,8 @@ services:
             - CHOKIDAR_USEPOLLING=true
             - WATCHPACK_POLLING=true
             - WDS_SOCKET_PORT=0
-            - REACT_APP_LOCAL_API_URL=http://52.221.131.145
-            - REACT_APP_SOCKET_URL=http://52.221.131.145:3003
+            - REACT_APP_LOCAL_API_URL=${REACT_APP_LOCAL_API_URL}
+            - REACT_APP_SOCKET_URL=${REACT_APP_SOCKET_URL}
 
     # Nginx API Gateway
     nginx:
