@@ -135,6 +135,10 @@ services:
             - ./backend/api-gateway/nginx.conf:/etc/nginx/nginx.conf
         networks:
             - peerprep-network
+        depends_on:
+            - matching-service
+            - question-service
+            - user-service
     
     # Redis Service
     peerprep-redis:
