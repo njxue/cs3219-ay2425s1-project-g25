@@ -174,9 +174,9 @@ function getRelaxedCriteria(
                 difficulty: userData.difficulty,
             };
         case 1:
-            return { category: userData.category, difficulty: "Any" };
+            return { category: userData.category, difficulty: "all" };
         case 2:
-            return { category: "Any", difficulty: userData.difficulty };
+            return { category: "all", difficulty: userData.difficulty };
         default:
             return {
                 category: userData.category,
@@ -196,10 +196,10 @@ function isCriteriaSatisfied(
     relaxedCriteria: { category: string; difficulty: string }
 ): boolean {
     const categoryMatch =
-        relaxedCriteria.category === "Any" ||
+        relaxedCriteria.category === "all" ||
         user.category === relaxedCriteria.category;
     const difficultyMatch =
-        relaxedCriteria.difficulty === "Any" ||
+        relaxedCriteria.difficulty === "all" ||
         user.difficulty === relaxedCriteria.difficulty;
     return categoryMatch && difficultyMatch;
 }
@@ -227,8 +227,8 @@ async function handleMatch(user1: any, user2: any) {
         );
         console.log(messagesBefore);
 
-        const category = user1.category || user2.category || "Any";
-        const difficulty = user1.difficulty || user2.difficulty || "Any";
+        const category = user1.category == 'all' ? user2.category : user1.category;
+        const difficulty = user1.difficulty == 'all' ? user2.difficulty : user1.difficulty;
 
         const matchingEvent = new MatchingEventModel({
             category: category,
