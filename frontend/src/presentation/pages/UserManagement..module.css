@@ -28,7 +28,19 @@
 .userControls {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 16px;
+    width: 100px;
+}
+
+.username {
+    justify-content: start;
+    flex: 1;
+}
+.username p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .deleteModalBtnGroup {
