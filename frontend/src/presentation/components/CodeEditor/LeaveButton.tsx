@@ -11,7 +11,6 @@ interface LeaveButtonProps {
     roomId: string;
     attemptStartedAt: Date;
     collaboratorId: string;
-    onUserConfirmedLeave: (shouldSave: boolean) => void;
 }
 
 const LeaveButton: React.FC<LeaveButtonProps> = ({
@@ -20,7 +19,6 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
     roomId,
     attemptStartedAt,
     collaboratorId,
-    onUserConfirmedLeave,
 }) => {
     const navigate = useNavigate();
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -36,10 +34,8 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
         setIsModalVisible(false);
     };
 
-    
     const handleLeaveWithoutSaving = () => {
         setIsModalVisible(false);
-        onUserConfirmedLeave(false);
         navigate('/');
     };
 
@@ -54,7 +50,6 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
                 getEditorText(),
             );
             message.success("Your work has been saved successfully.");
-            onUserConfirmedLeave(false);
             navigate('/');
         } catch (error) {
             if (error instanceof Error) {
