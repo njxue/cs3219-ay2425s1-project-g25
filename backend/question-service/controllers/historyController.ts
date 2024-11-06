@@ -1,5 +1,4 @@
 import { Response } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import historyEntryModel from '../models/HistoryEntry';
 import { AuthenticatedRequest } from 'middlewares/auth';
 
@@ -37,12 +36,13 @@ export const getUserHistoryEntries = async (req: AuthenticatedRequest, res: Resp
       return {
         id: entry._id,
         key: entry._id,
+        roomId: entry.roomId,
         attemptStartedAt: entry.attemptStartedAt.getTime(),
         attemptCompletedAt: entry.attemptCompletedAt.getTime(),
         title: entry.question.title,
         difficulty: entry.question.difficulty,
         topics: entry.question.categories.map((cat: any) => cat.name),
-        attemptCode: entry.attemptCode,
+        attemptCodes: entry.attemptCodes,
     }});
     res.status(200).json(historyViewModels);
   } catch (error) {
@@ -71,7 +71,7 @@ export const createOrUpdateUserHistoryEntry = async (req: AuthenticatedRequest, 
       existingEntry.attemptStartedAt = attemptStartedAt;
       existingEntry.attemptCompletedAt = attemptCompletedAt;
       existingEntry.collaboratorId = collaboratorId;
-      existingEntry.attemptCode = attemptCode;
+      existingEntry.attemptCodes.push(attemptCode);
 
       const updatedEntry = await existingEntry.save();
 
@@ -84,7 +84,7 @@ export const createOrUpdateUserHistoryEntry = async (req: AuthenticatedRequest, 
         attemptStartedAt,
         attemptCompletedAt,
         collaboratorId,
-        attemptCode,
+        attemptCodes: [attemptCode],
       });
 
       const savedEntry = await newHistoryEntry.save();
@@ -95,6 +95,30 @@ export const createOrUpdateUserHistoryEntry = async (req: AuthenticatedRequest, 
     return res.status(500).json({ error: getErrorMessage(error) });
   }
 };
+
+export const removeRoomIdPresence = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = extractUserIdFromToken(req);
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Invalid or missing token' });
+    }
+    const { roomId } = req.params;
+
+    const existingEntries = await historyEntryModel.find({ roomId });
+    const updatedEntries: string[] = [];
+
+    existingEntries.forEach(async (entry) => {
+      entry.roomId = "";
+      await entry.save();
+      updatedEntries.push(entry._id.toString());
+    });
+
+    return res.status(200).json({ updatedEntries })
+  } catch (error) {
+    return res.status(500).json({ error: getErrorMessage(error) });
+  }
+}
 
 export const deleteUserHistoryEntry = async (req: AuthenticatedRequest, res: Response) => {
   try {
