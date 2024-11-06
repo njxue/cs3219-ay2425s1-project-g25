@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import { CodeEditorHandle } from "../../presentation/components/CodeEditor/CodeEditor";
 import styles from "./CollaborationRoomPage.module.css";
 import CodeEditor from "../../presentation/components/CodeEditor/CodeEditor";
 import { QuestionDetail } from "../../presentation/components/QuestionDetail";
@@ -15,6 +16,7 @@ import { Room } from "../../domain/entities/Room";
 import { useAuth } from "../../domain/context/AuthContext";
 import { Spin } from "antd";
 import { toast } from "react-toastify";
+import { historyUseCases } from "domain/usecases/HistoryUseCases";
 
 const CollaborationRoomPage: React.FC = () => {
     const location = useLocation();
@@ -23,12 +25,15 @@ const CollaborationRoomPage: React.FC = () => {
 
     // State Definitions
     const { urlRoomId } = useParams<{ urlRoomId: string }>();
-    const [room, setRoom] = useState<Room | null>(null);
+    const [hasUserConfirmedLeave, setHasUserConfirmedLeave] = useState(false);
+    const [shouldSaveOnLeave, setShouldSaveOnLeave] = useState(true);
+    const [room, setRoom] = useState<Room>();
     const [question, setQuestion] = useState<Question | undefined>(undefined);
     const [showChat, setShowChat] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+    const codeEditorRef = useRef<CodeEditorHandle>(null);
 
     // Extract details from location.state if available
     const { roomId, attemptStartedAt, matchUserId, questionId } = locationState || {};
@@ -111,7 +116,68 @@ const CollaborationRoomPage: React.FC = () => {
             if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
         };
     }, [handleResize]);
+    
+      
+    useEffect(() => {
+    
+        const saveAttempt = async () => {
+            if (hasUserConfirmedLeave) {
+                if (!shouldSaveOnLeave) return; // User chose not to save
+            }
+        
+            // Attempt to save
+            try {
+                if (!room) return;
+                await historyUseCases.createOrUpdateUserHistory(
+                    room.questionId,
+                    room.roomId,
+                    new Date(room.attemptStartedAt).getTime().toString(),
+                    Date.now().toString(),
+                    room.userIdTwo?._id,
+                    codeEditorRef.current?.getEditorText() || "",
+                );
+                console.log("Attempt saved successfully.");
+            } catch (error) {
+            console.error("Failed to save attempt on unmount:", error);
+            }
+        };
 
+        return () => {
+            saveAttempt();
+        };
+    }, [hasUserConfirmedLeave, room, shouldSaveOnLeave]);
+      
+    useEffect(() => {
+    
+        const saveAttemptAsync = async () => {
+            if (!room) return;
+            if (hasUserConfirmedLeave) {
+                if (!shouldSaveOnLeave) return;
+            }
+        
+            const editorContent = codeEditorRef.current?.getEditorText() || "";
+            await historyUseCases.createOrUpdateUserHistory(
+                room.questionId,
+                room.roomId,
+                new Date(room.attemptStartedAt).getTime().toString(),
+                Date.now().toString(),
+                room.userIdTwo?._id,
+                editorContent,
+            );
+        };
+
+        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+            await saveAttemptAsync();
+        };
+      
+        window.addEventListener('beforeunload', handleBeforeUnload);
+      
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [hasUserConfirmedLeave, room, shouldSaveOnLeave]);
+      
+      
     // Resizable Layout Configurations
     const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
         axis: "x",
@@ -164,10 +230,15 @@ const CollaborationRoomPage: React.FC = () => {
                     <div className={styles.editorAndOutputContainer}>
                         <div className={styles.editorContainer}>
                             <CodeEditor
+                                ref={codeEditorRef}
                                 questionId={room.questionId}
                                 roomId={room.roomId}
                                 attemptStartedAt={new Date(room.attemptStartedAt)}
                                 collaboratorId={room.userIdTwo?._id}
+                                onUserConfirmedLeave={(shouldSave: boolean) => {
+                                  setHasUserConfirmedLeave(true);
+                                  setShouldSaveOnLeave(shouldSave);
+                                }}
                             />
                         </div>
 
