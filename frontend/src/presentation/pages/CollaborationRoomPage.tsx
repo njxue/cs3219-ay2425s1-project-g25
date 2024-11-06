@@ -32,19 +32,10 @@ const CollaborationRoomPage: React.FC = () => {
     const [showChat, setShowChat] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const resizeTimeoutRef = useRef<NodeJS.Timeout>();
     const codeEditorRef = useRef<CodeEditorHandle>(null);
 
     // Extract details from location.state if available
     const { roomId, attemptStartedAt, matchUserId, questionId } = locationState || {};
-    const handleResize = useCallback(() => {
-        if (resizeTimeoutRef.current) {
-            clearTimeout(resizeTimeoutRef.current);
-        }
-        resizeTimeoutRef.current = setTimeout(() => {
-            console.log("Resizing...");
-        }, 100);
-    }, []);
 
     useEffect(() => {
         const populateRoom = async () => {
@@ -104,21 +95,6 @@ const CollaborationRoomPage: React.FC = () => {
     }, [room]);
 
     useEffect(() => {
-        const resizeObserver = new ResizeObserver((entries) => {
-            if (entries[0]) handleResize();
-        });
-
-        const container = document.querySelector(`.${styles.container}`);
-        if (container) resizeObserver.observe(container);
-
-        return () => {
-            resizeObserver.disconnect();
-            if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-        };
-    }, [handleResize]);
-    
-      
-    useEffect(() => {
     
         const saveAttempt = async () => {
             if (hasUserConfirmedLeave) {
@@ -177,20 +153,19 @@ const CollaborationRoomPage: React.FC = () => {
         };
     }, [hasUserConfirmedLeave, room, shouldSaveOnLeave]);
       
-      
     // Resizable Layout Configurations
     const { position: questionPosition, separatorProps: verticalSeparatorProps } = useResizable({
         axis: "x",
         min: 300,
-        initial: window.innerWidth * 0.3,
-        max: window.innerWidth * 0.6
+        initial: window.innerWidth * 0.4,
+        max: 800
     });
 
     const { position: outputPosition, separatorProps: horizontalSeparatorProps } = useResizable({
         axis: "y",
         min: 60,
-        initial: window.innerHeight * 0.2,
-        max: window.innerHeight * 0.6,
+        initial: 60,
+        max: 500,
         reverse: true
     });
 
@@ -211,17 +186,10 @@ const CollaborationRoomPage: React.FC = () => {
         <>
             {room && question ? (
                 <div className={styles.container}>
-                    <div className={styles.questionContainer} style={{ width: questionPosition }}>
-                        <div className={styles.questionContent}>
-                            <ToggleButton showChat={showChat} onClick={() => setShowChat(!showChat)} />
-                            <div className={styles.contentArea}>
-                                <div className={`${styles.questionDetail} ${showChat ? styles.hidden : ""}`}>
-                                    <QuestionDetail question={question} />
-                                </div>
-                                <div className={`${styles.chatFrame} ${showChat ? styles.visible : styles.hidden}`}>
-                                    <ChatFrame roomId={room.roomId} />
-                                </div>
-                            </div>
+                    <div className={styles.leftContainer} style={{ width: questionPosition }}>
+                        <ToggleButton showChat={showChat} onClick={() => setShowChat((showChat) => !showChat)} />
+                        <div className={styles.questionAndChatContainer}>
+                            {showChat ? <ChatFrame roomId={roomId} /> : <QuestionDetail question={question} />}
                         </div>
                     </div>
 
