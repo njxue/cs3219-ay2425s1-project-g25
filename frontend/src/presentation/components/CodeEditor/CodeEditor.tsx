@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import styles from "./CodeEditor.module.css";
 import Editor from "@monaco-editor/react";
 import { Button, Spin, Modal } from "antd";
@@ -14,6 +14,10 @@ interface CodeEditorProps {
     roomId: string;
     attemptStartedAt: Date;
     collaboratorId: string;
+    onUserConfirmedLeave: (shouldSave: boolean) => void; // New prop
+}
+export interface CodeEditorHandle {
+  getEditorText: () => string;
 }
 
 function usePrevious<T>(value: T): T | undefined {
@@ -24,18 +28,24 @@ function usePrevious<T>(value: T): T | undefined {
     return ref.current;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ 
+const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(({
     questionId,
     roomId,
     attemptStartedAt,
-    collaboratorId
-}) => {
+    collaboratorId,
+    onUserConfirmedLeave,
+  }, ref) => {
     const { onEditorIsMounted, isExecuting, setRoomId, connectedUsers } = useCollaboration();
     const [theme, setTheme] = useState("vs-light");
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [leftUser, setLeftUser] = useState<string | null>(null);
+
+    // Expose the getEditorText method using useImperativeHandle
+    useImperativeHandle(ref, () => ({
+      getEditorText: () => editorRef.current?.getValue() || "",
+    }));
 
     const prevConnectedUsers = usePrevious(connectedUsers);
 
@@ -151,6 +161,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
                             roomId={roomId}
                             attemptStartedAt={attemptStartedAt}
                             collaboratorId={collaboratorId}
+                            onUserConfirmedLeave={onUserConfirmedLeave}
                         />
                     </div>
                 </div>
@@ -168,6 +179,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             </div>
         </div>
     );
-};
+});
 
 export default CodeEditor;
