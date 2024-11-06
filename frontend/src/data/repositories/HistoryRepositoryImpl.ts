@@ -8,8 +8,8 @@ export class HistoryRepositoryImpl {
         return this.dataSource.getAllUserHistories();
     }
 
-    async createOrUpdateUserHistory(questionId: string, roomId: string, attemptStartedAt: string, attemptCompletedAt: string, collaboratorId: string, attemptCode: string): Promise<void> {
-        this.dataSource.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode)
+    async createOrUpdateUserHistory(questionId: string, roomId: string, attemptStartedAt: string, attemptCompletedAt: string, collaboratorId: string, attemptCode: string, isInitial: boolean): Promise<void> {
+        this.dataSource.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, isInitial)
     }
 
     async deleteSelectedUserHistories(selectedHistoryIds: string[]): Promise<void> {

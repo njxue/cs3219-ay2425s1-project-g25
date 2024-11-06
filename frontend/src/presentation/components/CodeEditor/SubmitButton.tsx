@@ -34,7 +34,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
 
     const handleSave = async () => {
         try {
-            await historyUseCases.createOrUpdateUserHistory(
+            await historyUseCases.updateUserHistory(
                 questionId,
                 roomId,
                 attemptStartedAt.getTime().toString(),

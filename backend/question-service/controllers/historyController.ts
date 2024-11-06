@@ -40,7 +40,7 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
   try {
     const userId = req.userId;
 
-    const { questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode } = req.body;
+    const { questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, isInitial } = req.body;
 
     if (!roomId) {
       return res.status(400).json({ error: "roomId is required" });
@@ -48,7 +48,7 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
 
     const existingEntry = await historyEntryModel.findOne({ userId, roomId });
 
-    if (existingEntry) {
+    if (!isInitial && existingEntry) {
       existingEntry.question = questionId;
       existingEntry.attemptStartedAt = attemptStartedAt;
       existingEntry.attemptCompletedAt = attemptCompletedAt;
@@ -58,7 +58,7 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
       const updatedEntry = await existingEntry.save();
 
       return res.status(200).json(updatedEntry);
-    } else {
+    } else if (!existingEntry) {
       const newHistoryEntry = new historyEntryModel({
         userId,
         question: questionId,
@@ -66,12 +66,15 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
         attemptStartedAt,
         attemptCompletedAt,
         collaboratorId,
-        attemptCodes: [attemptCode],
+        attemptCodes: isInitial ? [attemptCode] : [],
       });
 
       const savedEntry = await newHistoryEntry.save();
 
       return res.status(201).json(savedEntry);
+    } else {
+      return res.status(200).json("Attempt already exists.");
+      // To reach here, this must be initial creation and there's an existing entry. No need to create new attempt.
     }
   } catch (error) {
     return res.status(500).json({ error: getErrorMessage(error) });

@@ -19,7 +19,7 @@ const historyEntrySchema: Schema = new Schema<HistoryEntry>({
   attemptStartedAt: { type: Date, required: true, default: Date.now() },
   attemptCompletedAt: { type: Date, required: true, default: Date.now() },
   collaboratorId: { type: String, required: true },
-  attemptCodes: [{ type: String, required: true }],
+  attemptCodes: [{ type: String }],
 });
 
 const historyEntryModel = mongoose.model<HistoryEntry>('historyEntry', historyEntrySchema);
