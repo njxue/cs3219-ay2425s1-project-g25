@@ -50,7 +50,7 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     useEffect(() => {
         if (!roomId) return;
         const ydoc = new Y.Doc();
-        const provider = new WebsocketProvider(`ws://localhost:3004/${roomId}`, roomId, ydoc);
+        const provider = new WebsocketProvider(`ws://${process.env.REACT_APP_LOCAL_API_URL}:3004/${roomId}`, roomId, ydoc);
         setProvider(provider);
 
         provider.awareness.setLocalStateField(USERNAME, username);
