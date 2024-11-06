@@ -19,8 +19,21 @@
     min-height: 0;
 }
 
-.questionContainer {
+.outputContainer {
     flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.leftContainer {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.questionAndChatContainer {
+    flex: 1;
 }
 
 .verticalSeparator,
@@ -38,12 +51,8 @@
     cursor: col-resize;
     width: 8px;
 }
+
 .horizontalSeparator {
     cursor: row-resize;
     height: 6px;
-}
-
-.outputContainer {
-    flex-shrink: 0;
-    overflow-y: auto;
 }

@@ -2,14 +2,18 @@ import express from "express";
 import {
   createUser,
   deleteUser,
+  forgetPassword,
   getAllUsers,
   getUser,
+  resetPassword,
   updateUser,
   updateUserPrivilege,
 } from "../controller/user-controller.js";
 import { verifyAccessToken, verifyIsAdmin, verifyIsOwnerOrAdmin } from "../middleware/basic-access-control.js";
 
 const router = express.Router();
+
+router.get("/test", (req, res) => { res.send("OK!"); });
 
 /**
  * @swagger
@@ -179,5 +183,9 @@ router.patch("/:id/privilege", verifyAccessToken, verifyIsAdmin, updateUserPrivi
  *         description: Internal server error
  */
 router.delete("/:id", verifyAccessToken, verifyIsOwnerOrAdmin, deleteUser);
+
+router.post("/forgetPassword", forgetPassword);
+
+router.post("/resetPassword", resetPassword);
 
 export default router;

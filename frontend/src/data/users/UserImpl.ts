@@ -45,6 +45,13 @@ export class UserImpl implements IUser {
     async updateUserPrivilege(userId: string, isAdmin: boolean): Promise<any> {
         return this.dataSource.updateUserPrivilege(userId, isAdmin);
     }
+    async forgetPassword(email: string): Promise<any> {
+        return this.dataSource.forgetPassword(email);
+    }
+
+    async resetPassword(password: string, token: string) {
+        return this.dataSource.resetPassword(password, token);
+    }
 }
 
 export const userImpl = new UserImpl();

@@ -28,4 +28,6 @@ export interface IUser {
     getAllUsers(): Promise<any>;
     deleteUser(userId: string): Promise<any>;
     updateUserPrivilege(userId: string, isAdmin: boolean): Promise<any>;
+    forgetPassword(email: string): Promise<any>;
+    resetPassword(password: string, token: string): Promise<any>;
 }

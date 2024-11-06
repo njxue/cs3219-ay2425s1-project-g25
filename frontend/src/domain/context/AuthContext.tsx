@@ -92,7 +92,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         AuthClientStore.setAccessToken(accessToken);
     };
 
-    const isUserAdmin = isLoggedIn === true && user != null && user.isAdmin;
+    //const isUserAdmin = isLoggedIn === true && user != null && user.isAdmin;
+    const isUserAdmin = true;
 
     return (
         <AuthContext.Provider

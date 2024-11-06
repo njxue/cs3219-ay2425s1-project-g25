@@ -2,14 +2,13 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: 100vh;
+    height: 100%;
 }
 
 .leftContainer, .rightContainer {
     display: flex;
     flex-direction: column;
-    width: 50%;
-    height: 100%;
+    width: 30%;
 }
 
 .leftContainer {
@@ -21,8 +20,9 @@
 }
 
 .rightContainer {
+    width: 70%;
     row-gap: 10%;
-    padding: 5% 3%;
+    padding: 3% 3%;
 }
 
 .headline {

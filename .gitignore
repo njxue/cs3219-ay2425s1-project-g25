@@ -44,3 +44,9 @@ ehthumbs.db
 /user-service/user-service/.env
 /backend/user-service/.env
 /frontend/.env
+/addon/chat/Chatio/obj
+/addon/chat/Chatio/Properties/PublishProfiles
+/addon/chat/Chatio/Properties/ServiceDependencies/Chatiox - Web Deploy
+/addon/chat/Chatio/.vs/Chatio
+/addon/chat/Chatio/bin
+/backend/collaboration-service/coverage

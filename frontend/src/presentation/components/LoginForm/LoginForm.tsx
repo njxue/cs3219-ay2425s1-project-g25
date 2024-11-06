@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./LoginForm.module.css";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { handleError } from "presentation/utils/errorHandler";
 import { useAuth } from "domain/context/AuthContext";
 
@@ -52,6 +52,9 @@ export const LoginForm: React.FC = () => {
                 <button type="submit" className={styles.button}>
                     Sign In
                 </button>
+                <Link to="/forgot-password" className={styles.forgotPasswordLink}>
+                    Forgot password?
+                </Link>
             </form>
         </div>
     );
