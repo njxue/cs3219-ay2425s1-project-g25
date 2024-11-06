@@ -1,16 +1,26 @@
 .container {
     display: flex;
     flex-direction: row;
+    justify-content: center;
     align-items: center;
     column-gap: calc(1.5rem + 1.5vw);
-    padding: 0 2em;
+    margin-bottom: 2em;
 }
 
 .profilePicture {
-    height: 10em;
-    width: 10em;
+    height: 7em;
+    width: 7em;
     object-fit: cover;
     border-radius: 500px;
+}
+
+.profileDetailsContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    column-gap: calc(1.5rem + 1.5vw);
+    padding: 0 2em;
 }
 
 .nameRow {
@@ -23,7 +33,7 @@
 
 .name {
     font-size: 3em;
-    font-weight: 500;
+    font-weight: 300;
     margin: 0;
 }
 
