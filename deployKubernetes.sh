@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-DOCKER_USERNAME="<your_docker_username>"
+DOCKER_USERNAME="rjkoh"
 TAG="latest"
 
 # Lists of services and their corresponding deployment YAML paths
@@ -31,11 +31,11 @@ for i in "${!services[@]}"; do
   
   # Apply the updated deployment file to Kubernetes
   echo "Applying Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
-  kubectl apply -f $K8S_DEPLOYMENT_FILE
+  kubectl apply -f $K8S_DEPLOYMENT_FILE --validate=false
 
   # Apply the HPA file to Kubernetes
   echo "Applying Kubernetes HPA file $K8S_HPA_FILE..."
-  kubectl apply -f $K8S_HPA_FILE
+  kubectl apply -f $K8S_HPA_FILE --validate=false
   
   # Cleanup backup file created by sed on macOS
   rm "$K8S_DEPLOYMENT_FILE.bak"
@@ -56,7 +56,7 @@ docker push $FULL_IMAGE_NAME
 echo "Updating image name in Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
 sed -i.bak "s|image: .*$|image: $FULL_IMAGE_NAME|g" $K8S_DEPLOYMENT_FILE
 echo "Applying Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
-kubectl apply -f $K8S_DEPLOYMENT_FILE
+kubectl apply -f $K8S_DEPLOYMENT_FILE --validate=false
 rm "$K8S_DEPLOYMENT_FILE.bak"
 echo "Deployment for $SERVICE complete."
 echo "----------------------------------------"
@@ -72,23 +72,23 @@ docker push $FULL_IMAGE_NAME
 echo "Updating image name in Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
 sed -i.bak "s|image: .*$|image: $FULL_IMAGE_NAME|g" $K8S_DEPLOYMENT_FILE
 echo "Applying Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
-kubectl apply -f $K8S_DEPLOYMENT_FILE
+kubectl apply -f $K8S_DEPLOYMENT_FILE --validate=false
 rm "$K8S_DEPLOYMENT_FILE.bak"
 echo "Deployment for $SERVICE complete."
 echo "----------------------------------------"
 
 echo "Applying Kubernetes deployment file for kafka..."
-kubectl apply -f kubernetes/kafka/kafka-deployment.yaml
+kubectl apply -f kubernetes/kafka/kafka-deployment.yaml --validate=false
 echo "Deployment for kafka complete."
 echo "----------------------------------------"
 
 echo "Applying Kubernetes deployment file for zookeeper..."
-kubectl apply -f kubernetes/zookeeper/zookeeper-deployment.yaml
+kubectl apply -f kubernetes/zookeeper/zookeeper-deployment.yaml --validate=false
 echo "Deployment for zookeeper complete."
 echo "----------------------------------------"
 
 echo "Applying Kubernetes deployment file for redis..."
-kubectl apply -f kubernetes/redis/redis-deployment.yaml
+kubectl apply -f kubernetes/redis/redis-deployment.yaml --validate=false
 echo "Deployment for redis complete."
 echo "----------------------------------------"
 
