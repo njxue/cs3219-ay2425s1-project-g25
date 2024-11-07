@@ -10,7 +10,7 @@ services=("collaboration-service" "matching-service" "question-service" "user-se
 # Loop through each service
 for i in "${!services[@]}"; do
   SERVICE="${services[$i]}"
-  SERVICE_NAME="cs3219-ay2425s1-project-g25-${SERVICE}"
+  SERVICE_NAME="cs3219-ay2425s1-project-g25_${SERVICE}"
   K8S_DEPLOYMENT_FILE="kubernetes/backend/${SERVICE}-deployment.yaml"
   K8S_HPA_FILE="kubernetes/hpa/${SERVICE}-hpa.yaml"
   
@@ -46,7 +46,7 @@ done
 
 # frontend
 SERVICE="frontend"
-SERVICE_NAME="cs3219-ay2425s1-project-g25-${SERVICE}"
+SERVICE_NAME="cs3219-ay2425s1-project-g25_${SERVICE}"
 K8S_DEPLOYMENT_FILE="kubernetes/frontend/${SERVICE}-deployment.yaml"
 FULL_IMAGE_NAME="$DOCKER_USERNAME/$SERVICE_NAME:$TAG"
 echo "Tagging image $SERVICE as $FULL_IMAGE_NAME..."
@@ -62,7 +62,7 @@ echo "Deployment for $SERVICE complete."
 echo "----------------------------------------"
 
 # nginx
-SERVICE_NAME="cs3219-ay2425s1-project-g25-nginx"
+SERVICE_NAME="cs3219-ay2425s1-project-g25_nginx"
 K8S_DEPLOYMENT_FILE="kubernetes/backend/nginx-deployment.yaml"
 FULL_IMAGE_NAME="$DOCKER_USERNAME/$SERVICE_NAME:$TAG"
 echo "Tagging image $SERVICE as $FULL_IMAGE_NAME..."
