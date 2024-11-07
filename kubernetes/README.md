@@ -16,7 +16,7 @@
 6. Add your docker username in `deploy.sh` at root.
 7. To deploy on Kubernetes, run `./deploy.sh` at root.
 8. View deployments, pods and HPA. Ensure all services are running. `kubectl get all`
-9. Wait for a few minutes for kubernetes to become fully functional. It is ready when running `kubectl get hpa` does not show any `<unknown>` under `TARGETS`
+9. Wait for a few minutes for kubernetes to become fully functional. It is ready when running `kubectl get hpa` does not show any `<unknown>` under `TARGETS`. For optimal testing performance, wait a few more minutes for the services to fully start and scale back down to 1 replica, as the services will scale up during startup due to greater utilization. Some services might not scale back down to 1 replica and might remain and 2-3 replicas instead.
 10. Load testing: 
     * In a separate terminal, run command to carry conduct load testing
     ```
