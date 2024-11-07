@@ -3,7 +3,7 @@ const resetAllDatabases = true;
 const MONGO_INITDB_ROOT_USERNAME = "admin";
 const MONGO_INITDB_ROOT_PASSWORD = "password";
 const PEERPREP_QUESTION_INITDB_NAME = "peerprepQuestionServiceDB";
-// const PEERPREP_USER_INITDB_NAME = "peerprepUserServiceDB";
+const PEERPREP_USER_INITDB_NAME = "peerprepUserServiceDB";
 // const PEERPREP_COLLAB_INITDB_NAME = "peerprepCollabServiceDB";
 
 db.getSiblingDB("admin").auth(MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD);
@@ -221,7 +221,7 @@ if (isUserDatabaseResetDesired) {
 }
 
 /*---------------USER-SERVICE-DB-INIT----------------*/
-/*const users = [
+const users = [
     {
         "username": "admin",
         "email": "admin@example.com",
@@ -248,7 +248,7 @@ users.forEach(user => {
             isAdmin: user.isAdmin
         });
     }
-});*/
+});
 
 /*-----------------------------INDEXING-(OPTIONAL)---------------------------------*/
 

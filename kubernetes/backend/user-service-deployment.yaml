@@ -24,8 +24,8 @@ spec:
             value: peerprep-mongodb.default.svc.cluster.local
         resources:
           requests:
-            cpu: "100m"
-            memory: "256Mi"
+            cpu: "300m"
+            memory: "768Mi"
           limits:
             cpu: "500m"
             memory: "1Gi"

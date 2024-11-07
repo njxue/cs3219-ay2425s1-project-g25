@@ -4,6 +4,26 @@
 DOCKER_USERNAME="rjkoh"
 TAG="latest"
 
+echo "Applying Kubernetes deployment file for kafka..."
+kubectl apply -f kubernetes/kafka/kafka-deployment.yaml --validate=false
+echo "Deployment for kafka complete."
+echo "----------------------------------------"
+
+echo "Applying Kubernetes deployment file for zookeeper..."
+kubectl apply -f kubernetes/zookeeper/zookeeper-deployment.yaml --validate=false
+echo "Deployment for zookeeper complete."
+echo "----------------------------------------"
+
+echo "Applying Kubernetes deployment file for redis..."
+kubectl apply -f kubernetes/redis/redis-deployment.yaml --validate=false
+echo "Deployment for redis complete."
+echo "----------------------------------------"
+
+echo "Applying Kubernetes deployment file for mongo..."
+kubectl apply -f kubernetes/mongo/mongo-deployment.yaml --validate=false
+echo "Deployment for mongo complete."
+echo "----------------------------------------"
+
 # Lists of services and their corresponding deployment YAML paths
 services=("collaboration-service" "matching-service" "question-service" "user-service")
 
@@ -75,21 +95,6 @@ echo "Applying Kubernetes deployment file $K8S_DEPLOYMENT_FILE..."
 kubectl apply -f $K8S_DEPLOYMENT_FILE --validate=false
 rm "$K8S_DEPLOYMENT_FILE.bak"
 echo "Deployment for $SERVICE complete."
-echo "----------------------------------------"
-
-echo "Applying Kubernetes deployment file for kafka..."
-kubectl apply -f kubernetes/kafka/kafka-deployment.yaml --validate=false
-echo "Deployment for kafka complete."
-echo "----------------------------------------"
-
-echo "Applying Kubernetes deployment file for zookeeper..."
-kubectl apply -f kubernetes/zookeeper/zookeeper-deployment.yaml --validate=false
-echo "Deployment for zookeeper complete."
-echo "----------------------------------------"
-
-echo "Applying Kubernetes deployment file for redis..."
-kubectl apply -f kubernetes/redis/redis-deployment.yaml --validate=false
-echo "Deployment for redis complete."
 echo "----------------------------------------"
 
 echo "All services deployed successfully."
