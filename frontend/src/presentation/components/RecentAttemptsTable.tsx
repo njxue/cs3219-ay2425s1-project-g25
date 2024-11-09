@@ -208,26 +208,36 @@ export const RecentAttemptsTable: React.FC = () => {
     {
       title: 'Actions',
       key: 'action',
-      render: (_text, record) => (
-        <Space size="middle" className={styles.actionsButton}>
-          <Button
-            type="link"
-            onClick={() => showModal(record.attemptCodes, record.key)}
-            icon={<EyeOutlined />}
-            aria-label={`View past code for attempt ${record.key}`}
-          >
-            View Past Code
-          </Button>
-          <Button
-            type="link"
-            onClick={() => navigate(`/room/${record.roomId}`)}
-            icon={<TeamOutlined />}
-            aria-label={`Rejoin room ${record.roomId}`}
-          >
-            Rejoin
-          </Button>
-        </Space>
-      ),
+      render: (_text, record) => {
+        const attemptStartDate = new Date(record.attemptStartedAt);
+        const now = new Date();
+        const timeDiffMs = now.getTime() - attemptStartDate.getTime();
+
+        const isWithin24Hours = timeDiffMs < 86400000; // Should be same as ROOM_LIFESPAN in MatchingService
+
+        return (
+          <Space size="middle" className={styles.actionsButton}>
+            <Button
+              type="link"
+              onClick={() => showModal(record.attemptCodes, record.key)}
+              icon={<EyeOutlined />}
+              aria-label={`View past code for attempt ${record.key}`}
+            >
+              View Past Code
+            </Button>
+            {isWithin24Hours && (
+              <Button
+                type="link"
+                onClick={() => navigate(`/room/${record.roomId}`)}
+                icon={<TeamOutlined />}
+                aria-label={`Rejoin room ${record.roomId}`}
+              >
+                Rejoin
+              </Button>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
