@@ -52,7 +52,6 @@ export const RecentAttemptsTable: React.FC = () => {
   // Modal State for Viewing Codes
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [currentCodes, setCurrentCodes] = useState<string[]>([]);
-  const [currentAttemptId, setCurrentAttemptId] = useState<string>(""); // To identify which attempt's codes are being viewed
 
   // Fetch Recent Attempts on Component Mount
   useEffect(() => {
@@ -122,7 +121,6 @@ export const RecentAttemptsTable: React.FC = () => {
   // Function to Show Modal with Codes
   const showModal = (attemptCodes: string[], attemptId: string) => {
     setCurrentCodes(attemptCodes);
-    setCurrentAttemptId(attemptId);
     setIsModalVisible(true);
   };
 
@@ -130,7 +128,6 @@ export const RecentAttemptsTable: React.FC = () => {
   const handleModalClose = () => {
     setIsModalVisible(false);
     setCurrentCodes([]);
-    setCurrentAttemptId("");
   };
 
   // Define Columns for the Table

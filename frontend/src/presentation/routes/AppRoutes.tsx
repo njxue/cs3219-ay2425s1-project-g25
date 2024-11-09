@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Layout from "presentation/pages/layout/Layout";
 import QuestionManagement from "presentation/pages/QuestionManagement";
 import QuestionPage from "presentation/pages/QuestionSelection";
