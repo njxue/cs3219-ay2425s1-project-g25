@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Modal, message } from "antd";
 import { StopOutlined } from "@ant-design/icons";
 import styles from "./LeaveButton.module.css";
@@ -23,6 +23,7 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
     const navigate = useNavigate();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editorContent, setEditorContent] = useState("");
+    const [created, setCreated] = useState(false);
 
     const showModal = () => {
         const content = getEditorText();
@@ -41,7 +42,7 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
 
     const handleSaveAndLeave = async () => {
         try {
-            await historyUseCases.createOrUpdateUserHistory(
+            await historyUseCases.updateUserHistory(
                 questionId,
                 roomId,
                 attemptStartedAt.getTime().toString(),
@@ -63,6 +64,24 @@ const LeaveButton: React.FC<LeaveButtonProps> = ({
             setIsModalVisible(false);
         }
     };
+
+    useEffect(() => { //On init, send request to create attempt if it is absent.
+        const createEntry = async () => {
+            await historyUseCases.createUserHistory(
+                questionId,
+                roomId,
+                attemptStartedAt.getTime().toString(),
+                Date.now().toString(),
+                collaboratorId,
+                getEditorText(),
+            );
+        }
+        if (!roomId || !questionId || !attemptStartedAt || !collaboratorId || !getEditorText) return;
+        if (!created) {
+            setCreated(true);
+            createEntry();
+        };
+    }, [roomId, questionId, attemptStartedAt, collaboratorId, getEditorText, created])
 
     return (
         <>

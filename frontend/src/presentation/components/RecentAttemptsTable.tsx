@@ -136,11 +136,11 @@ export const RecentAttemptsTable: React.FC = () => {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a, b) => new Date(a.attemptCompletedAt).getTime() - new Date(b.attemptCompletedAt).getTime(),
+      sorter: (a, b) => new Date(a.lastAttemptSubmittedAt).getTime() - new Date(b.lastAttemptSubmittedAt).getTime(),
       render: (_text, record) => {
         const formattedStartDate = formatDate(record.attemptStartedAt);
-        const formattedEndDate = formatDate(record.attemptCompletedAt);
-        const duration = calculateDuration(record.attemptStartedAt, record.attemptCompletedAt);
+        const formattedEndDate = formatDate(record.lastAttemptSubmittedAt);
+        const duration = calculateDuration(record.attemptStartedAt, record.lastAttemptSubmittedAt);
         return (
           <div className={styles.dateContainer}>
             <div>
@@ -276,7 +276,6 @@ export const RecentAttemptsTable: React.FC = () => {
           </Button>,
         ]}
         width={900}
-        bodyStyle={{ padding: 0 }}
       >
         {currentCodes.length > 0 ? (
           <Tabs

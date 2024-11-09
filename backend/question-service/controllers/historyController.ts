@@ -23,11 +23,11 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         key: entry._id,
         roomId: entry.roomId,
         attemptStartedAt: entry.attemptStartedAt.getTime(),
-        attemptCompletedAt: entry.attemptCompletedAt.getTime(),
+        lastAttemptSubmittedAt: entry.lastAttemptSubmittedAt.getTime(),
         title: entry.question.title,
         difficulty: entry.question.difficulty,
         topics: entry.question.categories.map((cat: any) => cat.name),
-        attemptCodes: entry.attemptCodes,
+        attemptCodes: entry.attemptCodes.filter((attemptCode) => attemptCode && attemptCode !== ""),
       };
     });
     res.status(200).json(historyViewModels);
@@ -40,7 +40,7 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
   try {
     const userId = req.userId;
 
-    const { questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode } = req.body;
+    const { questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, isInitial } = req.body;
 
     if (!roomId) {
       return res.status(400).json({ error: "roomId is required" });
@@ -48,30 +48,37 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
 
     const existingEntry = await historyEntryModel.findOne({ userId, roomId });
 
-    if (existingEntry) {
+    if (!isInitial && existingEntry && attemptCode && attemptCode !== "") {
       existingEntry.question = questionId;
       existingEntry.attemptStartedAt = attemptStartedAt;
-      existingEntry.attemptCompletedAt = attemptCompletedAt;
+      existingEntry.lastAttemptSubmittedAt = attemptCompletedAt;
       existingEntry.collaboratorId = collaboratorId;
       existingEntry.attemptCodes.push(attemptCode);
 
       const updatedEntry = await existingEntry.save();
 
       return res.status(200).json(updatedEntry);
+    } else if (!existingEntry) {
+      try {
+        const newHistoryEntry = new historyEntryModel({
+          userId,
+          question: questionId,
+          roomId,
+          attemptStartedAt,
+          attemptCompletedAt,
+          collaboratorId,
+          attemptCodes: isInitial ? [attemptCode] : [],
+        });
+
+        const savedEntry = await newHistoryEntry.save();
+
+        return res.status(201).json(savedEntry);
+      } catch {
+        return res.status(200).json("Attempt already exists.");
+      }
     } else {
-      const newHistoryEntry = new historyEntryModel({
-        userId,
-        question: questionId,
-        roomId,
-        attemptStartedAt,
-        attemptCompletedAt,
-        collaboratorId,
-        attemptCodes: [attemptCode],
-      });
-
-      const savedEntry = await newHistoryEntry.save();
-
-      return res.status(201).json(savedEntry);
+      return res.status(200).json("Attempt already exists.");
+      // To reach here, this must be initial creation and there's an existing entry. No need to create new attempt.
     }
   } catch (error) {
     return res.status(500).json({ error: getErrorMessage(error) });

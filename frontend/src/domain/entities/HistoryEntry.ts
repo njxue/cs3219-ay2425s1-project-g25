@@ -3,7 +3,7 @@ export interface HistoryEntry {
     key: string;
     roomId: string;
     attemptStartedAt: string;
-    attemptCompletedAt: string;
+    lastAttemptSubmittedAt: string;
     title: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
     topics: string[];
