@@ -27,6 +27,7 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         title: entry.question.title,
         difficulty: entry.question.difficulty,
         topics: entry.question.categories.map((cat: any) => cat.name),
+        description: entry.question.description,
         attemptCodes: entry.attemptCodes.filter((attemptCode) => attemptCode && attemptCode !== ""),
       };
     });
