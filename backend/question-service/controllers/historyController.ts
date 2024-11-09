@@ -23,7 +23,7 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         key: entry._id,
         roomId: entry.roomId,
         attemptStartedAt: entry.attemptStartedAt.getTime(),
-        attemptCompletedAt: entry.attemptCompletedAt.getTime(),
+        lastAttemptSubmittedAt: entry.lastAttemptSubmittedAt.getTime(),
         title: entry.question.title,
         difficulty: entry.question.difficulty,
         topics: entry.question.categories.map((cat: any) => cat.name),
@@ -48,10 +48,10 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
 
     const existingEntry = await historyEntryModel.findOne({ userId, roomId });
 
-    if (!isInitial && existingEntry) {
+    if (!isInitial && existingEntry && attemptCode && attemptCode !== "") {
       existingEntry.question = questionId;
       existingEntry.attemptStartedAt = attemptStartedAt;
-      existingEntry.attemptCompletedAt = attemptCompletedAt;
+      existingEntry.lastAttemptSubmittedAt = attemptCompletedAt;
       existingEntry.collaboratorId = collaboratorId;
       existingEntry.attemptCodes.push(attemptCode);
 
