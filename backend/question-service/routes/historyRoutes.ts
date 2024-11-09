@@ -5,7 +5,6 @@ import {
   deleteUserHistoryEntry,
   deleteUserHistoryEntries,
   deleteAllUserHistoryEntries,
-  removeRoomIdPresence,
 } from "../controllers/historyController";
 import { verifyAccessToken } from "../middlewares/basic-access-control";
 
@@ -13,7 +12,6 @@ const router = express.Router();
 
 router.get("/", verifyAccessToken, getUserHistoryEntries);
 router.post("/", verifyAccessToken, createOrUpdateUserHistoryEntry);
-router.post("/room/:id", verifyAccessToken, removeRoomIdPresence);
 router.delete("/user/:id", verifyAccessToken, deleteUserHistoryEntry);
 router.delete("/user", verifyAccessToken, deleteUserHistoryEntries);
 router.delete("/all", verifyAccessToken, deleteAllUserHistoryEntries);

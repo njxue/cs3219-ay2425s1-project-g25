@@ -85,26 +85,6 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
   }
 };
 
-export const removeRoomIdPresence = async (req: any, res: Response) => {
-  try {
-    const userId = req.userId;
-    const { roomId } = req.params;
-
-    const existingEntries = await historyEntryModel.find({ roomId });
-    const updatedEntries: string[] = [];
-
-    existingEntries.forEach(async (entry) => {
-      entry.roomId = "";
-      await entry.save();
-      updatedEntries.push(entry._id.toString());
-    });
-
-    return res.status(200).json({ updatedEntries });
-  } catch (error) {
-    return res.status(500).json({ error: getErrorMessage(error) });
-  }
-};
-
 export const deleteUserHistoryEntry = async (req: any, res: Response) => {
   try {
     const userId = req.userId;
