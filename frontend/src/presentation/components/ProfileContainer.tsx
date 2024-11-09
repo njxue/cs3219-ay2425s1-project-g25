@@ -21,7 +21,7 @@ export const ProfileContainer: React.FC = () => {
         <>
             <div className={styles.container}>
                 <div className={styles.profileContainer}>
-                    <img className={styles.profilePicture} src={SampleProfilePicture} />
+                    <img className={styles.profilePicture} src={SampleProfilePicture} alt="profile" />
                     <div className={styles.profileDetailsContainer}>
                         <div className={styles.nameRow}>
                             <h2 className={styles.name}>{user?.username}</h2>

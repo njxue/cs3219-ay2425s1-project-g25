@@ -45,7 +45,6 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
     const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
     const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [provider, setProvider] = useState<WebsocketProvider | null>(null);
-    const [binding, setBinding] = useState<MonacoBinding | null>(null);
 
     useEffect(() => {
         if (!roomId) return;
@@ -67,7 +66,6 @@ export const CollaborationProvider: React.FC<{ children: ReactNode }> = ({ child
 
         const ytext = provider.doc.getText("monaco");
         const binding = new MonacoBinding(ytext, editor.getModel()!, new Set([editor]), provider.awareness);
-        setBinding(binding);
 
         const ymap = provider.doc.getMap("sharedMap");
         ymap.observe((event) => {

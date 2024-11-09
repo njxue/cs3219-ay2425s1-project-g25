@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styles from "./ResetPasswordPage.module.css";
 
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Form, Input, Button } from "antd";
 import { getEqualityValidator, getPasswordStrengthValidator } from "presentation/utils/formUtils";
 import { useForm } from "antd/es/form/Form";
