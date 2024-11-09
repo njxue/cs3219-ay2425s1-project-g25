@@ -22,5 +22,7 @@ const historyEntrySchema: Schema = new Schema<HistoryEntry>({
   attemptCodes: [{ type: String }],
 });
 
+historyEntrySchema.index({ userId: 1, roomId: 1 }, { unique: true });
+
 const historyEntryModel = mongoose.model<HistoryEntry>('historyEntry', historyEntrySchema);
 export default historyEntryModel;

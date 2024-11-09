@@ -27,7 +27,7 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         title: entry.question.title,
         difficulty: entry.question.difficulty,
         topics: entry.question.categories.map((cat: any) => cat.name),
-        attemptCodes: entry.attemptCodes,
+        attemptCodes: entry.attemptCodes.filter((attemptCode) => attemptCode && attemptCode !== ""),
       };
     });
     res.status(200).json(historyViewModels);
@@ -59,19 +59,23 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
 
       return res.status(200).json(updatedEntry);
     } else if (!existingEntry) {
-      const newHistoryEntry = new historyEntryModel({
-        userId,
-        question: questionId,
-        roomId,
-        attemptStartedAt,
-        attemptCompletedAt,
-        collaboratorId,
-        attemptCodes: isInitial ? [attemptCode] : [],
-      });
+      try {
+        const newHistoryEntry = new historyEntryModel({
+          userId,
+          question: questionId,
+          roomId,
+          attemptStartedAt,
+          attemptCompletedAt,
+          collaboratorId,
+          attemptCodes: isInitial ? [attemptCode] : [],
+        });
 
-      const savedEntry = await newHistoryEntry.save();
+        const savedEntry = await newHistoryEntry.save();
 
-      return res.status(201).json(savedEntry);
+        return res.status(201).json(savedEntry);
+      } catch {
+        return res.status(200).json("Attempt already exists.");
+      }
     } else {
       return res.status(200).json("Attempt already exists.");
       // To reach here, this must be initial creation and there's an existing entry. No need to create new attempt.
