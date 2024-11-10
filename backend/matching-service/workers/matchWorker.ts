@@ -399,15 +399,14 @@ export async function emitMatchEvent(matchId: string) {
     if (roomObject.questionId && roomObject.roomId) {
         const newRoom = new Room({
             participants: [
-                { userId: roomObject.user1.userId },
-                { userId: roomObject.user2.userId },
+                JSON.parse(roomObject.user1).userId,
+                JSON.parse(roomObject.user2).userId,
             ],
             category: roomObject.category,
             difficulty: roomObject.difficulty,
             roomId: roomObject.roomId,
             questionId: roomObject.questionId,
         });
-
         await newRoom.save();
 
         await redisClient.xAdd("match_events", "*", { data });
