@@ -1,7 +1,7 @@
 export interface HistoryEntry {
     _id: string;
     key: string;
-    roomId: string;
+    roomId?: string; // If null, room is expired
     attemptStartedAt: string;
     lastAttemptSubmittedAt: string;
     title: string;

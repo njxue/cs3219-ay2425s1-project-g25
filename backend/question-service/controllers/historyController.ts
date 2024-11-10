@@ -18,10 +18,15 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
       },
     });
     const historyViewModels = historyEntries.map((entry) => {
+      const attemptStartDate = new Date(entry.attemptStartedAt);
+      const timeDiffMs = Date.now() - attemptStartDate.getTime();
+
+      const isWithin24Hours = timeDiffMs < 86400000; // 1 Day; Same as ROOM_LIFESPAN in MatchingService. Can be different if desired.
+
       return {
         id: entry._id,
         key: entry._id,
-        roomId: entry.roomId,
+        roomId: isWithin24Hours ? entry.roomId : null,
         attemptStartedAt: entry.attemptStartedAt.getTime(),
         lastAttemptSubmittedAt: entry.lastAttemptSubmittedAt.getTime(),
         title: entry.question.title,
