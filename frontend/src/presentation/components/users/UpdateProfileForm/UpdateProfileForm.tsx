@@ -10,7 +10,7 @@ import { handleError } from "presentation/utils/errorHandler";
 import { useForm } from "antd/es/form/Form";
 import { IUserUpdateInput } from "domain/users/IUser";
 import { getEqualityValidator, getPasswordStrengthValidator, validateMessages } from "presentation/utils/formUtils";
-import { PasswordInputLabel } from "../common/PasswordInputLabel/PasswordInputLabel";
+import { PasswordInputLabel } from "presentation/components/common/PasswordInputLabel/PasswordInputLabel";
 
 interface UpdateProfileFormProps {
     user: User;

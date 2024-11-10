@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { Category } from "domain/entities/Category";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
-import { ReactMarkdown } from "../common/ReactMarkdown";
+import { ReactMarkdown } from "presentation/components/common/ReactMarkdown";
 import axios from "axios";
 import { validateMessages } from "presentation/utils/formUtils";
 

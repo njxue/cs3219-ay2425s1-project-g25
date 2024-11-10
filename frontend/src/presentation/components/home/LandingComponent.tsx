@@ -1,9 +1,9 @@
 import React from "react";
 import { Card } from "antd";
 import styles from "./LandingComponent.module.css";
-import { AddQuestionButton } from "./buttons/AddQuestionButton";
+import { AddQuestionButton } from "../common/buttons/AddQuestionButton";
 import { LANDING_CARD_TEXT } from "presentation/utils/constants";
-import { UserCard } from "./cards/UserCard";
+import { UserCard } from "../common/cards/UserCard";
 
 interface LandingComponentProps {
     onAddQuestion?: () => void;

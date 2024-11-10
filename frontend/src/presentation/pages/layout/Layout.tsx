@@ -3,7 +3,7 @@ import { Layout as AntLayout } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "./Layout.module.css";
 import PeerPrepLogo from "../../../assets/images/PeerPrepLogo.png";
-import MatchingFloatingButton from "../../components/buttons/MatchingFloatingButton";
+import MatchingFloatingButton from "../../components/common/buttons/MatchingFloatingButton";
 import { ArrowLeftOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useAuth } from "domain/context/AuthContext";
 

@@ -1,7 +1,7 @@
-import styles from './RegisterPage.module.css';
-import { Col, Row } from 'antd';
-import { AuthLogo } from 'presentation/components/AuthLogo';
-import { SignUpForm } from 'presentation/components/SignUpForm/SignUpForm';
+import styles from "./RegisterPage.module.css";
+import { Col, Row } from "antd";
+import { AuthLogo } from "presentation/components/auth/AuthLogo";
+import { SignUpForm } from "presentation/components/auth/SignUpForm/SignUpForm";
 
 const RegisterPage: React.FC = () => {
     return (

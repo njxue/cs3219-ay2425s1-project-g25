@@ -1,20 +1,19 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "presentation/pages/layout/Layout";
-import QuestionManagement from "presentation/pages/QuestionManagement";
-import QuestionPage from "presentation/pages/QuestionSelection";
+import QuestionManagement from "presentation/pages/admin/questions/QuestionManagement";
 import NotFound from "presentation/pages/NotFound";
-import RegisterPage from "presentation/pages/RegisterPage";
-import LoginPage from "presentation/pages/LoginPage";
-import HomePage from "presentation/pages/HomePage";
+import RegisterPage from "presentation/pages/auth/RegisterPage";
+import LoginPage from "presentation/pages/auth/LoginPage";
+import HomePage from "presentation/pages/home/HomePage";
 import { ProtectedRoute } from "presentation/pages/ProtectedRoute";
 import { AdminProtectedRoute } from "presentation/pages/AdminProtectedRoute";
 import { MatchmakingProvider } from "domain/context/MatchmakingContext";
-import { UserManagement } from "presentation/pages/UserManagement";
-import CollaborationRoomPage from "presentation/pages/CollaborationRoomPage";
+import { UserManagement } from "presentation/pages/admin/users/UserManagement";
+import CollaborationRoomPage from "presentation/pages/room/CollaborationRoomPage";
 import { CollaborationProvider } from "domain/context/CollaborationContext";
-import { ForgotPasswordPage } from "presentation/pages/ForgotPasswordPage";
-import { ResetPasswordPage } from "presentation/pages/ResetPasswordPage";
+import { ForgotPasswordPage } from "presentation/pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "presentation/pages/auth/ResetPasswordPage";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -25,7 +24,6 @@ const AppRoutes: React.FC = () => {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="/room/:roomId/:matchUserId" element={<QuestionPage />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route

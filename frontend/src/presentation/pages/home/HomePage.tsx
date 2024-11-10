@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from "react";
 import styles from "./HomePage.module.css";
-import { FindPeerButton } from "presentation/components/buttons/FindPeerButton";
-import { ProfileContainer } from "presentation/components/ProfileContainer";
-import { RecentAttemptsTable } from "presentation/components/RecentAttemptsTable";
-import { QuestionFilters } from "presentation/components/QuestionFilters";
-import { SelectedCategories } from "presentation/components/SelectedCategories";
-import { MatchingModal } from "presentation/components/modals/MatchingModal";
+import { FindPeerButton } from "presentation/components/common/buttons/FindPeerButton";
+import { ProfileContainer } from "presentation/components/home/ProfileContainer";
+import { RecentAttemptsTable } from "presentation/components/home/RecentAttemptsTable";
+import { QuestionFilters } from "presentation/components/questions/QuestionList/QuestionFilters";
+import { SelectedCategories } from "presentation/components/questions/Category/SelectedCategories";
+import { MatchingModal } from "presentation/components/common/modals/MatchingModal";
 import { Tooltip, message } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Category } from "domain/entities/Category";
