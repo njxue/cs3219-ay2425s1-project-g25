@@ -244,7 +244,7 @@ async function handleMatch(user1: any, user2: any) {
             matchId: savedEvent._id.toString(),
         };
 
-        await producer.send({ 
+        await producer.send({
             topic: MATCH_TOPIC,
             messages: [
                 {
@@ -395,7 +395,6 @@ export async function emitMatchEvent(matchId: string) {
     }
 
     const roomObject = JSON.parse(data);
-    console.log(roomObject);
 
     if (roomObject.questionId && roomObject.roomId) {
         const newRoom = new Room({
@@ -408,11 +407,6 @@ export async function emitMatchEvent(matchId: string) {
             roomId: roomObject.roomId,
             questionId: roomObject.questionId,
         });
-        console.log(newRoom);
-        console.log(
-            JSON.parse(roomObject.user1).userId,
-            JSON.parse(roomObject.user2).userId);
-
         await newRoom.save();
 
         await redisClient.xAdd("match_events", "*", { data });
