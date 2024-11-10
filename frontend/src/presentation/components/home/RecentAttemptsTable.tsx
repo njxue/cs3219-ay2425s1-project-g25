@@ -238,14 +238,16 @@ export const RecentAttemptsTable: React.FC = () => {
           >
             View Past Code
           </Button>
-          <Button
-            type="link"
-            onClick={() => navigate(`/room/${record.roomId}`)}
-            icon={<TeamOutlined />}
-            aria-label={`Rejoin room ${record.roomId}`}
-          >
-            Rejoin
-          </Button>
+          {record.roomId && (
+            <Button
+              type="link"
+              onClick={() => navigate(`/room/${record.roomId}`)}
+              icon={<TeamOutlined />}
+              aria-label={`Rejoin room ${record.roomId}`}
+            >
+              Rejoin
+            </Button>
+          )}
         </Space>
       ),
     },
