@@ -12,7 +12,7 @@ export interface Room extends mongoose.Document {
 
 
 const roomSchema: Schema<Room> = new mongoose.Schema<Room>({
-    participants: [{ userId: String }],
+    participants: [{ type: String }],
     category: { type: String, default: 'Any' },
     difficulty: { type: String, default: 'Any' },
     roomId: { type: String, required: true },

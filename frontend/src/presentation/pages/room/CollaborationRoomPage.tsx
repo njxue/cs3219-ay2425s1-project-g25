@@ -44,16 +44,17 @@ const CollaborationRoomPage: React.FC = () => {
                     setRoom({
                         roomId: roomId,
                         attemptStartedAt: attemptStartedAt,
-                        userIdOne: { _id: user!._id },
-                        userIdTwo: { _id: matchUserId },
+                        userIdOne: user!._id,
+                        userIdTwo: matchUserId,
                         questionId: questionId
                     });
                 } else {
                     if (!urlRoomId) return;
                     // Fetch room details from API
                     const fetchedRoom = await roomUseCases.getRoomDetails(urlRoomId);
+                    console.log("Fetched Room", fetchedRoom)
                     // Ensure the current user is userIdOne
-                    if (fetchedRoom.userIdOne._id !== user?._id) {
+                    if (fetchedRoom.userIdOne !== user!._id) {
                         const temp = fetchedRoom.userIdOne;
                         fetchedRoom.userIdOne = fetchedRoom.userIdTwo;
                         fetchedRoom.userIdTwo = temp;
@@ -132,14 +133,16 @@ const CollaborationRoomPage: React.FC = () => {
                     <div className={styles.verticalSeparator} {...verticalSeparatorProps} />
 
                     <div className={styles.editorAndOutputContainer}>
-                        <div className={styles.editorContainer}>
-                            <CodeEditor
-                                questionId={room.questionId}
-                                roomId={room.roomId}
-                                attemptStartedAt={new Date(room.attemptStartedAt)}
-                                collaboratorId={room.userIdTwo?._id}
-                            />
-                        </div>
+                        {room.questionId && room.roomId && room.attemptStartedAt && room.userIdTwo &&
+                            <div className={styles.editorContainer}>
+                                <CodeEditor
+                                    questionId={room.questionId}
+                                    roomId={room.roomId}
+                                    attemptStartedAt={new Date(room.attemptStartedAt)}
+                                    collaboratorId={room.userIdTwo}
+                                />
+                            </div>
+                        }
 
                         <div className={styles.horizontalSeparator} {...horizontalSeparatorProps} />
 

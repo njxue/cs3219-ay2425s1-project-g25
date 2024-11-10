@@ -25,7 +25,7 @@ export class HistoryUseCases {
         || !attemptStartedAt || attemptStartedAt.trim() === "" 
         || !attemptCompletedAt || attemptCompletedAt.trim() === "" 
         || !collaboratorId || collaboratorId.trim() === "") {
-            throw new Error("Missing Attempt Details");
+            throw new Error(`Missing Attempt Details, ${questionId} ${roomId} ${attemptStartedAt} ${attemptCompletedAt} ${collaboratorId} ${attemptCode}`);
         }
         await this.historyRepository.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, true);
     }
@@ -42,7 +42,7 @@ export class HistoryUseCases {
         || !attemptStartedAt || attemptStartedAt.trim() === "" 
         || !attemptCompletedAt || attemptCompletedAt.trim() === "" 
         || !collaboratorId || collaboratorId.trim() === "") {
-            throw new Error("Missing Attempt Details");
+            throw new Error(`Missing Attempt Details, ${questionId} ${roomId} ${attemptStartedAt} ${attemptCompletedAt} ${collaboratorId} ${attemptCode}`);
         }
         await this.historyRepository.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, false);
     }
