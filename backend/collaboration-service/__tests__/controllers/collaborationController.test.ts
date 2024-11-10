@@ -5,6 +5,7 @@ import { createSession, handleMatchNotification } from '../../controllers/collab
 import Session from '../../models/Session';
 import { producer } from '../../utils/kafkaClient';
 import { EachMessagePayload, KafkaMessage } from 'kafkajs';
+ 
 
 // Mock the kafka producer
 jest.mock('../../utils/kafkaClient', () => ({

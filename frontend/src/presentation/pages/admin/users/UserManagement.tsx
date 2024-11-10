@@ -46,7 +46,7 @@ export const UserManagement: React.FC<{}> = () => {
                 }
                 return u1.username.localeCompare(u2.username);
             }),
-        [users]
+        [users, currUser?._id]
     );
 
     const filteredUsers = useMemo(
@@ -55,7 +55,7 @@ export const UserManagement: React.FC<{}> = () => {
     );
 
     const numFilteredUsers = filteredUsers.length;
-    const userCountText = `Found: ${numFilteredUsers} ${numFilteredUsers == 1 ? "user" : "users"}`;
+    const userCountText = `Found: ${numFilteredUsers} ${numFilteredUsers === 1 ? "user" : "users"}`;
 
     const renderUser = (user: User) => {
         return (

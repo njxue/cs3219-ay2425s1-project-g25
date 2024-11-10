@@ -8,7 +8,7 @@ import { historyUseCases } from "domain/usecases/HistoryUseCases";
 import { ReactMarkdown } from "../common/ReactMarkdown";
 import TabPane from "antd/es/tabs/TabPane";
 import { useNavigate } from "react-router-dom";
-import { EyeOutlined, TeamOutlined } from "@ant-design/icons"; // Importing additional icons
+import { EyeOutlined, TeamOutlined } from "@ant-design/icons";
 
 const formatDate = (dateString: string): string => {
   const options: Intl.DateTimeFormatOptions = {
@@ -42,7 +42,7 @@ const calculateDuration = (start: string, end: string): string => {
 };
 
 export const RecentAttemptsTable: React.FC = () => {
-  const navigate = useNavigate(); // Initialized navigate
+  const navigate = useNavigate();
 
   // State Definitions
   const [recentAttemptsData, setRecentAttemptsData] = useState<HistoryEntry[]>([]);
@@ -52,7 +52,10 @@ export const RecentAttemptsTable: React.FC = () => {
   // Modal State for Viewing Codes
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [currentCodes, setCurrentCodes] = useState<string[]>([]);
-  const [currentAttemptId, setCurrentAttemptId] = useState<string>(""); // To identify which attempt's codes are being viewed
+
+  // Modal State for Viewing Description
+  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState<boolean>(false);
+  const [currentDescription, setCurrentDescription] = useState<string>('');
 
   // Fetch Recent Attempts on Component Mount
   useEffect(() => {
@@ -122,7 +125,6 @@ export const RecentAttemptsTable: React.FC = () => {
   // Function to Show Modal with Codes
   const showModal = (attemptCodes: string[], attemptId: string) => {
     setCurrentCodes(attemptCodes);
-    setCurrentAttemptId(attemptId);
     setIsModalVisible(true);
   };
 
@@ -130,7 +132,18 @@ export const RecentAttemptsTable: React.FC = () => {
   const handleModalClose = () => {
     setIsModalVisible(false);
     setCurrentCodes([]);
-    setCurrentAttemptId("");
+  };
+
+  // Function to Show Description Modal
+  const showDescriptionModal = (description: string) => {
+    setCurrentDescription(description);
+    setIsDescriptionModalVisible(true);
+  };
+
+  // Function to Close Description Modal
+  const handleDescriptionModalClose = () => {
+    setIsDescriptionModalVisible(false);
+    setCurrentDescription('');
   };
 
   // Define Columns for the Table
@@ -139,11 +152,11 @@ export const RecentAttemptsTable: React.FC = () => {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a, b) => new Date(a.attemptCompletedAt).getTime() - new Date(b.attemptCompletedAt).getTime(),
+      sorter: (a, b) => new Date(a.lastAttemptSubmittedAt).getTime() - new Date(b.lastAttemptSubmittedAt).getTime(),
       render: (_text, record) => {
         const formattedStartDate = formatDate(record.attemptStartedAt);
-        const formattedEndDate = formatDate(record.attemptCompletedAt);
-        const duration = calculateDuration(record.attemptStartedAt, record.attemptCompletedAt);
+        const formattedEndDate = formatDate(record.lastAttemptSubmittedAt);
+        const duration = calculateDuration(record.attemptStartedAt, record.lastAttemptSubmittedAt);
         return (
           <div className={styles.dateContainer}>
             <div>
@@ -172,7 +185,11 @@ export const RecentAttemptsTable: React.FC = () => {
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
-      render: (text: string) => <Typography.Text>{text}</Typography.Text>,
+      render: (text: string, record: HistoryEntry) => (
+        <Typography.Link onClick={() => showDescriptionModal(record.description)}>
+          {text}
+        </Typography.Link>
+      ),
     },
     {
       title: 'Difficulty',
@@ -279,7 +296,6 @@ export const RecentAttemptsTable: React.FC = () => {
           </Button>,
         ]}
         width={900}
-        bodyStyle={{ padding: 0 }}
       >
         {currentCodes.length > 0 ? (
           <Tabs
@@ -309,6 +325,18 @@ export const RecentAttemptsTable: React.FC = () => {
         ) : (
           <Empty description="No code available" />
         )}
+      </Modal>
+
+      <Modal
+        title="Question Description"
+        open={isDescriptionModalVisible}
+        onCancel={handleDescriptionModalClose}
+        footer={null}
+        width={800}
+      >
+        <div style={{ height: '100%', overflow: 'auto', padding: '16px' }}>
+          <ReactMarkdown isReadOnly value={currentDescription} />
+        </div>
       </Modal>
     </div>
   );

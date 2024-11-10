@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./CollaborationRoomPage.module.css";
 import CodeEditor from "../../components/room/codeeditor/CodeEditor";
 import { QuestionDetail } from "presentation/components/questions/QuestionDetail/QuestionDetail";

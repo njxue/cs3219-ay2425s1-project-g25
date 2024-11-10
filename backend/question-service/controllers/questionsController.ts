@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { EachMessagePayload } from "kafkajs";
 import { producer, QUESTION_TOPIC } from "../utils/kafkaClient";
 import { Types } from "mongoose";
+import historyEntryModel from "../models/HistoryEntry";
 
 const DIFFICULTIES = ["easy", "medium", "hard"];
 
@@ -143,6 +144,7 @@ export async function deleteQuestion(
     const { id } = request.params;
 
     try {
+        await historyEntryModel.deleteMany({ question: id });
         const deletedQuestion = await questionModel.findOneAndDelete({
             _id: id,
         });

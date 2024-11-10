@@ -15,12 +15,11 @@ export class HistoryUseCases {
     }
 
     /**
-     * Creates a new User History Entry. If there already exists a History Entry with the same userId (obtained in
-     * backend via JWT token and not passed here) and roomId, update the existing one instead. 
+     * Creates a new User History Entry.
      * (Note that just roomId isn't enough because the collaborator will also have a very similar History Entry)
      * @returns Promise resolving when the history has been successfully created.
      */
-    async createOrUpdateUserHistory(questionId: string, roomId: string, attemptStartedAt: string, attemptCompletedAt: string, collaboratorId: string, attemptCode: string): Promise<void> {
+    async createUserHistory(questionId: string, roomId: string, attemptStartedAt: string, attemptCompletedAt: string, collaboratorId: string, attemptCode: string): Promise<void> {
         if (!questionId || questionId.trim() === ""
         || !roomId || roomId.trim() === "" 
         || !attemptStartedAt || attemptStartedAt.trim() === "" 
@@ -28,7 +27,24 @@ export class HistoryUseCases {
         || !collaboratorId || collaboratorId.trim() === "") {
             throw new Error("Missing Attempt Details");
         }
-        await this.historyRepository.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode);
+        await this.historyRepository.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, true);
+    }
+
+    /**
+     * Creates a new User History Entry. If there already exists a History Entry with the same userId (obtained in
+     * backend via JWT token and not passed here) and roomId, update the existing one instead. 
+     * (Note that just roomId isn't enough because the collaborator will also have a very similar History Entry)
+     * @returns Promise resolving when the history has been successfully created.
+     */
+    async updateUserHistory(questionId: string, roomId: string, attemptStartedAt: string, attemptCompletedAt: string, collaboratorId: string, attemptCode: string): Promise<void> {
+        if (!questionId || questionId.trim() === ""
+        || !roomId || roomId.trim() === "" 
+        || !attemptStartedAt || attemptStartedAt.trim() === "" 
+        || !attemptCompletedAt || attemptCompletedAt.trim() === "" 
+        || !collaboratorId || collaboratorId.trim() === "") {
+            throw new Error("Missing Attempt Details");
+        }
+        await this.historyRepository.createOrUpdateUserHistory(questionId, roomId, attemptStartedAt, attemptCompletedAt, collaboratorId, attemptCode, false);
     }
 
     /**
