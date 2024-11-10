@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table';
 import styles from "./RecentAttemptsTable.module.css";
 import { HistoryEntry } from "domain/entities/HistoryEntry";
 import { historyUseCases } from "domain/usecases/HistoryUseCases";
-import { ReactMarkdown } from "./common/ReactMarkdown";
+import { ReactMarkdown } from "../common/ReactMarkdown";
 import TabPane from "antd/es/tabs/TabPane";
 import { useNavigate } from "react-router-dom";
 import { EyeOutlined, TeamOutlined } from "@ant-design/icons"; // Importing additional icons

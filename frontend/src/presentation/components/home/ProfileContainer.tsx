@@ -1,12 +1,12 @@
 import styles from "./ProfileContainer.module.css";
 import React, { useState } from "react";
-import SampleProfilePicture from "../../assets/images/sample-profile-picture.jpg";
+import SampleProfilePicture from "../../../assets/images/sample-profile-picture.jpg";
 import { EditOutlined, MailOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 import { useAuth } from "domain/context/AuthContext";
 import { Modal } from "antd";
-import { UpdateProfileForm } from "./UpdateProfileForm/UpdateProfileForm";
+import { UpdateProfileForm } from "../users/UpdateProfileForm/UpdateProfileForm";
 import { Link } from "react-router-dom";
-import { DeleteUserForm } from "./DeleteUserForm/DeleteUserForm";
+import { DeleteUserForm } from "../users/DeleteUserForm/DeleteUserForm";
 
 export const ProfileContainer: React.FC = () => {
     const { user, isUserAdmin } = useAuth();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { List, Spin, Alert } from "antd";
-import { Question } from "../../domain/entities/Question";
+import { Question } from "../../../../domain/entities/Question";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionFilters } from "./QuestionFilters";
 import { Category } from "domain/entities/Category";

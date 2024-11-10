@@ -1,8 +1,8 @@
 import styles from "./LoginPage.module.css";
 import { Col, Row } from "antd";
 import { useAuth } from "domain/context/AuthContext";
-import { AuthLogo } from "presentation/components/AuthLogo";
-import { LoginForm } from "presentation/components/LoginForm/LoginForm";
+import { AuthLogo } from "presentation/components/auth/AuthLogo";
+import { LoginForm } from "presentation/components/auth/LoginForm/LoginForm";
 import { Navigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {

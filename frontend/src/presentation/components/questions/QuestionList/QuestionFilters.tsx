@@ -3,10 +3,10 @@ import { Dropdown, Button, Select, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./QuestionFilters.module.css";
 import { difficultyOptions } from "presentation/utils/QuestionUtils";
-import { CategoryFilter } from "./Category/CategoryFilter";
+import { CategoryFilter } from "../Category/CategoryFilter";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
-import { SearchBar } from "./SearchBar";
+import { SearchBar } from "../../common/SearchBar";
 
 interface QuestionFiltersProps {
     onFiltersChange?: (filters: {

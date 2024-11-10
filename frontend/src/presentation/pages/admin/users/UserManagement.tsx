@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { EditOutlined, DeleteOutlined, CrownFilled, CrownOutlined } from "@ant-design/icons";
 import styles from "./UserManagement..module.css";
 import { Modal } from "antd";
-import { UpdateProfileForm } from "presentation/components/UpdateProfileForm/UpdateProfileForm";
-import { DeleteUserForm } from "presentation/components/DeleteUserForm/DeleteUserForm";
-import { UpdateUserPrivilegeForm } from "presentation/components/UpdateUserPrivilegeForm/UpdateUserPrivilegeForm";
+import { UpdateProfileForm } from "presentation/components/users/UpdateProfileForm/UpdateProfileForm";
+import { DeleteUserForm } from "presentation/components/users/DeleteUserForm/DeleteUserForm";
+import { UpdateUserPrivilegeForm } from "presentation/components/users/UpdateUserPrivilegeForm/UpdateUserPrivilegeForm";
 import { useAuth } from "domain/context/AuthContext";
-import { SearchBar } from "presentation/components/SearchBar";
+import { SearchBar } from "presentation/components/common/SearchBar";
 
 export const UserManagement: React.FC<{}> = () => {
     const [users, setUsers] = useState<User[]>([]);

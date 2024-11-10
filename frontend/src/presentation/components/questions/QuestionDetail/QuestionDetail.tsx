@@ -1,16 +1,16 @@
 // QuestionDetail.tsx
 import React, { useState } from "react";
 import { Tag, Divider, Modal, Button, Card } from "antd";
-import { Question } from "../../domain/entities/Question";
-import { getDifficultyColor } from "../utils/QuestionUtils";
+import { Question } from "../../../../domain/entities/Question";
+import { getDifficultyColor } from "presentation/utils/QuestionUtils";
 import styles from "./QuestionDetail.module.css";
-import { EditQuestionForm } from "./EditQuestionForm/EditQuestionForm";
-import { ReactMarkdown } from "./common/ReactMarkdown";
+import { EditQuestionForm } from "../EditQuestionForm/EditQuestionForm";
+import { ReactMarkdown } from "presentation/components/common/ReactMarkdown";
 import { DeleteOutlined, EditOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { questionUseCases } from "domain/usecases/QuestionUseCases";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { UserCard } from "./cards/UserCard";
+import { UserCard } from "presentation/components/common/cards/UserCard";
 
 interface QuestionDetailProps {
     question: Question;
@@ -38,8 +38,6 @@ export const QuestionDetail: React.FC<QuestionDetailProps> = ({
         setIsEditModalOpen(false);
         onEdit?.(updatedQuestion);
     };
-
-    
 
     const handleDeleteQuestion = async () => {
         try {

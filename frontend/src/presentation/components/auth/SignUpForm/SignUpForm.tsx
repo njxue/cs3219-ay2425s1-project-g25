@@ -9,7 +9,7 @@ import { useForm } from "antd/es/form/Form";
 import { IUserRegisterInput } from "domain/users/IUser";
 import { toast } from "react-toastify";
 import { getEqualityValidator, getPasswordStrengthValidator, validateMessages } from "presentation/utils/formUtils";
-import { PasswordInputLabel } from "../common/PasswordInputLabel/PasswordInputLabel";
+import { PasswordInputLabel } from "presentation/components/common/PasswordInputLabel/PasswordInputLabel";
 
 export const SignUpForm: React.FC = () => {
     const [form] = useForm();

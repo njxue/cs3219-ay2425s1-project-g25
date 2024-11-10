@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { categoryUseCases } from "domain/usecases/CategoryUseCases";
 import { Category } from "domain/entities/Category";
 import { Question } from "domain/entities/Question";
-import { ReactMarkdown } from "../common/ReactMarkdown";
+import { ReactMarkdown } from "presentation/components/common/ReactMarkdown";
 import axios from "axios";
 import { validateMessages } from "presentation/utils/formUtils";
 
@@ -23,7 +23,7 @@ export const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ onSubmit }) =>
     const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
-    const [description, setDescription] = useState<string>(initialQuestionInput?.description)
+    const [description, setDescription] = useState<string>(initialQuestionInput?.description);
 
     const { FIELD_TITLE, FIELD_DIFFICULTY, FIELD_DESCRIPTION, FIELD_CATEGORIES, FIELD_URL } = QUESTION_FORM_FIELDS;
 
