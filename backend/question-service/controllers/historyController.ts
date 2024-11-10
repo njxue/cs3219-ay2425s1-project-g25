@@ -17,7 +17,15 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         model: "category",
       },
     });
-    const historyViewModels = historyEntries.map((entry) => {
+
+    historyEntries.forEach(async (entry) => {
+      if (entry.question === null) {
+        await historyEntryModel.findByIdAndDelete({_id: entry._id});
+      }
+    })
+    const historyViewModels = historyEntries
+    .filter((entry) => !(entry.question === null))
+    .map((entry) => {
       return {
         id: entry._id,
         key: entry._id,
