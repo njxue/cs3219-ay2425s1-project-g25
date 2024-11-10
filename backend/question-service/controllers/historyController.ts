@@ -17,12 +17,20 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         model: "category",
       },
     });
-    const historyViewModels = historyEntries.map((entry) => {
+    
+    historyEntries.forEach(async (entry) => {
+      if (entry.question === null) {
+        await historyEntryModel.findByIdAndDelete({_id: entry._id});
+      }
+    })
+    
+    const historyViewModels = historyEntries
+    .filter((entry) => !(entry.question === null))
+    .map((entry) => {
       const attemptStartDate = new Date(entry.attemptStartedAt);
       const timeDiffMs = Date.now() - attemptStartDate.getTime();
-
       const isWithin24Hours = timeDiffMs < 86400000; // 1 Day; Same as ROOM_LIFESPAN in MatchingService. Can be different if desired.
-
+      
       return {
         id: entry._id,
         key: entry._id,
@@ -32,6 +40,7 @@ export const getUserHistoryEntries = async (req: any, res: Response) => {
         title: entry.question.title,
         difficulty: entry.question.difficulty,
         topics: entry.question.categories.map((cat: any) => cat.name),
+        description: entry.question.description,
         attemptCodes: entry.attemptCodes.filter((attemptCode) => attemptCode && attemptCode !== ""),
       };
     });
@@ -85,26 +94,6 @@ export const createOrUpdateUserHistoryEntry = async (req: any, res: Response) =>
       return res.status(200).json("Attempt already exists.");
       // To reach here, this must be initial creation and there's an existing entry. No need to create new attempt.
     }
-  } catch (error) {
-    return res.status(500).json({ error: getErrorMessage(error) });
-  }
-};
-
-export const removeRoomIdPresence = async (req: any, res: Response) => {
-  try {
-    const userId = req.userId;
-    const { roomId } = req.params;
-
-    const existingEntries = await historyEntryModel.find({ roomId });
-    const updatedEntries: string[] = [];
-
-    existingEntries.forEach(async (entry) => {
-      entry.roomId = "";
-      await entry.save();
-      updatedEntries.push(entry._id.toString());
-    });
-
-    return res.status(200).json({ updatedEntries });
   } catch (error) {
     return res.status(500).json({ error: getErrorMessage(error) });
   }

@@ -8,7 +8,7 @@ import { historyUseCases } from "domain/usecases/HistoryUseCases";
 import { ReactMarkdown } from "./common/ReactMarkdown";
 import TabPane from "antd/es/tabs/TabPane";
 import { useNavigate } from "react-router-dom";
-import { EyeOutlined, TeamOutlined } from "@ant-design/icons"; // Importing additional icons
+import { EyeOutlined, TeamOutlined } from "@ant-design/icons";
 
 const formatDate = (dateString: string): string => {
   const options: Intl.DateTimeFormatOptions = {
@@ -42,7 +42,7 @@ const calculateDuration = (start: string, end: string): string => {
 };
 
 export const RecentAttemptsTable: React.FC = () => {
-  const navigate = useNavigate(); // Initialized navigate
+  const navigate = useNavigate();
 
   // State Definitions
   const [recentAttemptsData, setRecentAttemptsData] = useState<HistoryEntry[]>([]);
@@ -52,6 +52,10 @@ export const RecentAttemptsTable: React.FC = () => {
   // Modal State for Viewing Codes
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [currentCodes, setCurrentCodes] = useState<string[]>([]);
+
+  // Modal State for Viewing Description
+  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState<boolean>(false);
+  const [currentDescription, setCurrentDescription] = useState<string>('');
 
   // Fetch Recent Attempts on Component Mount
   useEffect(() => {
@@ -130,6 +134,18 @@ export const RecentAttemptsTable: React.FC = () => {
     setCurrentCodes([]);
   };
 
+  // Function to Show Description Modal
+  const showDescriptionModal = (description: string) => {
+    setCurrentDescription(description);
+    setIsDescriptionModalVisible(true);
+  };
+
+  // Function to Close Description Modal
+  const handleDescriptionModalClose = () => {
+    setIsDescriptionModalVisible(false);
+    setCurrentDescription('');
+  };
+
   // Define Columns for the Table
   const columns: ColumnsType<HistoryEntry> = [
     {
@@ -169,7 +185,11 @@ export const RecentAttemptsTable: React.FC = () => {
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
-      render: (text: string) => <Typography.Text>{text}</Typography.Text>,
+      render: (text: string, record: HistoryEntry) => (
+        <Typography.Link onClick={() => showDescriptionModal(record.description)}>
+          {text}
+        </Typography.Link>
+      ),
     },
     {
       title: 'Difficulty',
@@ -307,6 +327,18 @@ export const RecentAttemptsTable: React.FC = () => {
         ) : (
           <Empty description="No code available" />
         )}
+      </Modal>
+
+      <Modal
+        title="Question Description"
+        open={isDescriptionModalVisible}
+        onCancel={handleDescriptionModalClose}
+        footer={null}
+        width={800}
+      >
+        <div style={{ height: '100%', overflow: 'auto', padding: '16px' }}>
+          <ReactMarkdown isReadOnly value={currentDescription} />
+        </div>
       </Modal>
     </div>
   );
