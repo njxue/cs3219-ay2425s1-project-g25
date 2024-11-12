@@ -13,7 +13,7 @@
 3. Build the PeerPrep Docker containers with `docker compose build`
 4. Create the configmap for the nginx api-gateway: run `kubectl create configmap nginx-config --from-file=backend/api-gateway/nginx.conf` at root.
 5. Create the configmap for mongo: run `kubectl create configmap init-mongo-script --from-file=init-mongo.js` at root.
-6. Add your docker username in `deployKubernetes.sh` at root.
+6. Add your docker username in `deployKubernetes.sh` at root, replacing the existing username. Login is required. Run `docker login` in terminal and input your credentials if not yet logged in.
 7. To deploy on Kubernetes, run `./deployKubernetes.sh` at root.
 8. View deployments, pods and HPA. Ensure all services are running. `kubectl get all`
 9. Wait for a few minutes for kubernetes to become fully functional. It is ready when running `kubectl get hpa` does not show any `<unknown>` under `TARGETS`. For optimal testing performance, wait a few more minutes for the services to fully start and scale back down to 1 replica, as the services will scale up during startup due to greater utilization. Some services might not scale back down to 1 replica and might remain and 2-3 replicas instead.
