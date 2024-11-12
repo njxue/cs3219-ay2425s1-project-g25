@@ -36,7 +36,8 @@ export async function connectToDB() {
 }
 
 export async function createUser(username, email, password) {
-  return new UserModel({ username, email, password }).save();
+  const isAdmin = process.env.DEFAULT_ADMIN_ON_REGISTER_FEATURE === "true";
+  return new UserModel({ username, email, password, isAdmin }).save();
 }
 
 export async function findUserByEmail(email) {
