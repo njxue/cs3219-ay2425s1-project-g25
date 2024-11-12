@@ -21,7 +21,7 @@ export class BaseApi {
             baseURL: API_URL + baseUrl,
             timeout: 10000,
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             },
             withCredentials: true
         });
@@ -42,21 +42,26 @@ export class BaseApi {
 
     private setUpResponseInterceptors(axiosInstance: AxiosInstance): number {
         return axiosInstance.interceptors.response.use(
-            (response: AxiosResponse) => response,
+            (response: AxiosResponse) => {
+                return response;
+            },
             async (err: AxiosError) => {
                 const prevRequest = err?.config;
                 if (prevRequest && err?.response?.status === 401) {
                     try {
                         // Eject to prevent infinite loop
-                        this.protectedAxiosInstance.interceptors.response.eject(this.protectedResponseInterceptorId);
                         const newAccessToken = await userUseCases.refreshToken();
                         prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-                        AuthClientStore.setAccessToken(newAccessToken);
+                        if (newAccessToken) {
+                            AuthClientStore.setAccessToken(newAccessToken);
+                        }
                         return this.protectedAxiosInstance(prevRequest);
                     } catch (error) {
                         // Refresh token expired/invalid
                         console.error(error);
                         return Promise.reject(error);
+                    } finally {
+                        this.protectedAxiosInstance.interceptors.response.eject(this.protectedResponseInterceptorId);
                     }
                 }
                 return Promise.reject(err);
