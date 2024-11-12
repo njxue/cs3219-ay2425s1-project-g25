@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     //const isUserAdmin = isLoggedIn === true && user != null && user.isAdmin;
-    const isUserAdmin = true;
+    const isUserAdmin = !!user?.isAdmin;
 
     return (
         <AuthContext.Provider

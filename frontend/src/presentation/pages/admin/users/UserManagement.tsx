@@ -9,6 +9,8 @@ import { DeleteUserForm } from "presentation/components/users/DeleteUserForm/Del
 import { UpdateUserPrivilegeForm } from "presentation/components/users/UpdateUserPrivilegeForm/UpdateUserPrivilegeForm";
 import { useAuth } from "domain/context/AuthContext";
 import { SearchBar } from "presentation/components/common/SearchBar";
+import { toast } from "react-toastify";
+import { handleError } from "presentation/utils/errorHandler";
 
 export const UserManagement: React.FC<{}> = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -21,8 +23,12 @@ export const UserManagement: React.FC<{}> = () => {
 
     useEffect(() => {
         const getAllUsers = async () => {
-            const users = await userUseCases.getAllUsers();
-            setUsers(users);
+            try {
+                const users = await userUseCases.getAllUsers();
+                setUsers(users);
+            } catch (err) {
+                toast.error(handleError(err));
+            }
         };
         getAllUsers();
     }, []);
